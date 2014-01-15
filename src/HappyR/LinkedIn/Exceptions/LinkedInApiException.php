@@ -22,7 +22,8 @@ class LinkedInApiException extends \Exception
      *
      * @param array $result The result from the API server
      */
-    public function __construct($result) {
+    public function __construct($result)
+    {
         $this->result = $result;
 
         $code = 0;
@@ -33,16 +34,16 @@ class LinkedInApiException extends \Exception
         if (isset($result['error_description'])) {
             // OAuth 2.0 Draft 10 style
             $msg = $result['error_description'];
-        } else if (isset($result['error']) && is_array($result['error'])) {
+        } elseif (isset($result['error']) && is_array($result['error'])) {
             // OAuth 2.0 Draft 00 style
             $msg = $result['error']['message'];
-        } else if (isset($result['error_msg'])) {
+        } elseif (isset($result['error_msg'])) {
             // Rest server style
             $msg = $result['error_msg'];
-        } else if (is_string($result)) {
+        } elseif (is_string($result)) {
             $msg = $result;
         } else {
-            $msg = 'Unknown Error. Check getResult()';
+            $msg = 'Unknown Error. Check $exception->getResult()';
         }
 
         parent::__construct($msg, $code);
@@ -53,7 +54,8 @@ class LinkedInApiException extends \Exception
      *
      * @return array The result from the API server
      */
-    public function getResult() {
+    public function getResult()
+    {
         return $this->result;
     }
 
@@ -63,13 +65,14 @@ class LinkedInApiException extends \Exception
      *
      * @return string
      */
-    public function getType() {
+    public function getType()
+    {
         if (isset($this->result['error'])) {
             $error = $this->result['error'];
             if (is_string($error)) {
                 // OAuth 2.0 Draft 10 style
                 return $error;
-            } else if (is_array($error)) {
+            } elseif (is_array($error)) {
                 // OAuth 2.0 Draft 00 style
                 if (isset($error['type'])) {
                     return $error['type'];
@@ -85,11 +88,12 @@ class LinkedInApiException extends \Exception
      *
      * @return string The string representation of the error
      */
-    public function __toString() {
+    public function __toString()
+    {
         $str = $this->getType() . ': ';
         if ($this->code != 0) {
             $str .= $this->code . ': ';
         }
         return $str . $this->message;
     }
-} 
+}

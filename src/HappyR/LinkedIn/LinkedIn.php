@@ -194,7 +194,8 @@ class LinkedIn
      *
      * @return array|null
      */
-    protected function getUserFromAccessToken() {
+    protected function getUserFromAccessToken()
+    {
         try {
             return $this->api('/v1/people/~:(id,firstName,lastName,headline)');
         } catch (LinkedInApiException $e) {
@@ -209,7 +210,8 @@ class LinkedIn
      *
      * @return string|null The authorization code, or null if the authorization code could not be determined.
      */
-    protected function getCode() {
+    protected function getCode()
+    {
         if (isset($_REQUEST['code'])) {
             $state = $this->getState();
             //if state exists in session and in request and if they are equal
@@ -233,7 +235,8 @@ class LinkedIn
      *
      * @return string|null The access token of null if the access token is not found
      */
-    public function getAccessToken() {
+    public function getAccessToken()
+    {
         if ($this->accessToken !== null) {
             // we've done this already and cached it.  Just return.
             return $this->accessToken;
@@ -254,15 +257,15 @@ class LinkedIn
      *
      * @return string|null A valid user access token, or null if one could not be determined.
      */
-    protected function fetchNewAccessToken() {
-
+    protected function fetchNewAccessToken()
+    {
         $code = $this->getCode();
         if ($code && $code != $this->storage->get('code')) {
-            $access_token = $this->getAccessTokenFromCode($code);
-            if ($access_token) {
+            $accessToken = $this->getAccessTokenFromCode($code);
+            if ($accessToken) {
                 $this->storage->set('code', $code);
-                $this->storage->set('access_token', $access_token);
-                return $access_token;
+                $this->storage->set('access_token', $accessToken);
+                return $accessToken;
             }
 
             // code was bogus, so everything based on it should be invalidated.
@@ -286,12 +289,14 @@ class LinkedIn
      * either logged in to LinkedIn or has granted an offline access permission.
      *
      * @param string $code An authorization code.
-     * @param string $redirectUri Where the user should be redirected after token is generated. Default is the current url
+     * @param string $redirectUri Where the user should be redirected after token is generated.
+     *                            Default is the current url
      *
      * @return string|null An access token exchanged for the authorization code, or
      *               null if an access token could not be generated.
      */
-    protected function getAccessTokenFromCode($code, $redirectUri = null) {
+    protected function getAccessTokenFromCode($code, $redirectUri = null)
+    {
         if (empty($code)) {
             return null;
         }
@@ -303,15 +308,19 @@ class LinkedIn
         try {
 
             $response = $this->request->create(
-                $this->urlGenerator->getUrl('www', 'uas/oauth2/accessToken',
-                array(
-                    'grant_type' => 'authorization_code',
-                    'code' => $code,
-                    'redirect_uri' => $redirectUri,
-                    'client_id' => $this->getAppId(),
-                    'client_secret' => $this->getAppSecret(),
-                ))
-                , array(), 'POST'
+                $this->urlGenerator->getUrl(
+                    'www',
+                    'uas/oauth2/accessToken',
+                    array(
+                        'grant_type' => 'authorization_code',
+                        'code' => $code,
+                        'redirect_uri' => $redirectUri,
+                        'client_id' => $this->getAppId(),
+                        'client_secret' => $this->getAppSecret(),
+                    )
+                ),
+                array(),
+                'POST'
             );
 
 
@@ -344,7 +353,8 @@ class LinkedIn
      *
      * @return array assoc array from json_decode
      */
-    public function api($resource, array $params=array()) {
+    public function api($resource, array $params=array())
+    {
         if (!isset($params['oauth2_access_token'])) {
             $params['oauth2_access_token'] = $this->getAccessToken();
         }
@@ -383,7 +393,7 @@ class LinkedIn
             //if scope is an array
             if (is_array($scopeParams)) {
                 $params['scope'] = implode(' ', $scopeParams);
-            }  elseif (is_string($scopeParams)) {
+            } elseif (is_string($scopeParams)) {
                 //if scope is a string with ',' => make it to an array
                 $params['scope'] = str_replace(',', ' ', $scopeParams);
             }
@@ -400,7 +410,8 @@ class LinkedIn
                     'state' => $this->state,
                 ),
                 $params
-            ));
+            )
+        );
     }
 
     /**

@@ -39,7 +39,8 @@ class UrlGenerator
      *
      * @return string The URL for the given parameters
      */
-    public function getUrl($name, $path='', $params=array()) {
+    public function getUrl($name, $path='', $params=array())
+    {
         $url = self::$domainMap[$name];
         if ($path) {
             if ($path[0] === '/') {
@@ -62,7 +63,8 @@ class UrlGenerator
      *
      * @return string The current URL
      */
-    public function getCurrentUrl() {
+    public function getCurrentUrl()
+    {
         $protocol = $this->getHttpProtocol() . '://';
         $host = $this->getHttpHost();
         $currentUrl = $protocol.$host.$_SERVER['REQUEST_URI'];
@@ -72,18 +74,17 @@ class UrlGenerator
         if (!empty($parts['query'])) {
             // drop known linkedin params
             $params = explode('&', $parts['query']);
-            $retained_params = array();
+            $savedParams = array();
             foreach ($params as $param) {
                 if ($this->shouldRetainParam($param)) {
-                    $retained_params[] = $param;
+                    $savedParams[] = $param;
                 }
             }
 
-            if (!empty($retained_params)) {
-                $query = '?'.implode($retained_params, '&');
+            if (!empty($savedParams)) {
+                $query = '?'.implode($savedParams, '&');
             }
         }
-
 
         // use port if non default
         $port =
@@ -99,17 +100,17 @@ class UrlGenerator
     /**
      * Returns true if and only if the key or key/value pair should
      * be retained as part of the query string.  This amounts to
-     * a brute-force search of the very small list of Facebook-specific
+     * a brute-force search of the very small list of LinkedIn-specific
      * params that should be stripped out.
      *
-     * @param string $param A key or key/value pair within a URL's query (e.g.
-     *                     'foo=a', 'foo=', or 'foo'.
+     * @param string $param A key or key/value pair within a URL's query (e.g.'foo=a', 'foo=', or 'foo'.
      *
      * @return boolean
      */
-    protected function shouldRetainParam($param) {
-        foreach (DataStorage::$validKeys as $drop_query_param) {
-            if ($param === $drop_query_param || strpos($param, $drop_query_param.'=') === 0) {
+    protected function shouldRetainParam($param)
+    {
+        foreach (DataStorage::$validKeys as $dropMe) {
+            if ($param === $dropMe || strpos($param, $dropMe.'=') === 0) {
                 return false;
             }
         }
@@ -117,14 +118,28 @@ class UrlGenerator
         return true;
     }
 
-    protected function getHttpHost() {
+    /**
+     * Get the host
+     *
+     *
+     * @return mixed
+     */
+    protected function getHttpHost()
+    {
         if ($this->trustForwarded && isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
             return $_SERVER['HTTP_X_FORWARDED_HOST'];
         }
         return $_SERVER['HTTP_HOST'];
     }
 
-    protected function getHttpProtocol() {
+    /**
+     * Get the protocol
+     *
+     *
+     * @return string
+     */
+    protected function getHttpProtocol()
+    {
         if ($this->trustForwarded && isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
             if ($_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
                 return 'https';
@@ -156,4 +171,4 @@ class UrlGenerator
 
         return $this;
     }
-} 
+}

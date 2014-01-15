@@ -16,45 +16,49 @@ class SessionStorage extends DataStorage
     /**
      * {@inheritDoc}
      */
-    public function set($key, $value) {
+    public function set($key, $value)
+    {
         if (!in_array($key, self::$validKeys)) {
             throw new LinkedInApiException(sprintf('Unsupported key ("%s") passed to set.', $key));
         }
 
-        $session_var_name = $this->constructSessionVariableName($key);
-        $_SESSION[$session_var_name] = $value;
+        $name = $this->constructSessionVariableName($key);
+        $_SESSION[$name] = $value;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function get($key, $default = false) {
+    public function get($key, $default = false)
+    {
         if (!in_array($key, self::$validKeys)) {
             return $default;
         }
 
-        $session_var_name = $this->constructSessionVariableName($key);
-        return isset($_SESSION[$session_var_name]) ? $_SESSION[$session_var_name] : $default;
+        $name = $this->constructSessionVariableName($key);
+        return isset($_SESSION[$name]) ? $_SESSION[$name] : $default;
     }
 
     /**
      * {@inheritDoc}
      */
     public function clear($key) {
-        if (!in_array($key, self::$validKeys)) {
+        if (!in_array($key, self::$validKeys))
+        {
             throw new LinkedInApiException(sprintf('Unsupported key ("%s") passed to clear.', $key));
         }
 
-        $session_var_name = $this->constructSessionVariableName($key);
-        if (isset($_SESSION[$session_var_name])) {
-            unset($_SESSION[$session_var_name]);
+        $name = $this->constructSessionVariableName($key);
+        if (isset($_SESSION[$name])) {
+            unset($_SESSION[$name]);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public function clearAll() {
+    public function clearAll()
+    {
         foreach (self::$validKeys as $key) {
             $this->clear($key);
         }
@@ -67,7 +71,8 @@ class SessionStorage extends DataStorage
      *
      * @return string
      */
-    protected function constructSessionVariableName($key) {
+    protected function constructSessionVariableName($key)
+    {
         return 'linkedIn_'.$key;
     }
-} 
+}

@@ -49,4 +49,4 @@ abstract class DataStorage
      * @return void
      */
     abstract public function clearAll();
-} 
+}

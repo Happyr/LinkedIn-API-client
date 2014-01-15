@@ -10,7 +10,7 @@ namespace HappyR\LinkedIn\Http;
  * @author Tobias Nyholm
  *
  */
-interface RequestInterface 
+interface RequestInterface
 {
     public function create($url, $params=array());
-} 
+}
