@@ -40,10 +40,6 @@ class UrlGenerator
      * @return string The URL for the given parameters
      */
     public function getUrl($name, $path='', $params=array()) {
-        if($name=='test'){
-            return 'http://wordalist.dev/app_dev.php/public/linkedin/test';
-        }
-
         $url = self::$domainMap[$name];
         if ($path) {
             if ($path[0] === '/') {
@@ -53,7 +49,8 @@ class UrlGenerator
         }
 
         if ($params) {
-            $url .= '?' . http_build_query($params, null, '&');
+            //it needs to be PHP_QUERY_RFC3986. We want to have %20 between scopes
+            $url .= '?' . http_build_query($params, null, '&', PHP_QUERY_RFC3986);
         }
 
         return $url;

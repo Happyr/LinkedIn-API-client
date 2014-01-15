@@ -28,11 +28,11 @@ class LinkedIn
     protected $appSecret;
 
     /**
-     * The ID of the Facebook user, or 0 if the user is logged out.
+     * An array with default user stuff.
      *
-     * @var integer
+     * @var array
      */
-    protected $userId;
+    protected $user;
 
     /**
      * A CSRF state variable to assist in the defense against CSRF attacks.
@@ -80,16 +80,29 @@ class LinkedIn
     protected $requestClass = 'HappyR\LinkedIn\Http\Request';
 
     /**
-     * @param $appId
-     * @param $appSecret
+     * Constructor
+     *
+     * @param string $appId
+     * @param string $appSecret
      */
     public function __construct($appId, $appSecret)
     {
+        //save app stuff
         $this->appId = $appId;
         $this->appSecret = $appSecret;
 
         $this->urlGenerator = new UrlGenerator();
 
+        $this->init();
+    }
+
+    /**
+     * Init the API by creating some classes.
+     *
+     * This function could be overrided if you want to change any of these classes
+     */
+    protected function init()
+    {
         $class=$this->requestClass;
         $this->request=new $class();
 
@@ -108,37 +121,62 @@ class LinkedIn
         return $this->getUserId() != null;
     }
 
+    /**
+     * Get the id of the current user
+     *
+     * @return string|null returns null if no user found
+     */
     public function getUserId()
     {
-        if ($this->userId !== null) {
-            // we've already determined this and cached the value.
-            return $this->userId;
+        $user=$this->getUser();
+
+        if (isset($user['id'])) {
+            return $user['id'];
         }
 
-        return $this->user = $this->getUserFromAvailableData();
+        return null;
     }
 
     /**
-     * Determines the connected user by first examining any signed
-     * requests, then considering an authorization code, and then
+     * Get the user array
+     *
+     * @return array|null
+     */
+    public function getUser()
+    {
+        if ($this->user == null) {
+            // if we have not already determined this and cached the result.
+            $this->user = $this->getUserFromAvailableData();
+        }
+
+        return $this->user;
+    }
+
+
+    /**
+     * Determines the connected user by first considering an authorization code, and then
      * falling back to any persistent store storing the user.
      *
-     * @return integer The id of the connected Facebook user,
-     *                 or 0 if no such user exists.
+     * @return array|null get an user array or null
      */
     protected function  getUserFromAvailableData()
     {
-        $user = $this->storage->get('user_id', null);
-        $persisted_access_token = $this->storage->get('access_token');
+        //get saved values
+        $user = $this->storage->get('user', null);
+        $persistedAccessToken = $this->storage->get('access_token');
 
-        // use access_token to fetch user id if we have a user access_token, or if
-        // the cached access token has changed.
-        $access_token = $this->getAccessToken();
+        $accessToken = $this->getAccessToken();
 
-        if ($access_token  && !($user && $persisted_access_token == $access_token)) {
+        /**
+         * This is true if both statements are true:
+         * 1: We got an access token
+         * 2: The access token has changed or if we don't got a user
+         */
+        if ($accessToken && !($user && $persistedAccessToken == $accessToken)) {
+
             $user = $this->getUserFromAccessToken();
             if ($user) {
-                $this->storage->set('user_id', $user);
+                $this->storage->set('user', $user);
             } else {
                 $this->storage->clearAll();
             }
@@ -148,19 +186,17 @@ class LinkedIn
     }
 
     /**
-     * Retrieves the UID with the understanding that
+     * Retrieves the user array with the understanding that
      * $this->accessToken has already been set and is
-     * seemingly legitimate.  It relies on Facebook's Graph API
-     * to retrieve user information and then extract
-     * the user ID.
+     * seemingly legitimate.
      *
-     * @return integer Returns the UID of the Facebook user, or 0
-     *                 if the Facebook user could not be determined.
+     * You should override this function if you want to change the default user array
+     *
+     * @return array|null
      */
     protected function getUserFromAccessToken() {
         try {
-            $userInfo = $this->api('/v1/people/~:(id)');
-            return $userInfo['id'];
+            return $this->api('/v1/people/~:(id,firstName,lastName,headline)');
         } catch (LinkedInApiException $e) {
             return null;
         }
@@ -168,11 +204,10 @@ class LinkedIn
 
     /**
      * Get the authorization code from the query parameters, if it exists,
-     * and otherwise return false to signal no authorization code was
+     * and otherwise return null to signal no authorization code was
      * discoverable.
      *
-     * @return mixed The authorization code, or false if the authorization
-     *               code could not be determined.
+     * @return string|null The authorization code, or null if the authorization code could not be determined.
      */
     protected function getCode() {
         if (isset($_REQUEST['code'])) {
@@ -182,24 +217,21 @@ class LinkedIn
                 // CSRF state has done its job, so clear it
                 $this->state = null;
                 $this->storage->clear('state');
+
                 return $_REQUEST['code'];
             } else {
                 throw new LinkedInApiException('CSRF state token does not match one provided.');
-                return false;
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
      * Determines the access token that should be used for API calls.
-     * The first time this is called, $this->accessToken is set equal
-     * to either a valid user access token, or it's set to the application
-     * access token if a valid user access token wasn't available.  Subsequent
-     * calls return whatever the first call returned.
      *
-     * @return string The access token
+     *
+     * @return string|null The access token of null if the access token is not found
      */
     public function getAccessToken() {
         if ($this->accessToken !== null) {
@@ -207,44 +239,22 @@ class LinkedIn
             return $this->accessToken;
         }
 
-        // first establish access token to be the application
-        // access token, in case we navigate to the /oauth/access_token
-        // endpoint, where SOME access token is required.
-        //$this->setAccessToken('temp_token');
-        $user_access_token = $this->getUserAccessToken();
-        if ($user_access_token) {
-            $this->setAccessToken($user_access_token);
+        $newAccessToken = $this->fetchNewAccessToken();
+        if ($newAccessToken) {
+            $this->setAccessToken($newAccessToken);
         }
 
+        //return the new access token or null
         return $this->accessToken;
     }
 
     /**
+     * Determines and returns the user access token using the authorization code. The intent is to
+     * return a valid user access token, or null if one is determined to not be available.
      *
-     * @param string $accessToken
-     *
-     * @return $this
+     * @return string|null A valid user access token, or null if one could not be determined.
      */
-    public function setAccessToken($accessToken)
-    {
-        $this->accessToken = $accessToken;
-
-        return $this;
-    }
-
-
-
-    /**
-     * Determines and returns the user access token, first using
-     * the signed request if present, and then falling back on
-     * the authorization code if present.  The intent is to
-     * return a valid user access token, or false if one is determined
-     * to not be available.
-     *
-     * @return string A valid user access token, or false if one
-     *                could not be determined.
-     */
-    protected function getUserAccessToken() {
+    protected function fetchNewAccessToken() {
 
         $code = $this->getCode();
         if ($code && $code != $this->storage->get('code')) {
@@ -264,39 +274,40 @@ class LinkedIn
         // store, knowing nothing explicit (signed request, authorization
         // code, etc.) was present to shadow it (or we saw a code in $_REQUEST,
         // but it's the same as what's in the persistent store)
-        return $this->storage->get('access_token');
+        return $this->storage->get('access_token', null);
     }
 
     /**
      * Retrieves an access token for the given authorization code
-     * (previously generated from www.facebook.com on behalf of
-     * a specific user).  The authorization code is sent to graph.facebook.com
+     * (previously generated from www.linkedin.com on behalf of
+     * a specific user). The authorization code is sent to www.linkedin.com
      * and a legitimate access token is generated provided the access token
      * and the user for which it was generated all match, and the user is
-     * either logged in to Facebook or has granted an offline access permission.
+     * either logged in to LinkedIn or has granted an offline access permission.
      *
      * @param string $code An authorization code.
-     * @return mixed An access token exchanged for the authorization code, or
-     *               false if an access token could not be generated.
+     * @param string $redirectUri Where the user should be redirected after token is generated. Default is the current url
+     *
+     * @return string|null An access token exchanged for the authorization code, or
+     *               null if an access token could not be generated.
      */
-    protected function getAccessTokenFromCode($code, $redirect_uri = null) {
+    protected function getAccessTokenFromCode($code, $redirectUri = null) {
         if (empty($code)) {
-            return false;
+            return null;
         }
 
-        if ($redirect_uri === null) {
-            $redirect_uri = $this->urlGenerator->getCurrentUrl();
+        if ($redirectUri === null) {
+            $redirectUri = $this->urlGenerator->getCurrentUrl();
         }
 
         try {
-            // need to circumvent json_decode by calling _oauthRequest
-            // directly, since response isn't JSON format.
-            $access_token_response = $this->request->create(
+
+            $response = $this->request->create(
                 $this->urlGenerator->getUrl('www', 'uas/oauth2/accessToken',
                 array(
                     'grant_type' => 'authorization_code',
                     'code' => $code,
-                    'redirect_uri' => $redirect_uri,
+                    'redirect_uri' => $redirectUri,
                     'client_id' => $this->getAppId(),
                     'client_secret' => $this->getAppSecret(),
                 ))
@@ -308,28 +319,30 @@ class LinkedIn
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.
-            return false;
+            return null;
         }
 
-        if (empty($access_token_response)) {
-            return false;
+        if (empty($response)) {
+            return null;
         }
 
-        $response_params = json_decode($access_token_response, true);
-        if (!isset($response_params['access_token'])) {
-            return false;
+        $responseArray = json_decode($response, true);
+        if (!isset($responseArray['access_token'])) {
+            return null;
         }
 
-        return $response_params['access_token'];
+        return $responseArray['access_token'];
     }
 
     /**
-     * Make an API call
+     * Make an API call.
      *
-     * @param $resource
-     * @param array $params
+     * $linkedIn->api('/v1/people/~:(id,firstName,lastName,headline)');
      *
-     * @return mixed
+     * @param string $resource everything after the domain.
+     * @param array $params optional. This is the URL params
+     *
+     * @return array assoc array from json_decode
      */
     public function api($resource, array $params=array()) {
         if (!isset($params['oauth2_access_token'])) {
@@ -353,19 +366,27 @@ class LinkedIn
      *
      * The parameters:
      * - redirect_uri: the url to go to after a successful login
-     * - scope: comma separated list of requested extended perms
+     * - scope: comma (or space) separated list of requested extended permissions
      *
      * @param array $params Provide custom parameters
+     *
      * @return string The URL for the login flow
      */
-    public function getLoginUrl($params=array()) {
+    public function getLoginUrl($params=array())
+    {
         $this->establishCSRFTokenState();
         $currentUrl = $this->urlGenerator->getCurrentUrl();
 
-        // if 'scope' is passed as an array, convert to comma separated list
+        // if 'scope' is passed as an array, convert to space separated list
         $scopeParams = isset($params['scope']) ? $params['scope'] : null;
-        if ($scopeParams && is_array($scopeParams)) {
-            $params['scope'] = implode(' ', $scopeParams);
+        if ($scopeParams) {
+            //if scope is an array
+            if (is_array($scopeParams)) {
+                $params['scope'] = implode(' ', $scopeParams);
+            }  elseif (is_string($scopeParams)) {
+                //if scope is a string with ',' => make it to an array
+                $params['scope'] = str_replace(',', ' ', $scopeParams);
+            }
         }
 
         return $this->urlGenerator->getUrl(
@@ -385,7 +406,6 @@ class LinkedIn
     /**
      * Lays down a CSRF state token for this process.
      *
-     * @return void
      */
     protected function establishCSRFTokenState()
     {
@@ -396,10 +416,10 @@ class LinkedIn
     }
 
     /**
-     * Get the state
+     * Get the state, use this to verify the CSRF token
      *
      *
-     * @return mixed
+     * @return string|null
      */
     protected function getState()
     {
@@ -413,6 +433,7 @@ class LinkedIn
 
 
     /**
+     * Get the app id
      *
      * @return string
      */
@@ -422,6 +443,7 @@ class LinkedIn
     }
 
     /**
+     * Get the app secret
      *
      * @return string
      */
@@ -430,5 +452,17 @@ class LinkedIn
         return $this->appSecret;
     }
 
+    /**
+     * Get the access token
+     *
+     * @param string $accessToken
+     *
+     * @return $this
+     */
+    public function setAccessToken($accessToken)
+    {
+        $this->accessToken = $accessToken;
 
-} 
+        return $this;
+    }
+}
