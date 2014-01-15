@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         syntaxCheck="false"
+         codecoverage= "true"
+         bootstrap="./vendor/autoload.php"
+        >
+
+    <formatter type="clover" usefile="false" />
+
+    <testsuites>
+        <testsuite name="HappyR Api Client Test Suite">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <listeners>
+        <listener class="\Mockery\Adapter\Phpunit\TestListener" file="vendor/mockery/mockery/library/Mockery/Adapter/Phpunit/TestListener.php">
+        </listener>
+    </listeners>
+
+    <filter>
+        <blacklist>
+            <directory>vendor/</directory>
+            <directory>tests/</directory>
+
+            <!-- Don't test interfaces -->
+            <directory suffix="Interface.php">./</directory>
+        </blacklist>
+    </filter>
+
+    <groups>
+        <exclude>
+            <group>live</group>
+        </exclude>
+    </groups>
+
+    <logging>
+        <log type="coverage-clover" target="build/logs/phpunit.coverage.xml"/>
+        <log type="junit" target="build/logs/phpunit.xml" logIncompleteSkipped="false"/>
+    </logging>
+
+</phpunit>

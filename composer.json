@@ -1,0 +1,23 @@
+{
+    "name": "happyr/linkedin-api-client",
+    "type": "library",
+    "description": "LinkedIn api client",
+    "keywords": ["LinkedIn", "HappyR", "API", "Client", "SDK"],
+    "homepage": "http://developer.happyr.se/php-libraries/linkedin-api-client",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tobias Nyholm",
+            "email": "tobias@happyrecruiting.se"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2"
+    },
+    "require-dev": {
+        "mockery/mockery": "*"
+    },
+    "autoload": {
+        "psr-0": { "HappyR\\LinkedIn\\": "src/" }
+    }
+}
