@@ -73,17 +73,7 @@ class UrlGenerator
         $query = '';
         if (!empty($parts['query'])) {
             // drop known linkedin params
-            $params = explode('&', $parts['query']);
-            $savedParams = array();
-            foreach ($params as $param) {
-                if ($this->shouldRetainParam($param)) {
-                    $savedParams[] = $param;
-                }
-            }
-
-            if (!empty($savedParams)) {
-                $query = '?'.implode($savedParams, '&');
-            }
+            $query=$this->dropLinkedInParams($parts['query']);
         }
 
         // use port if non default
@@ -98,24 +88,32 @@ class UrlGenerator
     }
 
     /**
-     * Returns true if and only if the key or key/value pair should
-     * be retained as part of the query string.  This amounts to
-     * a brute-force search of the very small list of LinkedIn-specific
-     * params that should be stripped out.
+     * Drop known LinkedIn params. Ie those in DataStorage::$validKeys
      *
-     * @param string $param A key or key/value pair within a URL's query (e.g.'foo=a', 'foo=', or 'foo'.
+     * @param string $query
      *
-     * @return boolean
+     * @return string query without LinkedIn params. This string is prepended with a question mark '?'
      */
-    protected function shouldRetainParam($param)
+    protected function dropLinkedInParams($query)
     {
-        foreach (DataStorage::$validKeys as $dropMe) {
-            if ($param === $dropMe || strpos($param, $dropMe.'=') === 0) {
-                return false;
+        if ($query=='') {
+            return '';
+        }
+
+        $params = explode('&', $query);
+        foreach ($params as $i=>$param) {
+            //A key or key/value pair might me 'foo=bar', 'foo=', or 'foo'.
+            list($key)=explode('=', $param, 2);
+            if (in_array($key, DataStorage::$validKeys)) {
+                unset($params[$i]);
             }
         }
 
-        return true;
+        if (!empty($params)) {
+            return '?'.implode($params, '&');
+        }
+
+        return '';
     }
 
     /**
