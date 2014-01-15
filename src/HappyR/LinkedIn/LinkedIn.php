@@ -397,8 +397,6 @@ class LinkedIn
                 'POST'
             );
 
-
-
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.

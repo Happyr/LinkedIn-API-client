@@ -102,13 +102,17 @@ class UrlGenerator
 
         $params = explode('&', $query);
         foreach ($params as $i => $param) {
-            //A key or key/value pair might me 'foo=bar', 'foo=', or 'foo'.
+            /*
+             * A key or key/value pair might me 'foo=bar', 'foo=', or 'foo'.
+             */
+            //get the first value of the array you will get when you explode()
             list($key)=explode('=', $param, 2);
             if (in_array($key, DataStorage::$validKeys)) {
                 unset($params[$i]);
             }
         }
 
+        //assert: params is an array. It might be empty
         if (!empty($params)) {
             return '?'.implode($params, '&');
         }
