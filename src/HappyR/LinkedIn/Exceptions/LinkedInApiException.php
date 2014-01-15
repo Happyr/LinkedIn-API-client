@@ -39,6 +39,8 @@ class LinkedInApiException extends \Exception
         } else if (isset($result['error_msg'])) {
             // Rest server style
             $msg = $result['error_msg'];
+        } else if (is_string($result)) {
+            $msg = $result;
         } else {
             $msg = 'Unknown Error. Check getResult()';
         }

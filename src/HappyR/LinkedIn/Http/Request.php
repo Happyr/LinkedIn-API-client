@@ -14,6 +14,16 @@ use HappyR\LinkedIn\Exceptions\LinkedInApiException;
 class Request implements RequestInterface
 {
     /**
+     * Default options for curl.
+     */
+    public static $CURL_OPTS = array(
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 60,
+        CURLOPT_USERAGENT      => 'linkedin-php-client',
+    );
+
+    /**
      * Makes an HTTP request. This method can be overridden by subclasses if
      * developers want to do fancier things or use something other than curl to
      * make the request.
@@ -24,17 +34,17 @@ class Request implements RequestInterface
      *
      * @return string The response text
      */
-    public function create($url, $params, $ch=null) {
+    public function create($url, $params=array(), $method='GET', $ch=null) {
         if (!$ch) {
             $ch = curl_init();
         }
 
         $opts = self::$CURL_OPTS;
-        if ($this->getFileUploadSupport()) {
-            $opts[CURLOPT_POSTFIELDS] = $params;
-        } else {
+        $opts[CURLOPT_POST] = strtoupper($method)=='POST';
+        if ($opts[CURLOPT_POST]) {
             $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
         }
+
         $opts[CURLOPT_URL] = $url;
 
         // disable the 'Expect: 100-continue' behaviour. This causes CURL to wait
@@ -51,14 +61,6 @@ class Request implements RequestInterface
         $result = curl_exec($ch);
 
         $errno = curl_errno($ch);
-        // CURLE_SSL_CACERT || CURLE_SSL_CACERT_BADFILE
-        if ($errno == 60 || $errno == 77) {
-            self::errorLog('Invalid or no certificate authority found, '.
-                'using bundled information');
-            curl_setopt($ch, CURLOPT_CAINFO,
-                dirname(__FILE__) . DIRECTORY_SEPARATOR . 'fb_ca_chain_bundle.crt');
-            $result = curl_exec($ch);
-        }
 
         // With dual stacked DNS responses, it's possible for a server to
         // have IPv6 enabled but not have IPv6 connectivity.  If this is

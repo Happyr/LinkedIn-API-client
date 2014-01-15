@@ -91,7 +91,7 @@ class LinkedIn
         $this->urlGenerator = new UrlGenerator();
 
         $class=$this->requestClass;
-        $this->requestClass=new $class();
+        $this->request=new $class();
 
         $class=$this->storageClass;
         $this->storage=new $class();
@@ -138,7 +138,7 @@ class LinkedIn
         if ($access_token  && !($user && $persisted_access_token == $access_token)) {
             $user = $this->getUserFromAccessToken();
             if ($user) {
-                $this->storage->get('user_id', $user);
+                $this->storage->set('user_id', $user);
             } else {
                 $this->storage->clearAll();
             }
@@ -176,13 +176,15 @@ class LinkedIn
      */
     protected function getCode() {
         if (isset($_REQUEST['code'])) {
-            if ($this->state !== null && isset($_REQUEST['state']) && $this->state === $_REQUEST['state']) {
+            $state = $this->getState();
+            //if state exists in session and in request and if they are equal
+            if (null !== $state && isset($_REQUEST['state']) && $state === $_REQUEST['state']) {
                 // CSRF state has done its job, so clear it
                 $this->state = null;
                 $this->storage->clear('state');
                 return $_REQUEST['code'];
             } else {
-                self::errorLog('CSRF state token does not match one provided.');
+                throw new LinkedInApiException('CSRF state token does not match one provided.');
                 return false;
             }
         }
@@ -208,7 +210,7 @@ class LinkedIn
         // first establish access token to be the application
         // access token, in case we navigate to the /oauth/access_token
         // endpoint, where SOME access token is required.
-        $this->setAccessToken($this->getApplicationAccessToken());
+        //$this->setAccessToken('temp_token');
         $user_access_token = $this->getUserAccessToken();
         if ($user_access_token) {
             $this->setAccessToken($user_access_token);
@@ -216,6 +218,21 @@ class LinkedIn
 
         return $this->accessToken;
     }
+
+    /**
+     *
+     * @param string $accessToken
+     *
+     * @return $this
+     */
+    public function setAccessToken($accessToken)
+    {
+        $this->accessToken = $accessToken;
+
+        return $this;
+    }
+
+
 
     /**
      * Determines and returns the user access token, first using
@@ -240,7 +257,7 @@ class LinkedIn
 
             // code was bogus, so everything based on it should be invalidated.
             $this->storage->clearAll();
-            return false;
+            throw new LinkedInApiException('Could not get access token');
         }
 
         // as a fallback, just return whatever is in the persistent
@@ -268,23 +285,26 @@ class LinkedIn
         }
 
         if ($redirect_uri === null) {
-            $redirect_uri = $this->getCurrentUrl();
+            $redirect_uri = $this->urlGenerator->getCurrentUrl();
         }
 
         try {
             // need to circumvent json_decode by calling _oauthRequest
             // directly, since response isn't JSON format.
-            $access_token_response =
-                $this->_oauthRequest(
-                    $this->getUrl('www', 'uas/oauth2/accessToken'),
-                    $params = array(
-                        'grant_type' => 'authorization_code',
-                        'code' => $code,
-                        'redirect_uri' => $redirect_uri,
-                        'client_id' => $this->getAppId(),
-                        'client_secret' => $this->getAppSecret(),
-                    )
-                );
+            $access_token_response = $this->request->create(
+                $this->urlGenerator->getUrl('www', 'uas/oauth2/accessToken',
+                array(
+                    'grant_type' => 'authorization_code',
+                    'code' => $code,
+                    'redirect_uri' => $redirect_uri,
+                    'client_id' => $this->getAppId(),
+                    'client_secret' => $this->getAppSecret(),
+                ))
+                , array(), 'POST'
+            );
+
+
+
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.
@@ -295,8 +315,7 @@ class LinkedIn
             return false;
         }
 
-        $response_params = array();
-        parse_str($access_token_response, $response_params);
+        $response_params = json_decode($access_token_response, true);
         if (!isset($response_params['access_token'])) {
             return false;
         }
@@ -304,15 +323,28 @@ class LinkedIn
         return $response_params['access_token'];
     }
 
-    public function api($resource, array $params=array(), $method='GET') {
+    /**
+     * Make an API call
+     *
+     * @param $resource
+     * @param array $params
+     *
+     * @return mixed
+     */
+    public function api($resource, array $params=array()) {
         if (!isset($params['oauth2_access_token'])) {
             $params['oauth2_access_token'] = $this->getAccessToken();
         }
+        if (!isset($params['format'])) {
+            $params['format'] = 'json';
+        }
 
-        $url=$this->getUrl('api', $resource, $params);
+        $url=$this->urlGenerator->getUrl('api', $resource, $params);
+        $result= $this->request->create($url);
 
-        return $this->request-create($url, $params);
+        return json_decode($result, true);
     }
+
 
     /**
      * Get a Login URL for use with redirects. By default, full page redirect is
@@ -328,15 +360,15 @@ class LinkedIn
      */
     public function getLoginUrl($params=array()) {
         $this->establishCSRFTokenState();
-        $currentUrl = $this->getCurrentUrl();
+        $currentUrl = $this->urlGenerator->getCurrentUrl();
 
         // if 'scope' is passed as an array, convert to comma separated list
         $scopeParams = isset($params['scope']) ? $params['scope'] : null;
         if ($scopeParams && is_array($scopeParams)) {
-            $params['scope'] = implode(',', $scopeParams);
+            $params['scope'] = implode(' ', $scopeParams);
         }
 
-        return $this->getUrl(
+        return $this->urlGenerator->getUrl(
             'www',
             'uas/oauth2/authorization',
             array_merge(
@@ -355,13 +387,28 @@ class LinkedIn
      *
      * @return void
      */
-    protected function establishCSRFTokenState() {
+    protected function establishCSRFTokenState()
+    {
         if ($this->state === null) {
             $this->state = md5(uniqid(mt_rand(), true));
             $this->storage->set('state', $this->state);
         }
     }
 
+    /**
+     * Get the state
+     *
+     *
+     * @return mixed
+     */
+    protected function getState()
+    {
+        if ($this->state === null) {
+            $this->state = $this->storage->get('state', null);
+        }
+
+        return $this->state;
+    }
 
 
 
@@ -382,4 +429,6 @@ class LinkedIn
     {
         return $this->appSecret;
     }
+
+
 } 

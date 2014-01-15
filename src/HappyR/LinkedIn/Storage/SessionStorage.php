@@ -34,7 +34,7 @@ class SessionStorage extends DataStorage
         }
 
         $session_var_name = $this->constructSessionVariableName($key);
-        return isset($_SESSION[$session_var_name]) ?: $default;
+        return isset($_SESSION[$session_var_name]) ? $_SESSION[$session_var_name] : $default;
     }
 
     /**
@@ -56,7 +56,7 @@ class SessionStorage extends DataStorage
      */
     public function clearAll() {
         foreach (self::$validKeys as $key) {
-            $this->clearPersistentData($key);
+            $this->clear($key);
         }
     }
 
