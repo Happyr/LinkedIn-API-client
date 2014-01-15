@@ -6,7 +6,20 @@ use HappyR\LinkedIn\Exceptions\LinkedInApiException;
 use HappyR\LinkedIn\Http\UrlGenerator;
 
 /**
- * Class LinkedIn
+ * Class LinkedIn lets you talk to LinkedIn api.
+ *
+ * When a new user arrives and want to authenticate here is whats happens:
+ * 1. You redirect him to whatever url getLoginUrl() returns.
+ * 2. The user logs in on www.linkedin.com and authorize your application.
+ * 3. The user returns to your site with a *code* in the the $_REQUEST.
+ * 4. You call getUser()
+ * 5. getUser() needs a access token so it calls getAccessToken()
+ * 6. We don't got an access token (only a *code*). So getAccessToken() calls fetchNewAccessToken()
+ * 7. fetchNewAccessToken() gets the *code* and calls getAccessTokenFromCode()
+ * 8. getAccessTokenFromCode() makes a request to www.linkedin.com and exchanges the *code* for an access token
+ * 9. With a valid access token we can query the api for the user
+ * 10. When yuo make a second request to the api you skip the authorization (1-3) and
+ *     the "*code* for access token exchange" (6-8).
  *
  * @author Tobias Nyholm
  *
@@ -122,19 +135,81 @@ class LinkedIn
     }
 
     /**
-     * Get the id of the current user
+     * Make an API call.
      *
-     * @return string|null returns null if no user found
+     * $linkedIn->api('/v1/people/~:(id,firstName,lastName,headline)');
+     *
+     * @param string $resource everything after the domain.
+     * @param array $urlParams [optional] This is the URL params
+     * @param string $method [optional] This is the HTTP verb
+     * @param array $postParams [optional] If you are using a POST you might want to have some more parameters
+     *
+     * @return array assoc array from json_decode
      */
-    public function getUserId()
+    public function api($resource, array $urlParams=array(), $method='GET', array $postParams=array())
     {
-        $user=$this->getUser();
-
-        if (isset($user['id'])) {
-            return $user['id'];
+        /*
+         * Add token and format
+         */
+        if (!isset($urlParams['oauth2_access_token'])) {
+            $urlParams['oauth2_access_token'] = $this->getAccessToken();
+        }
+        if (!isset($urlParams['format'])) {
+            $urlParams['format'] = 'json';
         }
 
-        return null;
+        //generate an url
+        $url=$this->urlGenerator->getUrl('api', $resource, $urlParams);
+
+        //$method that url
+        $result= $this->request->create($url, $postParams, $method);
+
+        return json_decode($result, true);
+    }
+
+    /**
+     * Get a Login URL for use with redirects. By default, full page redirect is
+     * assumed. If you are using the generated URL with a window.open() call in
+     * JavaScript, you can pass in display=popup as part of the $params.
+     *
+     * The parameters:
+     * - redirect_uri: the url to go to after a successful login
+     * - scope: comma (or space) separated list of requested extended permissions
+     *
+     * @param array $params Provide custom parameters
+     *
+     * @return string The URL for the login flow
+     */
+    public function getLoginUrl($params=array())
+    {
+        $this->establishCSRFTokenState();
+        $currentUrl = $this->urlGenerator->getCurrentUrl();
+
+        // if 'scope' is passed as an array, convert to space separated list
+        $scopeParams = isset($params['scope']) ? $params['scope'] : null;
+        if ($scopeParams) {
+            //if scope is an array
+            if (is_array($scopeParams)) {
+                $params['scope'] = implode(' ', $scopeParams);
+            } elseif (is_string($scopeParams)) {
+                //if scope is a string with ',' => make it to an array
+                $params['scope'] = str_replace(',', ' ', $scopeParams);
+            }
+        }
+
+        return $this->urlGenerator->getUrl(
+            'www',
+            'uas/oauth2/authorization',
+            array_merge(
+                array(
+                    'response_type'=>'code',
+                    'client_id' => $this->getAppId(),
+                    'redirect_uri' => $currentUrl, // possibly overwritten
+                    'state' => $this->state,
+                ),
+                $params
+            )
+        );
     }
 
     /**
@@ -152,14 +227,13 @@ class LinkedIn
         return $this->user;
     }
 
-
     /**
      * Determines the connected user by first considering an authorization code, and then
      * falling back to any persistent store storing the user.
      *
      * @return array|null get an user array or null
      */
-    protected function  getUserFromAvailableData()
+    protected function getUserFromAvailableData()
     {
         //get saved values
         $user = $this->storage->get('user', null);
@@ -344,77 +418,6 @@ class LinkedIn
     }
 
     /**
-     * Make an API call.
-     *
-     * $linkedIn->api('/v1/people/~:(id,firstName,lastName,headline)');
-     *
-     * @param string $resource everything after the domain.
-     * @param array $params optional. This is the URL params
-     *
-     * @return array assoc array from json_decode
-     */
-    public function api($resource, array $params=array())
-    {
-        if (!isset($params['oauth2_access_token'])) {
-            $params['oauth2_access_token'] = $this->getAccessToken();
-        }
-        if (!isset($params['format'])) {
-            $params['format'] = 'json';
-        }
-
-        $url=$this->urlGenerator->getUrl('api', $resource, $params);
-        $result= $this->request->create($url);
-
-        return json_decode($result, true);
-    }
-
-
-    /**
-     * Get a Login URL for use with redirects. By default, full page redirect is
-     * assumed. If you are using the generated URL with a window.open() call in
-     * JavaScript, you can pass in display=popup as part of the $params.
-     *
-     * The parameters:
-     * - redirect_uri: the url to go to after a successful login
-     * - scope: comma (or space) separated list of requested extended permissions
-     *
-     * @param array $params Provide custom parameters
-     *
-     * @return string The URL for the login flow
-     */
-    public function getLoginUrl($params=array())
-    {
-        $this->establishCSRFTokenState();
-        $currentUrl = $this->urlGenerator->getCurrentUrl();
-
-        // if 'scope' is passed as an array, convert to space separated list
-        $scopeParams = isset($params['scope']) ? $params['scope'] : null;
-        if ($scopeParams) {
-            //if scope is an array
-            if (is_array($scopeParams)) {
-                $params['scope'] = implode(' ', $scopeParams);
-            } elseif (is_string($scopeParams)) {
-                //if scope is a string with ',' => make it to an array
-                $params['scope'] = str_replace(',', ' ', $scopeParams);
-            }
-        }
-
-        return $this->urlGenerator->getUrl(
-            'www',
-            'uas/oauth2/authorization',
-            array_merge(
-                array(
-                    'response_type'=>'code',
-                    'client_id' => $this->getAppId(),
-                    'redirect_uri' => $currentUrl, // possibly overwritten
-                    'state' => $this->state,
-                ),
-                $params
-            )
-        );
-    }
-
-    /**
      * Lays down a CSRF state token for this process.
      *
      */
@@ -440,6 +443,24 @@ class LinkedIn
 
         return $this->state;
     }
+
+
+    /**
+     * Get the id of the current user
+     *
+     * @return string|null returns null if no user found
+     */
+    public function getUserId()
+    {
+        $user=$this->getUser();
+
+        if (isset($user['id'])) {
+            return $user['id'];
+        }
+
+        return null;
+    }
+
 
 
 

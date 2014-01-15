@@ -101,7 +101,7 @@ class UrlGenerator
         }
 
         $params = explode('&', $query);
-        foreach ($params as $i=>$param) {
+        foreach ($params as $i => $param) {
             //A key or key/value pair might me 'foo=bar', 'foo=', or 'foo'.
             list($key)=explode('=', $param, 2);
             if (in_array($key, DataStorage::$validKeys)) {

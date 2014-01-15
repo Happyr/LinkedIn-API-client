@@ -42,9 +42,9 @@ class SessionStorage extends DataStorage
     /**
      * {@inheritDoc}
      */
-    public function clear($key) {
-        if (!in_array($key, self::$validKeys))
-        {
+    public function clear($key)
+    {
+        if (!in_array($key, self::$validKeys)) {
             throw new LinkedInApiException(sprintf('Unsupported key ("%s") passed to clear.', $key));
         }
 
