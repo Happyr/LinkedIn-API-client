@@ -1,12 +1,16 @@
 # LinkedIn API client in PHP
 
-A PHP library to handle authentication and comminication with LinkedIn API. The library/SDK helps you to get an access token and when authenticated it helps you to send API requests. You will nog get *everything* for free though... You have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API. We just help you with the boring stuff. 
+A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
+token and when authenticated it helps you to send API requests. You will nog get *everything* for free though... You
+have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API. We just help you
+with the boring stuff.
 
-To get an overview what this library actually is doing for you. Take a look at the authentication page from the [API docs][api-doc-authentication].
+To get an overview what this library actually is doing for you. Take a look at the authentication page from
+the [API docs][api-doc-authentication].
 
 ## Features
 
-Here is a list of features that might convince you to choose this LinkedIn cliet over some of our compeditor's. 
+Here is a list of features that might convince you to choose this LinkedIn client over some of our competitors'.
 
 * Easy to extend
 * Simple to implement
@@ -16,11 +20,15 @@ Here is a list of features that might convince you to choose this LinkedIn cliet
 * Not developed for a specific framework. 
 * Test coverage of 23% (2013-01-15)... FAIL!
 
-If I still haven't convinved you, check out these other libraries. This is the top 3 list in my optinion:
+If I still haven't convinced you, check out these other libraries. This is the top 3 list in my opinion:
 
-* [ashwinks](https://github.com/ashwinks/PHP-LinkedIn-SDK) - Looks good but it's lacking documentation. It does not hadle CSRF protection and it might be difficult to override this API with a subclass to extend it.
-* [roel-sluper](https://github.com/roel-sluper/LinkedIn-PHP-API) - No comments and and it looks like a strait forward solution. It has a few bugs in it but hey, I'm not saying that my lib is 100% bug free. This might be a good place to start if you want to build your own API client. 
-* [mahmudahsan](https://github.com/mahmudahsan/Linkedin---Simple-integration-for-your-website) - Lots of docs but no comments, namespaces or objects. It is basically only code samples.
+* [ashwinks](https://github.com/ashwinks/PHP-LinkedIn-SDK) - Looks good but it's lacking documentation. It does not
+handle CSRF protection and it might be difficult to override this API with a subclass to extend it.
+* [roel-sluper](https://github.com/roel-sluper/LinkedIn-PHP-API) - No comments and and it looks like a strait forward
+solution. It has a few bugs in it but hey, I'm not saying that my lib is 100% bug free. This might be a good place
+to start if you want to build your own API client.
+* [mahmudahsan](https://github.com/mahmudahsan/Linkedin---Simple-integration-for-your-website) - Lots of docs but no
+comments, namespaces or objects. It is basically only code samples.
 
 
 ## Installation
@@ -43,7 +51,9 @@ command from the directory where your ``composer.json`` file is located:
 
 ## Usage
 
-In order to use this API client (or any other LinkedIn clients) you have to [register][register-app] your application with LinkedIn to receive an API key. This unique key helps us identify your application and lets you make API calls. Once you've registered your LinkedIn app, you will be provided with an *API Key* and *Secret Key*. 
+In order to use this API client (or any other LinkedIn clients) you have to [register your application][register-app]
+with LinkedIn to receive an API key. This unique key helps us identify your application and lets you make API calls.
+Once you've registered your LinkedIn app, you will be provided with an *API Key* and *Secret Key*.
 
 This example below is a nicer way of connecting to LinkedIn compared to [their code samples][linkedin-code-samples].
 
@@ -56,13 +66,13 @@ This example below is a nicer way of connecting to LinkedIn compared to [their c
 
 /*
  * First you need to make sure you've used composers auto load. You have is probably 
- * allready done this before. You usually don't bother..
+ * already done this before. You usually don't bother..
  */
 //require_once "../vendor/autoload.php"
 
 $linkedIn=new HappyR\LinkedIn\LinkedIn('app_id', 'app_secret');
 
-//if not athenticated
+//if not authenticated
 if (!$linkedIn->isAuthenticated()) {
     $url = $linkedIn->getLoginUrl();
     echo "<a href='$url'>Login with LinkedIn</a>";
@@ -78,7 +88,8 @@ echo "Welcome ".$user['firstName'];
 
 ### Integrating with Symfony2
 
-It is very easy to integrate this LinkedIn client with Symfony2. I created a service that extended HappyR\LinkedIn\LinkedIn and a controller to enable LinkedIn authentication. 
+It is very easy to integrate this LinkedIn client with Symfony2. I created a service that extended
+HappyR\LinkedIn\LinkedIn and a controller to enable LinkedIn authentication.
 
 ```php
 <?php
