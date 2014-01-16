@@ -6,7 +6,9 @@ namespace HappyR\LinkedIn\Http;
 use HappyR\LinkedIn\Exceptions\LinkedInApiException;
 
 /**
- * Class Http
+ * Class Request
+ *
+ * Makes an HTTP request with curl
  *
  * @author Tobias Nyholm
  *

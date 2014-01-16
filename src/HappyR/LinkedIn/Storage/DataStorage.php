@@ -5,7 +5,10 @@ namespace HappyR\LinkedIn\Storage;
 
 
 /**
- * Class DataStorageInterface
+ * Class DataStorage
+ *
+ * We need to store data some where. It might be in a apc cache, filesystem cache, database or in the session.
+ * We need it to protect us from CSRF attacks and to reduce the requests to the API.
  *
  * @author Tobias Nyholm
  *

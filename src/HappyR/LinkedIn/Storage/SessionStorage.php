@@ -8,6 +8,8 @@ use HappyR\LinkedIn\Exceptions\LinkedInApiException;
 /**
  * Class SessionStorage
  *
+ * Store data in the session.
+ *
  * @author Tobias Nyholm
  *
  */

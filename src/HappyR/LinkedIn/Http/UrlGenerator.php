@@ -6,12 +6,12 @@ namespace HappyR\LinkedIn\Http;
 use HappyR\LinkedIn\Storage\DataStorage;
 
 /**
- * Class Http
+ * Class UrlGenerator
  *
  * @author Tobias Nyholm
  *
  */
-class UrlGenerator
+class UrlGenerator implements UrlGeneratorInterface
 {
     /**
      * Maps aliases to LinkedIn domains.

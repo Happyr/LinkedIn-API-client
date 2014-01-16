@@ -68,6 +68,52 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    /**
+     * Test a call to getAccessToken when there is not token
+     */
+    public function testGetAccessTokenEmpty()
+    {
+        $token='token';
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedIn', array('fetchNewAccessToken', 'setAccessToken'), array(), '', false);
+        $linkedIn->expects($this->once())->method('fetchNewAccessToken')->will($this->returnValue($token));
+        $linkedIn->expects($this->once())->method('setAccessToken')->with($token);
+
+        $linkedIn->getAccessToken();
+    }
+
+    public function testAccessTokenAccessors()
+    {
+        $token='token';
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedIn', array('fetchNewAccessToken'), array(), '', false);
+        $linkedIn->expects($this->never())->method('fetchNewAccessToken');
+
+        $linkedIn->setAccessToken($token);
+        $result=$linkedIn->getAccessToken();
+
+        $this->assertEquals($token, $result);
+    }
+
+    public function testRequestAccessors()
+    {
+        $object = m::mock('HappyR\LinkedIn\Http\RequestInterface');
+        $this->ln->setRequest($object);
+        $this->assertEquals($object, $this->ln->getRequest());
+    }
+
+    public function testGeneratorAccessors()
+    {
+        $object = m::mock('HappyR\LinkedIn\Http\UrlGenerator');
+        $this->ln->setUrlGenerator($object);
+        $this->assertEquals($object, $this->ln->getUrlGenerator());
+    }
+
+    public function testStorageAccessors()
+    {
+        $object = m::mock('HappyR\LinkedIn\Storage\DataStorage');
+        $this->ln->setStorage($object);
+        $this->assertEquals($object, $this->ln->getStorage());
+    }
+
 }
 
 

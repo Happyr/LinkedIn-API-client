@@ -4,7 +4,10 @@ namespace HappyR\LinkedIn;
 
 use HappyR\LinkedIn\Exceptions\LinkedInApiException;
 use HappyR\LinkedIn\Http\Request;
+use HappyR\LinkedIn\Http\RequestInterface;
 use HappyR\LinkedIn\Http\UrlGenerator;
+use HappyR\LinkedIn\Http\UrlGeneratorInterface;
+use HappyR\LinkedIn\Storage\DataStorage;
 use HappyR\LinkedIn\Storage\SessionStorage;
 
 /**
@@ -69,7 +72,7 @@ class LinkedIn
     protected $storage;
 
     /**
-     * @var \HappyR\LinkedIn\Http\UrlGenerator urlGenerator
+     * @var UrlGeneratorInterface urlGenerator
      *
      */
     protected $urlGenerator;
@@ -486,11 +489,12 @@ class LinkedIn
 
     /**
      *
-     * @param \HappyR\LinkedIn\Http\UrlGenerator $urlGenerator
+     *
+     * @param UrlGeneratorInterface $urlGenerator
      *
      * @return $this
      */
-    public function setUrlGenerator($urlGenerator)
+    public function setUrlGenerator(UrlGeneratorInterface $urlGenerator)
     {
         $this->urlGenerator = $urlGenerator;
 
@@ -499,7 +503,7 @@ class LinkedIn
 
     /**
      *
-     * @return \HappyR\LinkedIn\Http\UrlGenerator
+     * @return UrlGeneratorInterface
      */
     public function getUrlGenerator()
     {
@@ -508,11 +512,12 @@ class LinkedIn
 
     /**
      *
-     * @param \HappyR\LinkedIn\Storage\DataStorage $storage
+     *
+     * @param DataStorage $storage
      *
      * @return $this
      */
-    public function setStorage($storage)
+    public function setStorage(DataStorage $storage)
     {
         $this->storage = $storage;
 
@@ -521,7 +526,7 @@ class LinkedIn
 
     /**
      *
-     * @return \HappyR\LinkedIn\Storage\DataStorage
+     * @return DataStorage
      */
     public function getStorage()
     {
@@ -530,11 +535,11 @@ class LinkedIn
 
     /**
      *
-     * @param \HappyR\LinkedIn\Http\RequestInterface $request
+     * @param RequestInterface $request
      *
      * @return $this
      */
-    public function setRequest($request)
+    public function setRequest(RequestInterface $request)
     {
         $this->request = $request;
 
@@ -543,12 +548,10 @@ class LinkedIn
 
     /**
      *
-     * @return \HappyR\LinkedIn\Http\RequestInterface
+     * @return RequestInterface
      */
     public function getRequest()
     {
         return $this->request;
     }
-
-
 }

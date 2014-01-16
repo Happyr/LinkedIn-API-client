@@ -20,11 +20,11 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 * Not developed for a specific framework. 
 * Test coverage of 23% (2013-01-15)... FAIL!
 
-If I still haven't convinced you, check out these other libraries. This is the top 3 list in my opinion:
+If I still haven't convinced you, you might consider these other libraries. This is the top 3 list in my opinion:
 
 * [ashwinks](https://github.com/ashwinks/PHP-LinkedIn-SDK) - Looks good but it's lacking documentation. It does not
 handle CSRF protection and it might be difficult to override this API with a subclass to extend it.
-* [roel-sluper](https://github.com/roel-sluper/LinkedIn-PHP-API) - No comments and and it looks like a strait forward
+* [roel-sluper](https://github.com/roel-sluper/LinkedIn-PHP-API) - No comments but it looks like a strait forward
 solution. It has a few bugs in it but hey, I'm not saying that my lib is 100% bug free. This might be a good place
 to start if you want to build your own API client.
 * [mahmudahsan](https://github.com/mahmudahsan/Linkedin---Simple-integration-for-your-website) - Lots of docs but no
