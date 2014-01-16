@@ -197,7 +197,7 @@ class LinkedIn
                     'response_type'=>'code',
                     'client_id' => $this->getAppId(),
                     'redirect_uri' => $currentUrl, // possibly overwritten
-                    'state' => $this->state,
+                    'state' => $this->getState(),
                 ),
                 $params
             )
@@ -283,7 +283,7 @@ class LinkedIn
             //if state exists in session and in request and if they are equal
             if (null !== $state && isset($_REQUEST['state']) && $state === $_REQUEST['state']) {
                 // CSRF state has done its job, so clear it
-                $this->state = null;
+                $this->setState(null);
                 $this->getStorage()->clear('state');
 
                 return $_REQUEST['code'];
@@ -412,9 +412,9 @@ class LinkedIn
      */
     protected function establishCSRFTokenState()
     {
-        if ($this->state === null) {
-            $this->state = md5(uniqid(mt_rand(), true));
-            $this->getStorage()->set('state', $this->state);
+        if ($this->getState() === null) {
+            $this->setState(md5(uniqid(mt_rand(), true)));
+            $this->getStorage()->set('state', $this->getState());
         }
     }
 
@@ -433,6 +433,20 @@ class LinkedIn
         return $this->state;
     }
 
+    /**
+     *
+     *
+     * @param $state
+     *
+     * @return $this
+     */
+    protected function setState($state)
+    {
+        $this->state=$state;
+
+        return $this;
+    }
+
 
     /**
      * Get the id of the current user
@@ -449,9 +463,6 @@ class LinkedIn
 
         return null;
     }
-
-
-
 
     /**
      * Get the app id

@@ -18,7 +18,7 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 * Using composer.json
 * Handles CSRF protection for you
 * Not developed for a specific framework. 
-* Test coverage of 35% (2013-01-16)... FAIL!
+* Test coverage of 46% (2013-01-16)... FAIL!
 * 501 lines of code, 470 lines of comments
 
 If I still haven't convinced you, you might consider these other libraries. This is the top 3 list in my opinion:
