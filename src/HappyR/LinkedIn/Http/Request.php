@@ -34,7 +34,7 @@ class Request implements RequestInterface
      *
      * @return string The response text
      */
-    public function create($url, $params=array(), $method='GET', $ch=null)
+    public function send($url, $params=array(), $method='GET', $ch=null)
     {
         if (!$ch) {
             $ch = curl_init();

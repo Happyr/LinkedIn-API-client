@@ -3,7 +3,9 @@
 namespace HappyR\LinkedIn;
 
 use HappyR\LinkedIn\Exceptions\LinkedInApiException;
+use HappyR\LinkedIn\Http\Request;
 use HappyR\LinkedIn\Http\UrlGenerator;
+use HappyR\LinkedIn\Storage\SessionStorage;
 
 /**
  * Class LinkedIn lets you talk to LinkedIn api.
@@ -67,13 +69,6 @@ class LinkedIn
     protected $storage;
 
     /**
-     * @var string storageClass
-     *
-     * The class that handles the storage. Override this value with a subclass
-     */
-    protected $storageClass = 'HappyR\LinkedIn\Storage\SessionStorage';
-
-    /**
      * @var \HappyR\LinkedIn\Http\UrlGenerator urlGenerator
      *
      */
@@ -84,13 +79,6 @@ class LinkedIn
      *
      */
     protected $request;
-
-    /**
-     * @var string storageClass
-     *
-     * The class that handles the storage. Override this value with a subclass
-     */
-    protected $requestClass = 'HappyR\LinkedIn\Http\Request';
 
     /**
      * Constructor
@@ -104,8 +92,6 @@ class LinkedIn
         $this->appId = $appId;
         $this->appSecret = $appSecret;
 
-        $this->urlGenerator = new UrlGenerator();
-
         $this->init();
     }
 
@@ -116,11 +102,9 @@ class LinkedIn
      */
     protected function init()
     {
-        $class=$this->requestClass;
-        $this->request=new $class();
-
-        $class=$this->storageClass;
-        $this->storage=new $class();
+        $this->urlGenerator = new UrlGenerator();
+        $this->request = new Request();
+        $this->storage=new SessionStorage();
     }
 
     /**
@@ -144,7 +128,8 @@ class LinkedIn
      * @param string $method [optional] This is the HTTP verb
      * @param array $postParams [optional] If you are using a POST you might want to have some more parameters
      *
-     * @return array assoc array from json_decode
+     * @return string|array The default is an assoc array from json_decode. But if you specify
+     *                      $urlParams['format']='xml' you will get the raw result.
      */
     public function api($resource, array $urlParams=array(), $method='GET', array $postParams=array())
     {
@@ -159,12 +144,16 @@ class LinkedIn
         }
 
         //generate an url
-        $url=$this->urlGenerator->getUrl('api', $resource, $urlParams);
+        $url=$this->getUrlGenerator()->getUrl('api', $resource, $urlParams);
 
         //$method that url
-        $result= $this->request->create($url, $postParams, $method);
+        $result= $this->getRequest()->send($url, $postParams, $method);
 
-        return json_decode($result, true);
+        if ($urlParams['format']=='json') {
+            return json_decode($result, true);
+        }
+
+        return $result;
     }
 
     /**
@@ -183,7 +172,7 @@ class LinkedIn
     public function getLoginUrl($params=array())
     {
         $this->establishCSRFTokenState();
-        $currentUrl = $this->urlGenerator->getCurrentUrl();
+        $currentUrl = $this->getUrlGenerator()->getCurrentUrl();
 
         // if 'scope' is passed as an array, convert to space separated list
         $scopeParams = isset($params['scope']) ? $params['scope'] : null;
@@ -197,7 +186,7 @@ class LinkedIn
             }
         }
 
-        return $this->urlGenerator->getUrl(
+        return $this->getUrlGenerator()->getUrl(
             'www',
             'uas/oauth2/authorization',
             array_merge(
@@ -236,8 +225,8 @@ class LinkedIn
     protected function getUserFromAvailableData()
     {
         //get saved values
-        $user = $this->storage->get('user', null);
-        $persistedAccessToken = $this->storage->get('access_token');
+        $user = $this->getStorage()->get('user', null);
+        $persistedAccessToken = $this->getStorage()->get('access_token');
 
         $accessToken = $this->getAccessToken();
 
@@ -250,9 +239,9 @@ class LinkedIn
 
             $user = $this->getUserFromAccessToken();
             if ($user) {
-                $this->storage->set('user', $user);
+                $this->getStorage()->set('user', $user);
             } else {
-                $this->storage->clearAll();
+                $this->getStorage()->clearAll();
             }
         }
 
@@ -292,7 +281,7 @@ class LinkedIn
             if (null !== $state && isset($_REQUEST['state']) && $state === $_REQUEST['state']) {
                 // CSRF state has done its job, so clear it
                 $this->state = null;
-                $this->storage->clear('state');
+                $this->getStorage()->clear('state');
 
                 return $_REQUEST['code'];
             } else {
@@ -334,16 +323,16 @@ class LinkedIn
     protected function fetchNewAccessToken()
     {
         $code = $this->getCode();
-        if ($code && $code != $this->storage->get('code')) {
+        if ($code && $code != $this->getStorage()->get('code')) {
             $accessToken = $this->getAccessTokenFromCode($code);
             if ($accessToken) {
-                $this->storage->set('code', $code);
-                $this->storage->set('access_token', $accessToken);
+                $this->getStorage()->set('code', $code);
+                $this->getStorage()->set('access_token', $accessToken);
                 return $accessToken;
             }
 
             // code was bogus, so everything based on it should be invalidated.
-            $this->storage->clearAll();
+            $this->getStorage()->clearAll();
             throw new LinkedInApiException('Could not get access token');
         }
 
@@ -351,7 +340,7 @@ class LinkedIn
         // store, knowing nothing explicit (signed request, authorization
         // code, etc.) was present to shadow it (or we saw a code in $_REQUEST,
         // but it's the same as what's in the persistent store)
-        return $this->storage->get('access_token', null);
+        return $this->getStorage()->get('access_token', null);
     }
 
     /**
@@ -376,13 +365,12 @@ class LinkedIn
         }
 
         if ($redirectUri === null) {
-            $redirectUri = $this->urlGenerator->getCurrentUrl();
+            $redirectUri = $this->getUrlGenerator()->getCurrentUrl();
         }
 
         try {
-
-            $response = $this->request->create(
-                $this->urlGenerator->getUrl(
+            $response = $this->getRequest()->send(
+                $this->getUrlGenerator()->getUrl(
                     'www',
                     'uas/oauth2/accessToken',
                     array(
@@ -423,7 +411,7 @@ class LinkedIn
     {
         if ($this->state === null) {
             $this->state = md5(uniqid(mt_rand(), true));
-            $this->storage->set('state', $this->state);
+            $this->getStorage()->set('state', $this->state);
         }
     }
 
@@ -436,7 +424,7 @@ class LinkedIn
     protected function getState()
     {
         if ($this->state === null) {
-            $this->state = $this->storage->get('state', null);
+            $this->state = $this->getStorage()->get('state', null);
         }
 
         return $this->state;
@@ -495,4 +483,72 @@ class LinkedIn
 
         return $this;
     }
+
+    /**
+     *
+     * @param \HappyR\LinkedIn\Http\UrlGenerator $urlGenerator
+     *
+     * @return $this
+     */
+    public function setUrlGenerator($urlGenerator)
+    {
+        $this->urlGenerator = $urlGenerator;
+
+        return $this;
+    }
+
+    /**
+     *
+     * @return \HappyR\LinkedIn\Http\UrlGenerator
+     */
+    public function getUrlGenerator()
+    {
+        return $this->urlGenerator;
+    }
+
+    /**
+     *
+     * @param \HappyR\LinkedIn\Storage\DataStorage $storage
+     *
+     * @return $this
+     */
+    public function setStorage($storage)
+    {
+        $this->storage = $storage;
+
+        return $this;
+    }
+
+    /**
+     *
+     * @return \HappyR\LinkedIn\Storage\DataStorage
+     */
+    public function getStorage()
+    {
+        return $this->storage;
+    }
+
+    /**
+     *
+     * @param \HappyR\LinkedIn\Http\RequestInterface $request
+     *
+     * @return $this
+     */
+    public function setRequest($request)
+    {
+        $this->request = $request;
+
+        return $this;
+    }
+
+    /**
+     *
+     * @return \HappyR\LinkedIn\Http\RequestInterface
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+
 }

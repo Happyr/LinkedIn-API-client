@@ -12,5 +12,5 @@ namespace HappyR\LinkedIn\Http;
  */
 interface RequestInterface
 {
-    public function create($url, $params=array());
+    public function send($url, $params=array(), $method='GET');
 }

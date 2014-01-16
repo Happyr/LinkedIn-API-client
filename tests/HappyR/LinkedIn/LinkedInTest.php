@@ -12,17 +12,62 @@ use Mockery as m;
  */
 class LinkedInTest extends \PHPUnit_Framework_TestCase
 {
-    const APP_ID = '123456789';
-    const SECRET = '987654321';
+    /**
+     * @var LinkedInDummy ln
+     *
+     */
+    protected $ln;
 
-    public function testConstructor() {
-        $facebook = new LinkedInDummy(self::APP_ID,self::SECRET);
+    public function setUp()
+    {
+        $this->ln = new LinkedInDummy('123456789', '987654321');
+    }
 
-        $this->assertEquals($facebook->getAppId(), self::APP_ID,
+    public function testConstructor()
+    {
+        $this->assertEquals($this->ln->getAppId(), '123456789',
             'Expect the App ID to be set.');
-        $this->assertEquals($facebook->getAppSecret(), self::SECRET,
+        $this->assertEquals($this->ln->getAppSecret(), '987654321',
             'Expect the API secret to be set.');
     }
+
+    public function testApi()
+    {
+        $resource='resource';
+        $token='token';
+        $urlParams=array('url'=>'foo');
+        $postParams=array('post'=>'bar');
+        $method='GET';
+        $expected=array('foobar'=>'test');
+        $url='http://example.com/test';
+
+        $generator = m::mock('HappyR\LinkedIn\Http\UrlGenerator')
+            ->shouldReceive('getUrl')->once()->with(
+                'api',
+                $resource,
+                array(
+                    'url'=>'foo',
+                    'oauth2_access_token'=>$token,
+                    'format'=>'json',
+                ))->andReturn($url)
+            ->getMock();
+
+        $request = m::mock('HappyR\LinkedIn\Http\RequestInterface')
+            ->shouldReceive('send')->once()->with($url, $postParams, $method)->andReturn(json_encode($expected))
+            ->getMock();
+
+        $linkedIn=m::mock('HappyR\LinkedIn\LinkedIn[getAccessToken,getUrlGenerator,getRequest]', array('id', 'secret'))
+            ->shouldReceive('getAccessToken')->once()->andReturn($token)
+            ->shouldReceive('getUrlGenerator')->once()->andReturn($generator)
+            ->shouldReceive('getRequest')->once()->andReturn($request)
+            ->getMock();
+
+
+        $result=$linkedIn->api($resource, $urlParams, $method, $postParams);
+        $this->assertEquals($expected, $result);
+
+    }
+
 }
 
 
