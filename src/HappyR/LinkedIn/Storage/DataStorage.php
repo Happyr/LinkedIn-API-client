@@ -15,7 +15,7 @@ namespace HappyR\LinkedIn\Storage;
  */
 abstract class DataStorage
 {
-    public static $validKeys = array('state', 'code', 'access_token', 'user_id');
+    public static $validKeys = array('state', 'code', 'access_token', 'user');
 
     /**
      * Stores the given ($key, $value) pair, so that future calls to
