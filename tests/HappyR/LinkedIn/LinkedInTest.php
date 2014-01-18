@@ -155,6 +155,135 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $linkedIn->getUserId());
     }
 
+    public function testFetchNewAccessToken()
+    {
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
+            ->shouldReceive('set')->once()->with('code', 'newCode')
+            ->shouldReceive('set')->once()->with('access_token', 'at')
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
+        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('getAccessTokenFromCode')->will($this->returnValue('at'));
+        $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('newCode'));
+
+        $this->assertEquals('at', $linkedIn->fetchNewAccessToken());
+
+
+    }
+
+    /**
+     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     */
+    public function testFetchNewAccessTokenFail()
+    {
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
+            ->shouldReceive('clearAll')->once()
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
+        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('getAccessTokenFromCode');
+        $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('newCode'));
+
+        $linkedIn->fetchNewAccessToken();
+    }
+
+    public function testFetchNewAccessTokenNoCode()
+    {
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('get')->with('code')->andReturn('foobar')
+            ->shouldReceive('get')->once()->with('access_token', null)->andReturn('baz')
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
+        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('getCode');
+
+        $this->assertEquals('baz', $linkedIn->fetchNewAccessToken());
+    }
+
+    public function testFetchNewAccessTokenSameCode()
+    {
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
+            ->shouldReceive('get')->once()->with('access_token', null)->andReturn('baz')
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
+        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('foobar'));
+
+        $this->assertEquals('baz', $linkedIn->fetchNewAccessToken());
+    }
+
+    public function testGetAccessTokenFromCodeEmpty()
+    {
+        $this->assertNull($this->ln->getAccessTokenFromCode(''));
+        $this->assertNull($this->ln->getAccessTokenFromCode(null));
+        $this->assertNull($this->ln->getAccessTokenFromCode(false));
+    }
+
+    public function testGetAccessTokenFromCode()
+    {
+        $code='code';
+        $response=json_encode(array('access_token'=>'foobar'));
+        $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
+
+        $this->assertEquals('foobar', $linkedIn->getAccessTokenFromCode($code), 'Standard get access token form code');
+
+
+        $response=json_encode(array('foo'=>'bar'));
+        $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
+
+        $this->assertNull($linkedIn->getAccessTokenFromCode($code), 'Found array but no access token');
+
+        $response='';
+        $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
+
+        $this->assertNull($linkedIn->getAccessTokenFromCode($code), 'Empty result');
+
+    }
+
+    /**
+     * Default stuff for GetAccessTokenFromCode
+     *
+     * @param $response
+     *
+     * @return array
+     */
+    protected function prepareGetAccessTokenFromCode($code, $response)
+    {
+        $currentUrl='foobar';
+        $generator = m::mock('HappyR\LinkedIn\Http\UrlGenerator')
+            ->shouldReceive('getCurrentUrl')->once()->andReturn($currentUrl)
+            ->shouldReceive('getUrl')->once()->with(
+                'www',
+                'uas/oauth2/accessToken',
+                array(
+                    'grant_type' => 'authorization_code',
+                    'code' => $code,
+                    'redirect_uri' => $currentUrl,
+                    'client_id' => self::APP_ID,
+                    'client_secret' => self::APP_SECRET,
+                )
+            )->andReturn('url')
+            ->getMock();
+        $request = m::mock('HappyR\LinkedIn\Http\RequestInterface')
+            ->shouldReceive('send')->once()->with('url', array(), 'POST')->andReturn($response)
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getRequest', 'getUrlGenerator'), array(self::APP_ID, self::APP_SECRET));
+        $linkedIn->expects($this->any())->method('getUrlGenerator')->will($this->returnValue($generator));
+        $linkedIn->expects($this->once())->method('getRequest')->will($this->returnValue($request));
+
+
+        return $linkedIn;
+    }
+
+
     /**
      * Test a call to getAccessToken when there is no token
      */
