@@ -18,7 +18,7 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 * Using composer.json
 * Handles CSRF protection for you
 * Not developed for a specific framework. 
-* Test coverage of 58% (2013-01-18)... It's fair..
+* Test coverage of 61% (2013-01-18)... It's fair..
 * 506 lines of code, 477 lines of comments
 
 If I still haven't convinced you, you might consider these other libraries. This is the top 3 list in my opinion:
@@ -53,8 +53,8 @@ command from the directory where your ``composer.json`` file is located:
 ## Usage
 
 In order to use this API client (or any other LinkedIn clients) you have to [register your application][register-app]
-with LinkedIn to receive an API key. This unique key helps us identify your application and lets you make API calls.
-Once you've registered your LinkedIn app, you will be provided with an *API Key* and *Secret Key*.
+with LinkedIn to receive an API key. Once you've registered your LinkedIn app, you will be provided with
+an *API Key* and *Secret Key*.
 
 This example below is a nicer way of connecting to LinkedIn compared to [their code samples][linkedin-code-samples].
 

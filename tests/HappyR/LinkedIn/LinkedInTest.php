@@ -283,6 +283,22 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         return $linkedIn;
     }
 
+    public function testEstablishCSRFTokenState()
+    {
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('get')->with('state', null)->andReturn(null, 'state')
+            ->shouldReceive('set')->once()->with('state', \Mockery::on(function(&$param) {
+                    return !empty($param);
+                }))
+            ->getMock();
+
+        $this->ln->setStorage($storage);
+
+        $this->ln->establishCSRFTokenState();
+        $this->ln->establishCSRFTokenState();
+
+    }
+
 
     /**
      * Test a call to getAccessToken when there is no token
