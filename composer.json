@@ -3,7 +3,7 @@
     "type": "library",
     "description": "LinkedIn api client",
     "keywords": ["LinkedIn", "HappyR", "API", "Client", "SDK"],
-    "homepage": "http://developer.happyr.se/php-libraries/linkedin-api-client",
+    "homepage": "http://developer.happyr.se/libraries/linkedin-php-client",
     "license": "MIT",
     "authors": [
         {
