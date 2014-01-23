@@ -155,10 +155,16 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($real, $gen->GetHttpHost());
     }
 
-    public function testHttpProtocol()
+    public function testHttpProtocolApache()
     {
         $_SERVER['HTTPS'] = 'on';
-        $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'http';
+        $gen = new DummyUrlGenerator();
+        $this->assertEquals('https', $gen->GetHttpProtocol());
+    }
+
+    public function testHttpProtocolNginx()
+    {
+        $_SERVER['SERVER_PORT'] = '443';
         $gen = new DummyUrlGenerator();
         $this->assertEquals('https', $gen->GetHttpProtocol());
     }
@@ -184,14 +190,25 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testHttpProtocolForwardedSecure()
     {
-        $_SERVER['HTTPS'] = 'on';
         $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
         $gen = new DummyUrlGenerator();
+        $this->assertEquals('http', $gen->GetHttpProtocol());
+
+
+        $gen->setTrustForwarded(true);
         $this->assertEquals('https', $gen->GetHttpProtocol());
     }
 
-    
 
+    protected function tearDown()
+    {
+        unset($_SERVER['HTTPS']);
+        unset($_SERVER['HTTP_X_FORWARDED_PROTO']);
+        $_SERVER['HTTP_HOST'] = 'localhost';
+        unset($_SERVER['HTTP_X_FORWARDED_HOST']);
+        $_SERVER['SERVER_PORT'] = '80';
+        $_SERVER['REQUEST_URI'] = '';
+    }
 
 }
 

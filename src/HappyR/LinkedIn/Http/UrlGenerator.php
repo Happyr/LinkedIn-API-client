@@ -151,6 +151,7 @@ class UrlGenerator implements UrlGeneratorInterface
             if ($_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
                 return 'https';
             }
+
             return 'http';
         }
         /*apache + variants specific way of checking for https*/
@@ -163,6 +164,7 @@ class UrlGenerator implements UrlGeneratorInterface
             ($_SERVER['SERVER_PORT'] === '443')) {
             return 'https';
         }
+
         return 'http';
     }
 
