@@ -2,6 +2,7 @@
 
 namespace HappyR\LinkedIn;
 
+use HappyR\LinkedIn\Exceptions\LinkedInApiException;
 use Mockery as m;
 
 /**
@@ -299,6 +300,138 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    /**
+     * Test with no previous user
+     */
+    public function testGetUserFromAvailableData()
+    {
+        $expected='foobar';
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('set')->once()->with('user', $expected)
+            ->shouldReceive('get')->once()->with('user', null)->andReturn(null)
+            ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
+        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('access_token'));
+        $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue($expected));
+
+        $this->assertEquals($expected, $linkedIn->getUserFromAvailableData());
+    }
+
+    /**
+     * Test with previous user
+     */
+    public function testGetUserFromAvailableDataExistingUser()
+    {
+        $expected='user';
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('get')->once()->with('user', null)->andReturn($expected)
+            ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getAccessToken', 'getStorage'), array(), '', false);
+        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('access_token'));
+
+        $this->assertEquals($expected, $linkedIn->getUserFromAvailableData());
+    }
+
+    /**
+     * Test with previous user but new access token
+     */
+    public function testGetUserFromAvailableDataExistingUserDifferentAccessToken()
+    {
+        $expected='foobar';
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('set')->once()->with('user', $expected)
+            ->shouldReceive('get')->once()->with('user', null)->andReturn('user')
+            ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
+        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('new_access_token'));
+        $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue($expected));
+
+        $this->assertEquals($expected, $linkedIn->getUserFromAvailableData());
+    }
+
+    /**
+     * Test when getUserFromAccessToken fails
+     */
+    public function testGetUserFromAvailableDataFailedToGetUser()
+    {
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('clearAll')->once()
+            ->shouldReceive('get')->once()->with('user', null)->andReturn(null)
+            ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
+            ->getMock();
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
+        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('new_access_token'));
+        $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue(null));
+
+        $this->assertNull($linkedIn->getUserFromAvailableData());
+    }
+
+    public function testGetUserFromAccessToken()
+    {
+        $expected='foobar';
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('api'), array(), '', false);
+        $linkedIn->expects($this->once())->method('api')->will($this->returnValue($expected));
+
+        $this->assertEquals($expected, $linkedIn->getUserFromAccessToken());
+    }
+
+
+    public function testGetUserFromAccessTokenFail()
+    {
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('api'), array(), '', false);
+        $linkedIn->expects($this->once())->method('api')->will($this->throwException(new LinkedInApiException('foobar')));
+
+        $this->assertNull($linkedIn->getUserFromAccessToken());
+    }
+
+    public function testGetCodeEmpty()
+    {
+        unset($_REQUEST['code']);
+        $this->assertNull($this->ln->getCode());
+    }
+
+    public function testGetCode()
+    {
+        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorage')
+            ->shouldReceive('clear')->once()->with('state')
+            ->getMock();
+        $state='bazbar';
+
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getState', 'setState', 'getStorage'), array(), '', false);
+        $linkedIn->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+        $linkedIn->expects($this->once())->method('setState')->with($this->equalTo(null));
+        $linkedIn->expects($this->once())->method('getState')->will($this->returnValue($state));
+
+        $_REQUEST['code']='foobar';
+        $_REQUEST['state']=$state;
+
+        $this->assertEquals('foobar', $linkedIn->getCode());
+    }
+
+    /**
+     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     */
+    public function testGetCodeInvalidCode()
+    {
+        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getState'), array(), '', false);
+        $linkedIn->expects($this->once())->method('getState')->will($this->returnValue('bazbar'));
+
+        $_REQUEST['code']='foobar';
+        $_REQUEST['state']='invalid';
+
+        $this->assertEquals('foobar', $linkedIn->getCode());
+    }
 
     /**
      * Test a call to getAccessToken when there is no token
