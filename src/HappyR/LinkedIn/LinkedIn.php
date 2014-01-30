@@ -9,6 +9,7 @@ use HappyR\LinkedIn\Http\UrlGenerator;
 use HappyR\LinkedIn\Http\UrlGeneratorInterface;
 use HappyR\LinkedIn\Storage\DataStorage;
 use HappyR\LinkedIn\Storage\SessionStorage;
+use HappyR\LinkedIn\Storage\HttpFoundationSessionStorage;
 
 /**
  * Class LinkedIn lets you talk to LinkedIn api.
@@ -107,7 +108,14 @@ class LinkedIn
     {
         $this->urlGenerator = new UrlGenerator();
         $this->request = new Request();
-        $this->storage=new SessionStorage();
+
+        // Use the Symfony HttpFoundation session storage if it is available
+        if(class_exists('Symfony\Component\HttpFoundation\Session\Session')) {
+            $this->storage = new HttpFoundationSessionStorage();
+        }
+        else {
+            $this->storage = new SessionStorage();
+        }
     }
 
     /**
