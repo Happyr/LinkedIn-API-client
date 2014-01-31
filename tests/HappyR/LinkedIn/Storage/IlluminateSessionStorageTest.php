@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Session;
 /**
  * Class SessionStorageTest
  *
- * @author Tobias Nyholm
+ * @author Andreas Creten
  *
  */
 class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
@@ -72,19 +72,4 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     {
         $this->storage->clear('foobar');
     }
-
-    public function testClearAll()
-    {
-        $validKeys = DataStorage::$validKeys;
-
-        $storage = m::mock('HappyR\LinkedIn\Storage\SessionStorage[clear]')
-            ->shouldReceive('clear')->times(count($validKeys))
-            ->with(m::on(function($arg) use ($validKeys){
-                return in_array($arg, $validKeys);
-            }))
-            ->getMock();
-
-        $storage->clearAll();
-    }
-
 } 

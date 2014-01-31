@@ -110,7 +110,7 @@ class LinkedIn
         $this->request = new Request();
 
         // Use the Illuminate Session storage if it is available
-        if(class_exists('\Illuminate\Support\Facades\Session')) {
+        if (class_exists('\Illuminate\Support\Facades\Session')) {
             $this->storage = new IlluminateSessionStorage();
         } else {
             $this->storage = new SessionStorage();

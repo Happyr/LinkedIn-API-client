@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Session;
  *
  * Store data in the session.
  *
- * @author Tobias Nyholm
+ * @author Andreas Creten
  *
  */
 class  IlluminateSessionStorage extends SessionStorage
