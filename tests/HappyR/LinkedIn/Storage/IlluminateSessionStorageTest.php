@@ -1,6 +1,5 @@
 <?php
 
-
 namespace HappyR\LinkedIn\Storage;
 
 use Mockery as m;

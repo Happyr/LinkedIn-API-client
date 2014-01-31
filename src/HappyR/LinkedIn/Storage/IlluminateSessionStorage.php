@@ -1,6 +1,5 @@
 <?php
 
-
 namespace HappyR\LinkedIn\Storage;
 
 use HappyR\LinkedIn\Exceptions\LinkedInApiException;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\Session;
  * @author Andreas Creten
  *
  */
-class  IlluminateSessionStorage extends SessionStorage
+class IlluminateSessionStorage extends SessionStorage
 {
     /**
      * {@inheritDoc}
