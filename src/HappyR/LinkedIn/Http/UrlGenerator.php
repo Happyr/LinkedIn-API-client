@@ -14,6 +14,15 @@ use HappyR\LinkedIn\Storage\DataStorage;
 class UrlGenerator implements UrlGeneratorInterface
 {
     /**
+     * @var array knownLinkedInParams
+     *
+     * A list of params that might be in the query string
+     */
+    public static $knownLinkedInParams = array('state', 'code', 'access_token', 'user');
+
+    /**
+     * @var array domainMap
+     *
      * Maps aliases to LinkedIn domains.
      */
     public static $domainMap = array(
@@ -22,9 +31,9 @@ class UrlGenerator implements UrlGeneratorInterface
     );
 
     /**
-     * Indicates if we trust HTTP_X_FORWARDED_* headers.
-     *
      * @var boolean
+     *
+     * Indicates if we trust HTTP_X_FORWARDED_* headers.
      */
     protected $trustForwarded = false;
 
@@ -93,7 +102,7 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * Drop known LinkedIn params. Ie those in DataStorage::$validKeys
+     * Drop known LinkedIn params. Ie those in self::$knownLinkeInParams
      *
      * @param string $query
      *
@@ -112,7 +121,7 @@ class UrlGenerator implements UrlGeneratorInterface
              */
             //get the first value of the array you will get when you explode()
             list($key)=explode('=', $param, 2);
-            if (in_array($key, DataStorage::$validKeys)) {
+            if (in_array($key, self::$knownLinkedInParams)) {
                 unset($params[$i]);
             }
         }

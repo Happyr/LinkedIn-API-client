@@ -11,10 +11,8 @@ namespace HappyR\LinkedIn\Storage;
  * @author Tobias Nyholm
  *
  */
-abstract class DataStorage
+interface DataStorageInterface
 {
-    public static $validKeys = array('state', 'code', 'access_token', 'user');
-
     /**
      * Stores the given ($key, $value) pair, so that future calls to
      * getPersistentData($key) return $value. This call may be in another request.
@@ -24,7 +22,7 @@ abstract class DataStorage
      *
      * @return void
      */
-    abstract public function set($key, $value);
+    public function set($key, $value);
 
     /**
      * Get the data for $key, persisted by BaseFacebook::setPersistentData()
@@ -34,7 +32,7 @@ abstract class DataStorage
      *
      * @return mixed
      */
-    abstract public function get($key, $default = false);
+    public function get($key, $default = false);
 
     /**
      * Clear the data with $key from the persistent storage
@@ -42,12 +40,12 @@ abstract class DataStorage
      * @param string $key
      * @return void
      */
-    abstract public function clear($key);
+    public function clear($key);
 
     /**
      * Clear all data from the persistent storage
      *
      * @return void
      */
-    abstract public function clearAll();
+    public function clearAll();
 }

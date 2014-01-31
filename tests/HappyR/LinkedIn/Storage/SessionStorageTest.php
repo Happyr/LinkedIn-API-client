@@ -75,7 +75,7 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testClearAll()
     {
-        $validKeys=DataStorage::$validKeys;
+        $validKeys=SessionStorage::$validKeys;
 
         $storage = m::mock('HappyR\LinkedIn\Storage\SessionStorage[clear]')
             ->shouldReceive('clear')->times(count($validKeys))

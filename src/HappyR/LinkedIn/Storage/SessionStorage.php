@@ -13,8 +13,10 @@ use HappyR\LinkedIn\Exceptions\LinkedInApiException;
  * @author Tobias Nyholm
  *
  */
-class SessionStorage extends DataStorage
+class SessionStorage implements DataStorageInterface
 {
+    public static $validKeys = array('state', 'code', 'access_token', 'user');
+
     /**
      * {@inheritDoc}
      */

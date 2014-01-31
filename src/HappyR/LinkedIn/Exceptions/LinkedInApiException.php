@@ -1,8 +1,6 @@
 <?php
 
-
 namespace HappyR\LinkedIn\Exceptions;
-
 
 /**
  * Class LinkedInApiException
