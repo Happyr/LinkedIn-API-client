@@ -9,6 +9,7 @@ use HappyR\LinkedIn\Http\UrlGenerator;
 use HappyR\LinkedIn\Http\UrlGeneratorInterface;
 use HappyR\LinkedIn\Storage\DataStorage;
 use HappyR\LinkedIn\Storage\SessionStorage;
+use HappyR\LinkedIn\Storage\IlluminateSessionStorage;
 
 /**
  * Class LinkedIn lets you talk to LinkedIn api.
@@ -101,13 +102,19 @@ class LinkedIn
     /**
      * Init the API by creating some classes.
      *
-     * This function could be overrided if you want to change any of these classes
+     * This function could be overwritten if you want to change any of these classes
      */
     protected function init()
     {
         $this->urlGenerator = new UrlGenerator();
         $this->request = new Request();
-        $this->storage=new SessionStorage();
+
+        // Use the Illuminate Session storage if it is available
+        if (class_exists('\Illuminate\Support\Facades\Session')) {
+            $this->storage = new IlluminateSessionStorage();
+        } else {
+            $this->storage = new SessionStorage();
+        }
     }
 
     /**
