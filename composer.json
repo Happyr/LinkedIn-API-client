@@ -16,7 +16,7 @@
     },
     "require-dev": {
         "mockery/mockery": "*",
-        "illuminate/session": "*"
+        "illuminate/support": "*"
     },
     "autoload": {
         "psr-0": { "HappyR\\LinkedIn\\": "src/" }
