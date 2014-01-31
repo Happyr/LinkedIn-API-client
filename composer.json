@@ -15,7 +15,8 @@
         "php": ">=5.3.2"
     },
     "require-dev": {
-        "mockery/mockery": "*"
+        "mockery/mockery": "*",
+        "illuminate/session": "*"
     },
     "autoload": {
         "psr-0": { "HappyR\\LinkedIn\\": "src/" }
