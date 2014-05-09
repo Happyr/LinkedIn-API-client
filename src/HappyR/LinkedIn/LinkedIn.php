@@ -85,6 +85,20 @@ class LinkedIn
     protected $request;
 
     /**
+     * @var $redirect_uri
+     *
+     */
+    protected $redirect_uri;
+
+    public function setRedirectUri($redirectUri)
+    {
+        if (filter_var($redirectUri, FILTER_VALIDATE_URL) === FALSE) {
+            throw new LinkedInApiException('Not a valid redirect URL.');
+        }
+        $this->redirect_uri = $redirectUri;
+    }
+
+    /**
      * Constructor
      *
      * @param string $appId
@@ -182,7 +196,9 @@ class LinkedIn
     public function getLoginUrl($params=array())
     {
         $this->establishCSRFTokenState();
-        $currentUrl = $this->getUrlGenerator()->getCurrentUrl();
+        if(empty($this->redirect_uri)){
+            $this->redirect_uri = $this->getUrlGenerator()->getCurrentUrl();
+        }
 
         // if 'scope' is passed as an array, convert to space separated list
         $scopeParams = isset($params['scope']) ? $params['scope'] : null;
@@ -195,7 +211,7 @@ class LinkedIn
                 $params['scope'] = str_replace(',', ' ', $scopeParams);
             }
         }
-
+        
         return $this->getUrlGenerator()->getUrl(
             'www',
             'uas/oauth2/authorization',
@@ -203,7 +219,7 @@ class LinkedIn
                 array(
                     'response_type'=>'code',
                     'client_id' => $this->getAppId(),
-                    'redirect_uri' => $currentUrl, // possibly overwritten
+                    'redirect_uri' => $this->redirect_uri,
                     'state' => $this->getState(),
                 ),
                 $params
@@ -235,7 +251,7 @@ class LinkedIn
     protected function getUserFromAvailableData()
     {
         //get saved values
-        $user = $this->getStorage()->get('user', null);
+        $user = $this->getStorage()->get('user', null);        
         $persistedAccessToken = $this->getStorage()->get('access_token');
 
         $accessToken = $this->getAccessToken();
@@ -373,9 +389,13 @@ class LinkedIn
         if (empty($code)) {
             return null;
         }
-
+        
         if ($redirectUri === null) {
-            $redirectUri = $this->getUrlGenerator()->getCurrentUrl();
+            if (empty($this->redirect_uri)) {
+                $this->redirect_uri = $this->getUrlGenerator()->getCurrentUrl();
+            }
+        } else {
+            $this->redirect_uri = $redirectUri;
         }
 
         try {
@@ -386,7 +406,7 @@ class LinkedIn
                     array(
                         'grant_type' => 'authorization_code',
                         'code' => $code,
-                        'redirect_uri' => $redirectUri,
+                        'redirect_uri' => $this->redirect_uri,
                         'client_id' => $this->getAppId(),
                         'client_secret' => $this->getAppSecret(),
                     )
@@ -463,7 +483,7 @@ class LinkedIn
     public function getUserId()
     {
         $user=$this->getUser();
-
+        
         if (isset($user['id'])) {
             return $user['id'];
         }
