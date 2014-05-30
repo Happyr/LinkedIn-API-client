@@ -1,6 +1,5 @@
 <?php
 
-
 namespace HappyR\LinkedIn\Http;
 
 use HappyR\LinkedIn\Storage\DataStorage;
@@ -36,8 +35,6 @@ class UrlGenerator implements UrlGeneratorInterface
      * Indicates if we trust HTTP_X_FORWARDED_* headers.
      */
     protected $trustForwarded = false;
-
-
 
     /**
      * Build the URL for given domain alias, path and parameters.
@@ -163,11 +160,13 @@ class UrlGenerator implements UrlGeneratorInterface
 
             return 'http';
         }
+
         /*apache + variants specific way of checking for https*/
         if (isset($_SERVER['HTTPS']) &&
             ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] == 1)) {
             return 'https';
         }
+
         /*nginx way of checking for https*/
         if (isset($_SERVER['SERVER_PORT']) &&
             ($_SERVER['SERVER_PORT'] === '443')) {
