@@ -1,6 +1,5 @@
 <?php
 
-
 namespace HappyR\LinkedIn\Http;
 
 use HappyR\LinkedIn\Exceptions\LinkedInApiException;

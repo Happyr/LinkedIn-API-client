@@ -27,13 +27,16 @@
     </listeners>
 
     <filter>
-        <blacklist>
-            <directory>vendor/</directory>
-            <directory>tests/</directory>
+        <whitelist>
+            <directory suffix=".php">src</directory>
+            <exclude>
+                <directory>vendor/</directory>
+                <directory>tests/</directory>
 
-            <!-- Don't test interfaces -->
-            <directory suffix="Interface.php">./</directory>
-        </blacklist>
+                <!-- Don't test interfaces -->
+                <directory suffix="Interface.php">./</directory>
+            </exclude>
+        </whitelist>
     </filter>
 
     <groups>

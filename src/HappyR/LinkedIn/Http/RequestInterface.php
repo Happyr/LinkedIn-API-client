@@ -1,8 +1,6 @@
 <?php
 
-
 namespace HappyR\LinkedIn\Http;
-
 
 /**
  * Class RequestInterface

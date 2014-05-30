@@ -1,8 +1,9 @@
 <?php
+
 namespace HappyR\LinkedIn\Http;
 
 /**
- * Class Http
+ * Class UrlGeneratorInterface
  *
  * Time to time we need build a URL or get the current URL
  *
