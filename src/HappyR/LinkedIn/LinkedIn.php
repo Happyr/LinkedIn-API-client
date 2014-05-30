@@ -157,7 +157,7 @@ class LinkedIn
         $url=$this->getUrlGenerator()->getUrl('api', $resource, $urlParams);
 
         //$method that url
-        $result= $this->getRequest()->send($url, $postParams, $method);
+        $result = $this->getRequest()->send($url, $postParams, $method, $urlParams['format']);
 
         if ($urlParams['format']=='json') {
             return json_decode($result, true);

@@ -32,37 +32,39 @@ class Request implements RequestInterface
      *
      * @param string $url The URL to make the request to
      * @param array $params The parameters to use for the POST body
-     * @param CurlHandler $ch Initialized curl handle
+     * @param string $contentType Either json or xml or null (defaults to null)
      *
      * @return string The response text
      */
-    public function send($url, $params=array(), $method='GET', $ch=null)
+    public function send($url, $params = array(), $method = 'GET', $contentType = null)
     {
-        if (!$ch) {
-            $ch = curl_init();
-        }
+        $ch = curl_init();
 
         $opts = self::$curlOptions;
         $opts[CURLOPT_POST] = strtoupper($method)=='POST';
         if ($opts[CURLOPT_POST]) {
-            $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
+            if ($contentType == 'json') {
+                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : json_encode($params);
+            } else if ($contentType == 'xml') {
+                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : $params->asXML();
+            } else {
+                $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
+            }
         }
 
         $opts[CURLOPT_URL] = $url;
 
         // disable the 'Expect: 100-continue' behaviour. This causes CURL to wait
         // for 2 seconds if the server does not support this header.
-        if (isset($opts[CURLOPT_HTTPHEADER])) {
-            $existingHeaders = $opts[CURLOPT_HTTPHEADER];
-            $existingHeaders[] = 'Expect:';
-            $opts[CURLOPT_HTTPHEADER] = $existingHeaders;
-        } else {
-            $opts[CURLOPT_HTTPHEADER] = array('Expect:');
+        $opts[CURLOPT_HTTPHEADER] = array('Expect:');
+
+        if ($contentType) {
+            $mimeType = $contentType == 'xml' ? 'text/xml' : 'application/json';
+            $opts[CURLOPT_HTTPHEADER][] = "Content-Type: {$mimeType}"; 
         }
 
         curl_setopt_array($ch, $opts);
         $result = curl_exec($ch);
-        $errno = curl_errno($ch);
 
         if ($result === false) {
             $e = new LinkedInApiException(
