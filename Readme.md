@@ -73,17 +73,21 @@ This example below is a nicer way of connecting to LinkedIn compared to [their c
 
 $linkedIn=new HappyR\LinkedIn\LinkedIn('app_id', 'app_secret');
 
-//if not authenticated
-if (!$linkedIn->isAuthenticated()) {
-    $url = $linkedIn->getLoginUrl();
-    echo "<a href='$url'>Login with LinkedIn</a>";
+if ($linkedIn->isAuthenticated()) {
+    //we know that the user is authenticated now. Start query the API
+    $user=$linkedIn->api('v1/people/~:(firstName,lastName)');
+    echo "Welcome ".$user['firstName'];
+
+    exit();
+} elseif ($linkedIn->hasError()) {
+    echo "User canceled the login."
     exit();
 }
 
-//we know that the user is authenticated now
-$user=$linkedIn->api('v1/people/~:(firstName,lastName)');
+//if not authenticated
+$url = $linkedIn->getLoginUrl();
+echo "<a href='$url'>Login with LinkedIn</a>";
 
-echo "Welcome ".$user['firstName'];
 ```
 
 

@@ -487,6 +487,39 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($state, $this->ln->getState());
     }
 
+    public function testHasError()
+    {
+        unset($_GET['error']);
+        $this->assertFalse($this->ln->hasError());
+
+        $_GET['error']='foobar';
+        $this->assertTrue($this->ln->hasError());
+    }
+
+    public function testGetError()
+    {
+        unset($_GET['error']);
+        unset($_GET['error_description']);
+
+        $this->assertNull($this->ln->getError());
+
+        $_GET['error']='foo';
+        $_GET['error_description']='bar';
+
+        $this->assertEquals('foo', $this->ln->getError()->getName());
+        $this->assertEquals('bar', $this->ln->getError()->getDescription());
+    }
+
+    public function testGetErrorWithMissingDescription()
+    {
+        unset($_GET['error']);
+        unset($_GET['error_description']);
+
+        $_GET['error']='foo';
+
+        $this->assertEquals('foo', $this->ln->getError()->getName());
+        $this->assertNull($this->ln->getError()->getDescription());
+    }
 }
 
 

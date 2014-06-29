@@ -3,6 +3,7 @@
 namespace HappyR\LinkedIn;
 
 use HappyR\LinkedIn\Exceptions\LinkedInApiException;
+use HappyR\LinkedIn\Exceptions\LoginError;
 use HappyR\LinkedIn\Http\Request;
 use HappyR\LinkedIn\Http\RequestInterface;
 use HappyR\LinkedIn\Http\UrlGenerator;
@@ -571,5 +572,30 @@ class LinkedIn
     public function getRequest()
     {
         return $this->request;
+    }
+
+    /**
+     * If the user has canceled the login we will return with an error
+     *
+     *
+     * @return bool
+     */
+    public function hasError()
+    {
+        return !empty($_GET['error']);
+    }
+
+    /**
+     * Returns a LoginError or null
+     *
+     * @return LoginError|null
+     */
+    public function getError()
+    {
+        if (!$this->hasError()) {
+            return null;
+        }
+
+        return new LoginError($_GET['error'], isset($_GET['error_description'])?$_GET['error_description']:null);
     }
 }
