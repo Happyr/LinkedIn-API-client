@@ -2,8 +2,6 @@
 
 namespace HappyR\LinkedIn\Http;
 
-use HappyR\LinkedIn\Storage\DataStorage;
-
 /**
  * Class UrlGenerator
  *

@@ -44,7 +44,7 @@ class Request implements RequestInterface
         if ($opts[CURLOPT_POST]) {
             if ($contentType == 'json') {
                 $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : json_encode($params);
-            } else if ($contentType == 'xml') {
+            } elseif ($contentType == 'xml') {
                 $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : $params->asXML();
             } else {
                 $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
@@ -59,7 +59,7 @@ class Request implements RequestInterface
 
         if ($contentType) {
             $mimeType = $contentType == 'xml' ? 'text/xml' : 'application/json';
-            $opts[CURLOPT_HTTPHEADER][] = "Content-Type: {$mimeType}"; 
+            $opts[CURLOPT_HTTPHEADER][] = "Content-Type: {$mimeType}";
         }
 
         curl_setopt_array($ch, $opts);

@@ -26,7 +26,7 @@ class LoginError
      * @param string $name
      * @param string $description
      */
-    function __construct($name, $description)
+    public function __construct($name, $description)
     {
         $this->name = $name;
         $this->description = $description;
