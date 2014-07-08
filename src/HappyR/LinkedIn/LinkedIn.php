@@ -137,12 +137,12 @@ class LinkedIn
      * @param string $resource everything after the domain.
      * @param array $urlParams [optional] This is the URL params
      * @param string $method [optional] This is the HTTP verb
-     * @param array $postParams [optional] If you are using a POST you might want to have some more parameters
+     * @param mixed $postParams [optional] If you are using a POST you might want to have some more parameters
      *
      * @return string|array The default is an assoc array from json_decode. But if you specify
      *                      $urlParams['format']='xml' you will get the raw result.
      */
-    public function api($resource, array $urlParams=array(), $method='GET', array $postParams=array())
+    public function api($resource, array $urlParams=array(), $method='GET', $postParams=array())
     {
         /*
          * Add token and format
