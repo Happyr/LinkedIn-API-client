@@ -1,5 +1,11 @@
 # LinkedIn API client in PHP
 
+[![Build Status](https://travis-ci.org/HappyR/LinkedIn-API-client.svg?branch=master)](https://travis-ci.org/HappyR/LinkedIn-API-client)
+[![Coverage Status](https://img.shields.io/coveralls/HappyR/LinkedIn-API-client.svg)](https://coveralls.io/r/HappyR/LinkedIn-API-client?branch=master)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b/mini.png)](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b)
+[![Latest Stable Version](https://poser.pugx.org/happyr/linkedin-api-client/v/stable.svg)](https://packagist.org/packages/happyr/linkedin-api-client)
+[![Monthly Downloads](https://poser.pugx.org/happyr/linkedin-api-client/d/monthly.png)](https://packagist.org/packages/happyr/linkedin-api-client)
+
 A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
 token and when authenticated it helps you to send API requests. You will nog get *everything* for free though... You
 have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API. We just help you
@@ -20,17 +26,6 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 * Not developed for a specific framework. 
 * More than 85% test coverage.
 * 580 lines of code, 540 lines of comments.
-
-If I still haven't convinced you, you might consider these other libraries. This is the top 3 list in my opinion:
-
-* [ashwinks](https://github.com/ashwinks/PHP-LinkedIn-SDK) - Looks good but it's lacking documentation. It does not
-handle CSRF protection and it might be difficult to override this API with a subclass to extend it.
-* [roel-sluper](https://github.com/roel-sluper/LinkedIn-PHP-API) - No comments but it looks like a strait forward
-solution. It has a few bugs in it but hey, I'm not saying that my lib is 100% bug free. This might be a good place
-to start if you want to build your own API client.
-* [mahmudahsan](https://github.com/mahmudahsan/Linkedin---Simple-integration-for-your-website) - Lots of docs but no
-comments, namespaces or objects. It is basically only code samples.
-
 
 ## Installation
 
