@@ -178,7 +178,7 @@ class LinkedInController extends Controller
              * I could now: 
              *  - Register the user
              *  - Login the user
-             *  - Show some linked in data
+             *  - Show some LinkedIn data
              */
 
         }
