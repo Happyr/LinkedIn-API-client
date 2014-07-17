@@ -47,6 +47,13 @@ class LinkedInApiExceptionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($error, $e->getType());
     }
 
+    public function testExceptionTypeRest() {
+        $error = 'foo';
+        $e = new LinkedInApiException(array('error_msg' => $error));
+        $this->assertEquals($error, $e->getMessage());
+        $this->assertEquals('Exception', $e->getType());
+    }
+
     public function testExceptionTypeDefault() {
         $e = new LinkedInApiException(array('error' => false));
         $this->assertEquals('Exception', $e->getType());
@@ -58,6 +65,14 @@ class LinkedInApiExceptionTest extends \PHPUnit_Framework_TestCase
             'error_description' => 'foo',
         ));
         $this->assertEquals('Exception: 1: foo', (string) $e);
+    }
+
+    public function testGetResult()
+    {
+        $var='foobar';
+        $e = new LinkedInApiException($var);
+
+        $this->assertEquals($var, $e->getResult());
     }
 
 } 

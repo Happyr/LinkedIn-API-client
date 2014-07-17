@@ -39,31 +39,9 @@ class Request implements RequestInterface
      */
     public function send($url, $params = array(), $method = 'GET', $contentType = null)
     {
+        $opts = $this->prepareParams($url, $params, $method, $contentType);
+
         $ch = curl_init();
-
-        $opts = self::$curlOptions;
-        $opts[CURLOPT_POST] = strtoupper($method)=='POST';
-        if ($opts[CURLOPT_POST]) {
-            if ($contentType == 'json') {
-                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : json_encode($params);
-            } elseif ($contentType == 'xml') {
-                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : $params->asXML();
-            } else {
-                $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
-            }
-        }
-
-        $opts[CURLOPT_URL] = $url;
-
-        // disable the 'Expect: 100-continue' behaviour. This causes CURL to wait
-        // for 2 seconds if the server does not support this header.
-        $opts[CURLOPT_HTTPHEADER] = array('Expect:');
-
-        if ($contentType) {
-            $mimeType = $contentType == 'xml' ? 'text/xml' : 'application/json';
-            $opts[CURLOPT_HTTPHEADER][] = "Content-Type: {$mimeType}";
-        }
-
         curl_setopt_array($ch, $opts);
         $result = curl_exec($ch);
 
@@ -85,5 +63,43 @@ class Request implements RequestInterface
         curl_close($ch);
 
         return $result;
+    }
+
+    /**
+     * Prepare Curl parameters
+     *
+     * @param string $url
+     * @param array $params
+     * @param string $method
+     * @param string $contentType
+     *
+     * @return array
+     */
+    protected function prepareParams($url, $params, $method, $contentType)
+    {
+        $opts = self::$curlOptions;
+        $opts[CURLOPT_POST] = strtoupper($method) == 'POST';
+        if ($opts[CURLOPT_POST]) {
+            if ($contentType == 'json') {
+                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : json_encode($params);
+            } elseif ($contentType == 'xml') {
+                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : $params->asXML();
+            } else {
+                $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
+            }
+        }
+
+        $opts[CURLOPT_URL] = $url;
+
+        // disable the 'Expect: 100-continue' behaviour. This causes CURL to wait
+        // for 2 seconds if the server does not support this header.
+        $opts[CURLOPT_HTTPHEADER] = array('Expect:');
+
+        if ($contentType) {
+            $mimeType = $contentType == 'xml' ? 'text/xml' : 'application/json';
+            $opts[CURLOPT_HTTPHEADER][] = "Content-Type: {$mimeType}";
+        }
+
+        return $opts;
     }
 }
