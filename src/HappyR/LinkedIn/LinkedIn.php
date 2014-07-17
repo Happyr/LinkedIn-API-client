@@ -8,7 +8,7 @@ use HappyR\LinkedIn\Http\Request;
 use HappyR\LinkedIn\Http\RequestInterface;
 use HappyR\LinkedIn\Http\UrlGenerator;
 use HappyR\LinkedIn\Http\UrlGeneratorInterface;
-use HappyR\LinkedIn\Storage\DataStorage;
+use HappyR\LinkedIn\Storage\DataStorageInterface;
 use HappyR\LinkedIn\Storage\SessionStorage;
 use HappyR\LinkedIn\Storage\IlluminateSessionStorage;
 
@@ -68,7 +68,7 @@ class LinkedIn
     protected $accessToken = null;
 
     /**
-     * @var \HappyR\LinkedIn\Storage\DataStorage storage
+     * @var DataStorageInterface storage
      *
      */
     protected $storage;
@@ -228,7 +228,7 @@ class LinkedIn
     }
 
     /**
-     * Determines the connected user by first considering an authorization code, and then
+     *  Determines the connected user by first considering an authorization code, and then
      * falling back to any persistent store storing the user.
      *
      * @return array|null get an user array or null
@@ -283,6 +283,7 @@ class LinkedIn
      * discoverable.
      *
      * @return string|null The authorization code, or null if the authorization code could not be determined.
+     * @throws LinkedInApiException
      */
     protected function getCode()
     {
@@ -330,6 +331,7 @@ class LinkedIn
      * return a valid user access token, or null if one is determined to not be available.
      *
      * @return string|null A valid user access token, or null if one could not be determined.
+     * @throws LinkedInApiException
      */
     protected function fetchNewAccessToken()
     {
@@ -532,11 +534,11 @@ class LinkedIn
     /**
      *
      *
-     * @param DataStorage $storage
+     * @param DataStorageInterface $storage
      *
      * @return $this
      */
-    public function setStorage(DataStorage $storage)
+    public function setStorage(DataStorageInterface $storage)
     {
         $this->storage = $storage;
 
@@ -545,7 +547,7 @@ class LinkedIn
 
     /**
      *
-     * @return DataStorage
+     * @return DataStorageInterface
      */
     public function getStorage()
     {
