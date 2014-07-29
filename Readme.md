@@ -1,7 +1,7 @@
 # LinkedIn API client in PHP
 
-[![Build Status](https://travis-ci.org/HappyR/LinkedIn-API-client.svg?branch=master)](https://travis-ci.org/HappyR/LinkedIn-API-client)
-[![Coverage Status](https://img.shields.io/coveralls/HappyR/LinkedIn-API-client.svg)](https://coveralls.io/r/HappyR/LinkedIn-API-client?branch=master)
+[![Build Status](https://travis-ci.org/Happyr/LinkedIn-API-client.svg?branch=master)](https://travis-ci.org/Happyr/LinkedIn-API-client)
+[![Coverage Status](https://img.shields.io/coveralls/Happyr/LinkedIn-API-client.svg)](https://coveralls.io/r/Happyr/LinkedIn-API-client?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b/mini.png)](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b)
 [![Latest Stable Version](https://poser.pugx.org/happyr/linkedin-api-client/v/stable.svg)](https://packagist.org/packages/happyr/linkedin-api-client)
 [![Monthly Downloads](https://poser.pugx.org/happyr/linkedin-api-client/d/monthly.png)](https://packagist.org/packages/happyr/linkedin-api-client)
