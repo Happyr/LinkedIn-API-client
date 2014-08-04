@@ -7,7 +7,7 @@
 [![Monthly Downloads](https://poser.pugx.org/happyr/linkedin-api-client/d/monthly.png)](https://packagist.org/packages/happyr/linkedin-api-client)
 
 A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
-token and when authenticated it helps you to send API requests. You will nog get *everything* for free though... You
+token and when authenticated it helps you to send API requests. You will not get *everything* for free though... You
 have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API. We just help you
 with the boring stuff.
 
