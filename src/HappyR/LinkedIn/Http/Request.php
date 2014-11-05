@@ -22,6 +22,7 @@ class Request implements RequestInterface
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 60,
         CURLOPT_USERAGENT      => 'linkedin-php-client',
+        //CURLOPT_SSL_VERIFYPEER => false
     );
 
     /**
