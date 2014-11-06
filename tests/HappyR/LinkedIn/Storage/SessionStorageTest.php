@@ -23,7 +23,8 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->storage=new SessionStorage();
+        $this->storage=new SessionStorage(true);
+        $this->storage->ignoreNonActiveSession();
     }
 
     public function testSet()
@@ -77,7 +78,10 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     {
         $validKeys=SessionStorage::$validKeys;
 
-        $storage = m::mock('HappyR\LinkedIn\Storage\SessionStorage[clear]')
+        $storage = m::mock(
+                'HappyR\LinkedIn\Storage\SessionStorage'
+                .'[clear]'
+            )
             ->shouldReceive('clear')->times(count($validKeys))
             ->with(m::on(function($arg) use ($validKeys){
                 return in_array($arg, $validKeys);
@@ -87,4 +91,13 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
         $storage->clearAll();
     }
 
-} 
+    /**
+     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     */
+    public function testDoesntAllowToReadIfTheSessionIsNotStarted()
+    {
+        $storage = new SessionStorage();
+
+        $value = $storage->get('test');
+    }
+}
