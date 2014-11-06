@@ -23,7 +23,7 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->storage = new IlluminateSessionStorage();
+        $this->storage = new IlluminateSessionStorage(true);
     }
 
     public function testSet()
