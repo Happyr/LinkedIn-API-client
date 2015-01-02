@@ -36,12 +36,6 @@
         </whitelist>
     </filter>
 
-    <groups>
-        <exclude>
-            <group>live</group>
-        </exclude>
-    </groups>
-
     <logging>
         <log type="coverage-clover" target="build/logs/phpunit.coverage.xml"/>
         <log type="junit" target="build/logs/phpunit.xml" logIncompleteSkipped="false"/>
