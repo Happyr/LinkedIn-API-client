@@ -16,6 +16,12 @@ class SessionStorage implements DataStorageInterface
 {
     public static $validKeys = array('state', 'code', 'access_token', 'user');
 
+    public function __construct()
+    {
+        //start the session if it not already been started
+        @session_start();
+    }
+
     /**
      * {@inheritDoc}
      */
