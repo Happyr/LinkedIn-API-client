@@ -12,7 +12,7 @@ use HappyR\LinkedIn\Exceptions\LinkedInApiException;
  * @author Tobias Nyholm
  *
  */
-class Request implements RequestInterface
+class CurlRequest implements RequestInterface
 {
     /**
      * Default options for curl.

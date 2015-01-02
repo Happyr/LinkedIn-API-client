@@ -8,7 +8,7 @@ namespace HappyR\LinkedIn\Http;
  * @author Tobias Nyholm
  *
  */
-class RequestTest extends \PHPUnit_Framework_TestCase
+class CurlRequestTest extends \PHPUnit_Framework_TestCase
 {
     public function testPrepareParams()
     {
@@ -16,7 +16,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $result=$dummy->prepareParams('url', array(), 'GET', null);
 
         //make sure we include all values from $curlOptions
-        $this->assertCount(0, @array_diff(Request::$curlOptions, $result));
+        $this->assertCount(0, @array_diff(CurlRequest::$curlOptions, $result));
 
         //test url
         $this->assertEquals('url', $result[CURLOPT_URL]);
@@ -63,7 +63,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 /**
  * Class Dummy to expose protected params
  */
-class Dummy extends Request
+class Dummy extends CurlRequest
 {
     public function prepareParams($url, $params, $method, $contentType)
     {
