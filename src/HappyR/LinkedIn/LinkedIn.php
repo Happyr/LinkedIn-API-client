@@ -235,9 +235,11 @@ class LinkedIn
      */
     protected function getUserFromAvailableData()
     {
+        $storage = $this->getStorage();
+
         //get saved values
-        $user = $this->getStorage()->get('user', null);
-        $persistedAccessToken = $this->getStorage()->get('access_token');
+        $user = $storage->get('user', null);
+        $persistedAccessToken = $storage->get('access_token');
 
         $accessToken = $this->getAccessToken();
 
@@ -250,9 +252,9 @@ class LinkedIn
 
             $user = $this->getUserFromAccessToken();
             if ($user) {
-                $this->getStorage()->set('user', $user);
+                $storage->set('user', $user);
             } else {
-                $this->getStorage()->clearAll();
+                $storage->clearAll();
             }
         }
 
@@ -335,17 +337,19 @@ class LinkedIn
      */
     protected function fetchNewAccessToken()
     {
+        $storage = $this->getStorage();
         $code = $this->getCode();
-        if ($code && $code != $this->getStorage()->get('code')) {
+
+        if ($code && $code != $storage->get('code')) {
             $accessToken = $this->getAccessTokenFromCode($code);
             if ($accessToken) {
-                $this->getStorage()->set('code', $code);
-                $this->getStorage()->set('access_token', $accessToken);
+                $storage->set('code', $code);
+                $storage->set('access_token', $accessToken);
                 return $accessToken;
             }
 
             // code was bogus, so everything based on it should be invalidated.
-            $this->getStorage()->clearAll();
+            $storage->clearAll();
             throw new LinkedInApiException('Could not get access token');
         }
 
@@ -353,7 +357,7 @@ class LinkedIn
         // store, knowing nothing explicit (signed request, authorization
         // code, etc.) was present to shadow it (or we saw a code in $_REQUEST,
         // but it's the same as what's in the persistent store)
-        return $this->getStorage()->get('access_token', null);
+        return $storage->get('access_token', null);
     }
 
     /**

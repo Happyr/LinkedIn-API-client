@@ -64,7 +64,7 @@ This example below is a nicer way of connecting to LinkedIn compared to [their c
  * First you need to make sure you've used composers auto load. You have is probably 
  * already done this before. You usually don't bother..
  */
-//require_once "../vendor/autoload.php"
+//require_once "vendor/autoload.php";
 
 $linkedIn=new HappyR\LinkedIn\LinkedIn('app_id', 'app_secret');
 
@@ -75,7 +75,7 @@ if ($linkedIn->isAuthenticated()) {
 
     exit();
 } elseif ($linkedIn->hasError()) {
-    echo "User canceled the login."
+    echo "User canceled the login.";
     exit();
 }
 
