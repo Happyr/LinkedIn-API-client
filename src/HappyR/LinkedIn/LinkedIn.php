@@ -4,7 +4,7 @@ namespace HappyR\LinkedIn;
 
 use HappyR\LinkedIn\Exceptions\LinkedInApiException;
 use HappyR\LinkedIn\Exceptions\LoginError;
-use HappyR\LinkedIn\Http\CurlRequest;
+use HappyR\LinkedIn\Http\GuzzleRequest;
 use HappyR\LinkedIn\Http\RequestInterface;
 use HappyR\LinkedIn\Http\UrlGenerator;
 use HappyR\LinkedIn\Http\UrlGeneratorInterface;
@@ -108,7 +108,7 @@ class LinkedIn
     protected function init()
     {
         $this->urlGenerator = new UrlGenerator();
-        $this->request = new CurlRequest();
+        $this->request = new GuzzleRequest();
 
         // Use the Illuminate Session storage if it is available
         if (class_exists('\Illuminate\Support\Facades\Session')) {
