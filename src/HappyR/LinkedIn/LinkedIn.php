@@ -126,7 +126,7 @@ class LinkedIn
      */
     public function isAuthenticated()
     {
-        return $this->getUserId() != null;
+        return $this->getUserId() !== null;
     }
 
     /**
@@ -219,7 +219,7 @@ class LinkedIn
      */
     public function getUser()
     {
-        if ($this->user == null) {
+        if ($this->user === null) {
             // if we have not already determined this and cached the result.
             $this->user = $this->getUserFromAvailableData();
         }
