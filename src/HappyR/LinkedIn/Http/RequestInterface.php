@@ -1,6 +1,6 @@
 <?php
 
-namespace HappyR\LinkedIn\Http;
+namespace Happyr\LinkedIn\Http;
 
 /**
  * Class RequestInterface
@@ -21,7 +21,7 @@ interface RequestInterface
      * @param string $contentType Either json or xml or null (defaults to null)
      *
      * @return string The response text
-     * @throws \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     * @throws \Happyr\LinkedIn\Exceptions\LinkedInApiException
      */
     public function send($url, $params = array(), $method = 'GET', $contentType = null);
 }

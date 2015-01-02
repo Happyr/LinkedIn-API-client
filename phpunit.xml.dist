@@ -16,7 +16,7 @@
     <formatter type="clover" usefile="false" />
 
     <testsuites>
-        <testsuite name="HappyR Api Client Test Suite">
+        <testsuite name="Happyr Api Client Test Suite">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>

@@ -1,8 +1,8 @@
 <?php
 
-namespace HappyR\LinkedIn\Http;
+namespace Happyr\LinkedIn\Http;
 
-use HappyR\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 
 /**
  * Class Request

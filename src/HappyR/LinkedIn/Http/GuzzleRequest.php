@@ -1,10 +1,10 @@
 <?php
 
-namespace HappyR\LinkedIn\Http;
+namespace Happyr\LinkedIn\Http;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
-use HappyR\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 
 /**
  * @author Tobias Nyholm

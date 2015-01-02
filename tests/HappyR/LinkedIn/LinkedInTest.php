@@ -1,9 +1,9 @@
 <?php
 
-namespace HappyR\LinkedIn;
+namespace Happyr\LinkedIn;
 
-use HappyR\LinkedIn\Exceptions\LinkedInApiException;
-use HappyR\LinkedIn\Storage\SessionStorage;
+use Happyr\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Storage\SessionStorage;
 use Mockery as m;
 
 /**
@@ -46,7 +46,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $url='http://example.com/test';
         $format='json';
 
-        $generator = m::mock('HappyR\LinkedIn\Http\UrlGenerator')
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getUrl')->once()->with(
                 'api',
                 $resource,
@@ -57,11 +57,11 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
                 ))->andReturn($url)
             ->getMock();
 
-        $request = m::mock('HappyR\LinkedIn\Http\RequestInterface')
+        $request = m::mock('Happyr\LinkedIn\Http\RequestInterface')
             ->shouldReceive('send')->once()->with($url, $postParams, $method, $format)->andReturn(json_encode($expected))
             ->getMock();
 
-        $linkedIn=m::mock('HappyR\LinkedIn\LinkedIn[getAccessToken,getUrlGenerator,getRequest]', array('id', 'secret'))
+        $linkedIn=m::mock('Happyr\LinkedIn\LinkedIn[getAccessToken,getUrlGenerator,getRequest]', array('id', 'secret'))
             ->shouldReceive('getAccessToken')->once()->andReturn($token)
             ->shouldReceive('getUrlGenerator')->once()->andReturn($generator)
             ->shouldReceive('getRequest')->once()->andReturn($request)
@@ -75,12 +75,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testIsAuthenticated()
     {
-        $linkedIn=m::mock('HappyR\LinkedIn\LinkedIn[getUserId]', array(1, 2))
+        $linkedIn=m::mock('Happyr\LinkedIn\LinkedIn[getUserId]', array(1, 2))
             ->shouldReceive('getUserId')->once()->andReturn(null)
             ->getMock();
         $this->assertFalse($linkedIn->isAuthenticated());
 
-        $linkedIn=m::mock('HappyR\LinkedIn\LinkedIn[getUserId]', array(1, 2))
+        $linkedIn=m::mock('Happyr\LinkedIn\LinkedIn[getUserId]', array(1, 2))
             ->shouldReceive('getUserId')->once()->andReturn(3)
             ->getMock();
         $this->assertTrue($linkedIn->isAuthenticated());
@@ -99,11 +99,11 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
 
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedIn', array('establishCSRFTokenState', 'getState'), array(self::APP_ID, self::APP_SECRET));
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedIn', array('establishCSRFTokenState', 'getState'), array(self::APP_ID, self::APP_SECRET));
         $linkedIn->expects($this->any())->method('establishCSRFTokenState');
         $linkedIn->expects($this->any())->method('getState')->will($this->returnValue($state));
 
-        $generator = m::mock('HappyR\LinkedIn\Http\UrlGenerator')
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getCurrentUrl')->once()->andReturn('currentUrl')
             ->shouldReceive('getUrl')->once()->with('www','uas/oauth2/authorization', $params)->andReturn($expected)
             ->getMock();
@@ -125,7 +125,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
             'scope' => 'foo bar baz',
         );
 
-        $generator = m::mock('HappyR\LinkedIn\Http\UrlGenerator')
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getCurrentUrl')->once()->andReturn('currentUrl')
             ->shouldReceive('getUrl')->once()->with('www','uas/oauth2/authorization', $params)->andReturn($expected)
             ->getMock();
@@ -138,7 +138,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testGetUser()
     {
         $user='user';
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedIn', array('getUserFromAvailableData', 'getState'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedIn', array('getUserFromAvailableData', 'getState'), array(), '', false);
         $linkedIn->expects($this->once())->method('getUserFromAvailableData')->will($this->returnValue($user));
 
         $this->assertEquals($user, $linkedIn->getUser());
@@ -149,7 +149,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testGetUserId()
     {
-        $linkedIn=m::mock('HappyR\LinkedIn\LinkedIn[getUser]', array(self::APP_ID, self::APP_SECRET))
+        $linkedIn=m::mock('Happyr\LinkedIn\LinkedIn[getUser]', array(self::APP_ID, self::APP_SECRET))
             ->shouldReceive('getUser')->andReturn(array('id'=>'foobar'), array(), null)
             ->getMock();
 
@@ -160,13 +160,13 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testFetchNewAccessToken()
     {
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
             ->shouldReceive('set')->once()->with('code', 'newCode')
             ->shouldReceive('set')->once()->with('access_token', 'at')
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('getAccessTokenFromCode')->will($this->returnValue('at'));
         $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('newCode'));
@@ -177,16 +177,16 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
      */
     public function testFetchNewAccessTokenFail()
     {
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
             ->shouldReceive('clearAll')->once()
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('getAccessTokenFromCode');
         $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('newCode'));
@@ -196,12 +196,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testFetchNewAccessTokenNoCode()
     {
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->with('code')->andReturn('foobar')
             ->shouldReceive('get')->once()->with('access_token', null)->andReturn('baz')
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('getCode');
 
@@ -210,12 +210,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testFetchNewAccessTokenSameCode()
     {
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
             ->shouldReceive('get')->once()->with('access_token', null)->andReturn('baz')
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('foobar'));
 
@@ -260,7 +260,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     protected function prepareGetAccessTokenFromCode($code, $response)
     {
         $currentUrl='foobar';
-        $generator = m::mock('HappyR\LinkedIn\Http\UrlGenerator')
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getCurrentUrl')->once()->andReturn($currentUrl)
             ->shouldReceive('getUrl')->once()->with(
                 'www',
@@ -274,11 +274,11 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
                 )
             )->andReturn('url')
             ->getMock();
-        $request = m::mock('HappyR\LinkedIn\Http\RequestInterface')
+        $request = m::mock('Happyr\LinkedIn\Http\RequestInterface')
             ->shouldReceive('send')->once()->with('url', array(), 'POST')->andReturn($response)
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getRequest', 'getUrlGenerator'), array(self::APP_ID, self::APP_SECRET));
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getRequest', 'getUrlGenerator'), array(self::APP_ID, self::APP_SECRET));
         $linkedIn->expects($this->any())->method('getUrlGenerator')->will($this->returnValue($generator));
         $linkedIn->expects($this->once())->method('getRequest')->will($this->returnValue($request));
 
@@ -288,7 +288,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testEstablishCSRFTokenState()
     {
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->with('state', null)->andReturn(null, 'state')
             ->shouldReceive('set')->once()->with('state', \Mockery::on(function(&$param) {
                     return !empty($param);
@@ -308,13 +308,13 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testGetUserFromAvailableData()
     {
         $expected='foobar';
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('set')->once()->with('user', $expected)
             ->shouldReceive('get')->once()->with('user', null)->andReturn(null)
             ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('access_token'));
         $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue($expected));
@@ -328,12 +328,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testGetUserFromAvailableDataExistingUser()
     {
         $expected='user';
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->once()->with('user', null)->andReturn($expected)
             ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getAccessToken', 'getStorage'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getAccessToken', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('access_token'));
 
@@ -346,13 +346,13 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testGetUserFromAvailableDataExistingUserDifferentAccessToken()
     {
         $expected='foobar';
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('set')->once()->with('user', $expected)
             ->shouldReceive('get')->once()->with('user', null)->andReturn('user')
             ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('new_access_token'));
         $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue($expected));
@@ -365,13 +365,13 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetUserFromAvailableDataFailedToGetUser()
     {
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('clearAll')->once()
             ->shouldReceive('get')->once()->with('user', null)->andReturn(null)
             ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
             ->getMock();
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('new_access_token'));
         $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue(null));
@@ -382,7 +382,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testGetUserFromAccessToken()
     {
         $expected='foobar';
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('api'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('api'), array(), '', false);
         $linkedIn->expects($this->once())->method('api')->will($this->returnValue($expected));
 
         $this->assertEquals($expected, $linkedIn->getUserFromAccessToken());
@@ -391,7 +391,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testGetUserFromAccessTokenFail()
     {
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('api'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('api'), array(), '', false);
         $linkedIn->expects($this->once())->method('api')->will($this->throwException(new LinkedInApiException('foobar')));
 
         $this->assertNull($linkedIn->getUserFromAccessToken());
@@ -405,12 +405,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testGetCode()
     {
-        $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface')
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('clear')->once()->with('state')
             ->getMock();
         $state='bazbar';
 
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getState', 'setState', 'getStorage'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getState', 'setState', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
         $linkedIn->expects($this->once())->method('setState')->with($this->equalTo(null));
         $linkedIn->expects($this->once())->method('getState')->will($this->returnValue($state));
@@ -422,11 +422,11 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
      */
     public function testGetCodeInvalidCode()
     {
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedInDummy', array('getState'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getState'), array(), '', false);
         $linkedIn->expects($this->once())->method('getState')->will($this->returnValue('bazbar'));
 
         $_REQUEST['code']='foobar';
@@ -441,7 +441,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testGetAccessTokenEmpty()
     {
         $token='token';
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedIn', array('fetchNewAccessToken', 'setAccessToken'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedIn', array('fetchNewAccessToken', 'setAccessToken'), array(), '', false);
         $linkedIn->expects($this->once())->method('fetchNewAccessToken')->will($this->returnValue($token));
         $linkedIn->expects($this->once())->method('setAccessToken')->with($token);
 
@@ -451,7 +451,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testAccessTokenAccessors()
     {
         $token='token';
-        $linkedIn=$this->getMock('HappyR\LinkedIn\LinkedIn', array('fetchNewAccessToken'), array(), '', false);
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedIn', array('fetchNewAccessToken'), array(), '', false);
         $linkedIn->expects($this->never())->method('fetchNewAccessToken');
 
         $linkedIn->setAccessToken($token);
@@ -462,21 +462,21 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testRequestAccessors()
     {
-        $object = m::mock('HappyR\LinkedIn\Http\RequestInterface');
+        $object = m::mock('Happyr\LinkedIn\Http\RequestInterface');
         $this->ln->setRequest($object);
         $this->assertEquals($object, $this->ln->getRequest());
     }
 
     public function testGeneratorAccessors()
     {
-        $object = m::mock('HappyR\LinkedIn\Http\UrlGenerator');
+        $object = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
         $this->ln->setUrlGenerator($object);
         $this->assertEquals($object, $this->ln->getUrlGenerator());
     }
 
     public function testStorageAccessors()
     {
-        $object = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface');
+        $object = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface');
         $this->ln->setStorage($object);
         $this->assertEquals($object, $this->ln->getStorage());
     }
@@ -536,15 +536,15 @@ class LinkedInDummy extends LinkedIn
     public function init($storage=null, $request=null, $generator=null)
     {
         if (!$storage) {
-            $storage = m::mock('HappyR\LinkedIn\Storage\DataStorageInterface');
+            $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface');
         }
 
         if (!$request) {
-            $request = m::mock('HappyR\LinkedIn\Http\RequestInterface');
+            $request = m::mock('Happyr\LinkedIn\Http\RequestInterface');
         }
 
         if (!$generator) {
-            $generator = m::mock('HappyR\LinkedIn\Http\UrlGenerator');
+            $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
         }
 
         $this->storage=$storage;

@@ -2,7 +2,7 @@
     "name": "happyr/linkedin-api-client",
     "type": "library",
     "description": "LinkedIn API client. Handles OAuth, CSRF protection. Easy to implement and extend. This is a standalone library for any composer project.",
-    "keywords": ["LinkedIn", "OAuth", "HappyR", "API", "Client", "SDK"],
+    "keywords": ["LinkedIn", "OAuth", "Happyr", "API", "Client", "SDK"],
     "homepage": "http://developer.happyr.com/libraries/linkedin-php-client",
     "license": "MIT",
     "authors": [
@@ -20,6 +20,6 @@
         "illuminate/support": "*"
     },
     "autoload": {
-        "psr-0": { "HappyR\\LinkedIn\\": "src/" }
+        "psr-0": { "Happyr\\LinkedIn\\": "src/" }
     }
 }

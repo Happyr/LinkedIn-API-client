@@ -1,7 +1,7 @@
 <?php
 
 
-namespace HappyR\LinkedIn\Storage;
+namespace Happyr\LinkedIn\Storage;
 
 use Mockery as m;
 
@@ -14,7 +14,7 @@ use Mockery as m;
 class SessionStorageTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \HappyR\LinkedIn\Storage\SessionStorage storage
+     * @var \Happyr\LinkedIn\Storage\SessionStorage storage
      *
      */
     protected $storage;
@@ -33,7 +33,7 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
      */
     public function testSetFail()
     {
@@ -66,7 +66,7 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
      */
     public function testClearFail()
     {
@@ -77,7 +77,7 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     {
         $validKeys=SessionStorage::$validKeys;
 
-        $storage = m::mock('HappyR\LinkedIn\Storage\SessionStorage[clear]')
+        $storage = m::mock('Happyr\LinkedIn\Storage\SessionStorage[clear]')
             ->shouldReceive('clear')->times(count($validKeys))
             ->with(m::on(function($arg) use ($validKeys){
                 return in_array($arg, $validKeys);
@@ -87,4 +87,4 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
         $storage->clearAll();
     }
 
-} 
+}

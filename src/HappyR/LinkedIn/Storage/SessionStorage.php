@@ -1,8 +1,8 @@
 <?php
 
-namespace HappyR\LinkedIn\Storage;
+namespace Happyr\LinkedIn\Storage;
 
-use HappyR\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 
 /**
  * Class SessionStorage
