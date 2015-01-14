@@ -1,6 +1,6 @@
 <?php
 
-namespace HappyR\LinkedIn\Http;
+namespace Happyr\LinkedIn\Http;
 
 /**
  * Class UrlGeneratorInterface

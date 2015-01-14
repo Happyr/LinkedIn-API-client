@@ -1,6 +1,6 @@
 <?php
 
-namespace HappyR\LinkedIn\Storage;
+namespace Happyr\LinkedIn\Storage;
 
 /**
  * Class DataStorage

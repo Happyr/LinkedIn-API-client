@@ -66,7 +66,7 @@ This example below is a nicer way of connecting to LinkedIn compared to [their c
  */
 //require_once "vendor/autoload.php";
 
-$linkedIn=new HappyR\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
 
 if ($linkedIn->isAuthenticated()) {
     //we know that the user is authenticated now. Start query the API
@@ -89,14 +89,14 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 ### Integrating with Symfony2
 
 It is very easy to integrate this LinkedIn client with Symfony2. I created a service that extended
-HappyR\LinkedIn\LinkedIn and a controller to enable LinkedIn authentication.
+Happyr\LinkedIn\LinkedIn and a controller to enable LinkedIn authentication.
 
 ```php
 <?php
 
 namespace Acme\LinkedInBundle\Services;
 
-use HappyR\LinkedIn\LinkedIn;
+use Happyr\LinkedIn\LinkedIn;
 
 /**
  * Extends the LinkedIn class 

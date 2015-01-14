@@ -1,16 +1,16 @@
 <?php
 
-namespace HappyR\LinkedIn;
+namespace Happyr\LinkedIn;
 
-use HappyR\LinkedIn\Exceptions\LinkedInApiException;
-use HappyR\LinkedIn\Exceptions\LoginError;
-use HappyR\LinkedIn\Http\Request;
-use HappyR\LinkedIn\Http\RequestInterface;
-use HappyR\LinkedIn\Http\UrlGenerator;
-use HappyR\LinkedIn\Http\UrlGeneratorInterface;
-use HappyR\LinkedIn\Storage\DataStorageInterface;
-use HappyR\LinkedIn\Storage\SessionStorage;
-use HappyR\LinkedIn\Storage\IlluminateSessionStorage;
+use Happyr\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Exceptions\LoginError;
+use Happyr\LinkedIn\Http\GuzzleRequest;
+use Happyr\LinkedIn\Http\RequestInterface;
+use Happyr\LinkedIn\Http\UrlGenerator;
+use Happyr\LinkedIn\Http\UrlGeneratorInterface;
+use Happyr\LinkedIn\Storage\DataStorageInterface;
+use Happyr\LinkedIn\Storage\SessionStorage;
+use Happyr\LinkedIn\Storage\IlluminateSessionStorage;
 
 /**
  * Class LinkedIn lets you talk to LinkedIn api.
@@ -80,7 +80,7 @@ class LinkedIn
     protected $urlGenerator;
 
     /**
-     * @var \HappyR\LinkedIn\Http\RequestInterface request
+     * @var \Happyr\LinkedIn\Http\RequestInterface request
      *
      */
     protected $request;
@@ -108,7 +108,7 @@ class LinkedIn
     protected function init()
     {
         $this->urlGenerator = new UrlGenerator();
-        $this->request = new Request();
+        $this->request = new GuzzleRequest();
 
         // Use the Illuminate Session storage if it is available
         if (class_exists('\Illuminate\Support\Facades\Session')) {

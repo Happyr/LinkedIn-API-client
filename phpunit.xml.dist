@@ -16,7 +16,7 @@
     <formatter type="clover" usefile="false" />
 
     <testsuites>
-        <testsuite name="HappyR Api Client Test Suite">
+        <testsuite name="Happyr Api Client Test Suite">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
@@ -35,12 +35,6 @@
             </exclude>
         </whitelist>
     </filter>
-
-    <groups>
-        <exclude>
-            <group>live</group>
-        </exclude>
-    </groups>
 
     <logging>
         <log type="coverage-clover" target="build/logs/phpunit.coverage.xml"/>

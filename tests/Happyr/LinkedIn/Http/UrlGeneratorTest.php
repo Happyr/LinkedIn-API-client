@@ -1,9 +1,9 @@
 <?php
 
 
-namespace HappyR\LinkedIn\Http;
+namespace Happyr\LinkedIn\Http;
 
-use HappyR\LinkedIn\Storage\DataStorage;
+use Happyr\LinkedIn\Storage\DataStorage;
 
 /**
  * Class UrlGeneratorTest
@@ -81,7 +81,7 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testGetCurrentURL() {
-        $gen=$this->getMock('HappyR\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
+        $gen=$this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
         $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
         $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com'));
         $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function($arg){return empty($arg)?'':'?'.$arg;}));
@@ -114,7 +114,7 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testGetCurrentURLPort80() {
-        $gen=$this->getMock('HappyR\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
+        $gen=$this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
         $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
         $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com:80'));
         $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function($arg){return empty($arg)?'':'?'.$arg;}));
@@ -130,7 +130,7 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetCurrentURLPort8080() {
 
-        $gen=$this->getMock('HappyR\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
+        $gen=$this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
         $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
         $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com:8080'));
         $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function($arg){return empty($arg)?'':'?'.$arg;}));

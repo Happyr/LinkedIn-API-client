@@ -1,6 +1,6 @@
 <?php
 
-namespace HappyR\LinkedIn\Storage;
+namespace Happyr\LinkedIn\Storage;
 
 use Mockery as m;
 use Illuminate\Support\Facades\Session;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Session;
 class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \HappyR\LinkedIn\Storage\SessionStorage storage
+     * @var \Happyr\LinkedIn\Storage\SessionStorage storage
      *
      */
     protected $storage;
@@ -34,11 +34,11 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
      */
     public function testSetFail()
     {
-        Session::shouldReceive('put')->once()->with($this->prefix.'code', 'baz')->andThrow('\HappyR\LinkedIn\Exceptions\LinkedInApiException');
+        Session::shouldReceive('put')->once()->with($this->prefix.'code', 'baz')->andThrow('\Happyr\LinkedIn\Exceptions\LinkedInApiException');
 
         $this->storage->set('foobar', 'baz');
     }
@@ -65,7 +65,7 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \HappyR\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
      */
     public function testClearFail()
     {

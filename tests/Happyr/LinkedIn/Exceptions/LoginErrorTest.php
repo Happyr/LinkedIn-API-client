@@ -1,7 +1,7 @@
 <?php
 
 
-namespace HappyR\LinkedIn\Exceptions;
+namespace Happyr\LinkedIn\Exceptions;
 
 
 /**
