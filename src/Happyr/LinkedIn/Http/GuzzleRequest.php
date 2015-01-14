@@ -16,10 +16,7 @@ class GuzzleRequest implements RequestInterface
      */
     public function send($url, $params = array(), $method = 'GET', $contentType = null)
     {
-        $client = new Client(array(
-            'User-Agent' => 'linkedin-php-client',
-        ));
-
+        $client = $this->getClient();
         $options = $this->createOptions($params, $method, $contentType);
         $request = $client->createRequest($method, $url, $options);
 
@@ -45,15 +42,15 @@ class GuzzleRequest implements RequestInterface
     /**
      * Create options for Guzzle request
      *
-     * @param $params
-     * @param $method
-     * @param $contentType
+     * @param mixed $params
+     * @param string $method
+     * @param string $contentType
      *
      * @return array
      */
     protected function createOptions($params, $method, $contentType)
     {
-        if ($method == 'POST') {
+        if (strtoupper($method) == 'POST') {
             if ($contentType == 'json') {
                 $options = array('json' => $params);
             } elseif ($contentType == 'xml') {
@@ -83,4 +80,14 @@ class GuzzleRequest implements RequestInterface
 
     }
 
+    /**
+     *
+     * @return Client
+     */
+    protected function getClient()
+    {
+        return new Client(array(
+            'User-Agent' => 'linkedin-php-client',
+        ));
+    }
 }
