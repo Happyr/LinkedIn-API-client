@@ -161,7 +161,6 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testFetchNewAccessToken()
     {
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
             ->shouldReceive('set')->once()->with('code', 'newCode')
             ->shouldReceive('set')->once()->with('access_token', 'at')
             ->getMock();
@@ -172,8 +171,6 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('newCode'));
 
         $this->assertEquals('at', $linkedIn->fetchNewAccessToken());
-
-
     }
 
     /**
@@ -182,7 +179,6 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testFetchNewAccessTokenFail()
     {
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
             ->shouldReceive('clearAll')->once()
             ->getMock();
 
@@ -211,13 +207,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testFetchNewAccessTokenSameCode()
     {
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
             ->shouldReceive('get')->once()->with('access_token', null)->andReturn('baz')
             ->getMock();
 
         $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('foobar'));
+        $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue(null));
 
         $this->assertEquals('baz', $linkedIn->fetchNewAccessToken());
     }
@@ -407,6 +402,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     {
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('clear')->once()->with('state')
+            ->shouldReceive('get')->once()->with('code')->andReturn(null)
             ->getMock();
         $state='bazbar';
 
@@ -426,13 +422,33 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetCodeInvalidCode()
     {
-        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getState'), array(), '', false);
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
+            ->shouldReceive('get')->once()->with('code')->andReturn(null)
+            ->getMock();
+
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getState', 'getStorage'), array(), '', false);
         $linkedIn->expects($this->once())->method('getState')->will($this->returnValue('bazbar'));
+        $linkedIn->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+
 
         $_REQUEST['code']='foobar';
         $_REQUEST['state']='invalid';
 
         $this->assertEquals('foobar', $linkedIn->getCode());
+    }
+
+    public function testGetCodeUsedCode()
+    {
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
+            ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
+            ->getMock();
+
+        $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getStorage'), array(), '', false);
+        $linkedIn->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+
+        $_REQUEST['code']='foobar';
+
+        $this->assertEquals(null, $linkedIn->getCode());
     }
 
     /**
