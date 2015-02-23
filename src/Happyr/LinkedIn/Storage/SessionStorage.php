@@ -19,7 +19,11 @@ class SessionStorage implements DataStorageInterface
     public function __construct()
     {
         //start the session if it not already been started
-        @session_start();
+        if(php_sapi_name() != "cli") {
+            if (!session_id()) {
+                session_start();
+            }
+        }
     }
 
     /**
