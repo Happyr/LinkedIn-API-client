@@ -297,17 +297,26 @@ class LinkedIn
                 return null;
             }
 
-            $state = $this->getState();
-            //if state exists in session and in request and if they are equal
-            if (null !== $state && isset($_REQUEST['state']) && $state === $_REQUEST['state']) {
-                // CSRF state has done its job, so clear it
-                $this->setState(null);
-                $storage->clear('state');
-
-                return $_REQUEST['code'];
-            } else {
-                throw new LinkedInApiException('CSRF state token does not match one provided.');
+            //if stored state does not exists
+            if (null === $state = $this->getState()) {
+                throw new LinkedInApiException('Could not find a stored CSRF state token.');
             }
+
+            //if state exists in the request
+            if (!isset($_REQUEST['state'])) {
+                throw new LinkedInApiException('Could not find a CSRF state token in the request.');
+            }
+
+            //if state exists in session and in request and if they are not equal
+            if ($state !== $_REQUEST['state']) {
+                throw new LinkedInApiException('The CSRF state token from the request does not match the stored token.');
+            }
+
+            // CSRF state has done its job, so clear it
+            $this->setState(null);
+            $storage->clear('state');
+
+            return $_REQUEST['code'];
         }
 
         return null;
