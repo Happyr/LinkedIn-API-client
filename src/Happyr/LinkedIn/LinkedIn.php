@@ -249,7 +249,6 @@ class LinkedIn
          * 2: The access token has changed or if we don't got a user
          */
         if ($accessToken && !($user && $persistedAccessToken == $accessToken)) {
-
             $user = $this->getUserFromAccessToken();
             if ($user) {
                 $storage->set('user', $user);
@@ -417,7 +416,6 @@ class LinkedIn
                 array(),
                 'POST'
             );
-
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.

@@ -22,7 +22,7 @@ class GuzzleRequest implements RequestInterface
 
         try {
             $response = $client->send($request);
-        } catch(TransferException $guzzleException) {
+        } catch (TransferException $guzzleException) {
             $e = new LinkedInApiException(
                 array(
                     'error_code' => $guzzleException->getCode(),
@@ -77,7 +77,6 @@ class GuzzleRequest implements RequestInterface
      */
     protected function modifyOptions(&$options)
     {
-
     }
 
     /**
