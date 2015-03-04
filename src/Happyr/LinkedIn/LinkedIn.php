@@ -289,13 +289,20 @@ class LinkedIn
      */
     protected function getCode()
     {
+        $storage = $this->getStorage();
+
         if (isset($_REQUEST['code'])) {
+            if ($storage->get('code') === $_REQUEST['code']) {
+                //we have already validated this code
+                return null;
+            }
+
             $state = $this->getState();
             //if state exists in session and in request and if they are equal
             if (null !== $state && isset($_REQUEST['state']) && $state === $_REQUEST['state']) {
                 // CSRF state has done its job, so clear it
                 $this->setState(null);
-                $this->getStorage()->clear('state');
+                $storage->clear('state');
 
                 return $_REQUEST['code'];
             } else {
@@ -340,7 +347,7 @@ class LinkedIn
         $storage = $this->getStorage();
         $code = $this->getCode();
 
-        if ($code && $code != $storage->get('code')) {
+        if ($code) {
             $accessToken = $this->getAccessTokenFromCode($code);
             if ($accessToken) {
                 $storage->set('code', $code);
