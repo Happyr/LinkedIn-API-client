@@ -63,7 +63,7 @@ class LinkedIn
      * The OAuth access token received in exchange for a valid authorization
      * code.  null means the access token has yet to be determined.
      *
-     * @var string
+     * @var AccessToken
      */
     protected $accessToken = null;
 
@@ -325,7 +325,7 @@ class LinkedIn
      * Determines the access token that should be used for API calls.
      *
      *
-     * @return string|null The access token of null if the access token is not found
+     * @return AccessToken|null The access token of null if the access token is not found
      */
     public function getAccessToken()
     {
@@ -387,7 +387,7 @@ class LinkedIn
      * @param string $redirectUri Where the user should be redirected after token is generated.
      *                            Default is the current url
      *
-     * @return string|null An access token exchanged for the authorization code, or
+     * @return AccessToken|null An access token exchanged for the authorization code, or
      *               null if an access token could not be generated.
      */
     protected function getAccessTokenFromCode($code, $redirectUri = null)
@@ -426,12 +426,14 @@ class LinkedIn
             return null;
         }
 
-        $responseArray = json_decode($response, true);
-        if (!isset($responseArray['access_token'])) {
+        $token = new AccessToken();
+        $token->constructFromJson($response);
+
+        if (!$token->hasToken()) {
             return null;
         }
 
-        return $responseArray['access_token'];
+        return $token;
     }
 
     /**
@@ -515,12 +517,16 @@ class LinkedIn
     /**
      * Get the access token
      *
-     * @param string $accessToken
+     * @param string|AccessToken $accessToken
      *
      * @return $this
      */
     public function setAccessToken($accessToken)
     {
+        if (!($accessToken instanceof AccessToken)) {
+            $accessToken = new AccessToken($accessToken);
+        }
+
         $this->accessToken = $accessToken;
 
         return $this;

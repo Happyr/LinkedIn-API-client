@@ -227,11 +227,11 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testGetAccessTokenFromCode()
     {
         $code='code';
-        $response=json_encode(array('access_token'=>'foobar'));
+        $response=json_encode(array('access_token'=>'foobar', 'expires_in'=>10));
         $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
 
-        $this->assertEquals('foobar', $linkedIn->getAccessTokenFromCode($code), 'Standard get access token form code');
-
+        $token = $linkedIn->getAccessTokenFromCode($code);
+        $this->assertEquals('foobar', $token, 'Standard get access token form code');
 
         $response=json_encode(array('foo'=>'bar'));
         $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
@@ -242,6 +242,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
 
         $this->assertNull($linkedIn->getAccessTokenFromCode($code), 'Empty result');
+        $this->assertNull($linkedIn->getAccessTokenFromCode(null), 'Empty result');
 
     }
 
