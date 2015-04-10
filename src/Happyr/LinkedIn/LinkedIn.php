@@ -90,31 +90,41 @@ class LinkedIn
      *
      * @param string $appId
      * @param string $appSecret
+     * @param null|DataStorageInterface $storage
      */
-    public function __construct($appId, $appSecret)
+    public function __construct($appId, $appSecret, $storage = null)
     {
+        if ($storage && !($storage instanceof DataStorageInterface)) {
+            throw new \InvalidArgumentException('\$storage has to be an instance of DataStorageInterface');
+        }
         //save app stuff
         $this->appId = $appId;
         $this->appSecret = $appSecret;
 
-        $this->init();
+        $this->init($storage);
     }
 
     /**
      * Init the API by creating some classes.
      *
      * This function could be overwritten if you want to change any of these classes
+     * 
+     * @param null|DataStorageInterface $storage
      */
-    protected function init()
+    protected function init($storage = null)
     {
         $this->urlGenerator = new UrlGenerator();
         $this->request = new GuzzleRequest();
 
-        // Use the Illuminate Session storage if it is available
-        if (class_exists('\Illuminate\Support\Facades\Session')) {
-            $this->storage = new IlluminateSessionStorage();
+        if ($storage) {
+            $this->storage = $storage;
         } else {
-            $this->storage = new SessionStorage();
+            // Use the Illuminate Session storage if it is available
+            if (class_exists('\Illuminate\Support\Facades\Session')) {
+                $this->storage = new IlluminateSessionStorage();
+            } else {
+                $this->storage = new SessionStorage();
+            }
         }
     }
 
