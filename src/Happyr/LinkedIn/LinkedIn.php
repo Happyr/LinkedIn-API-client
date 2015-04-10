@@ -90,7 +90,7 @@ class LinkedIn
      *
      * @param string $appId
      * @param string $appSecret
-     * @param null|DataStorageInterface $storage
+     * @param DataStorageInterface $storage [optional] the session storage object to use
      */
     public function __construct($appId, $appSecret, $storage = null)
     {
@@ -109,7 +109,7 @@ class LinkedIn
      *
      * This function could be overwritten if you want to change any of these classes
      * 
-     * @param null|DataStorageInterface $storage
+     * @param DataStorageInterface $storage [optional] the session storage object to use
      */
     protected function init($storage = null)
     {
