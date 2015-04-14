@@ -37,12 +37,24 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException PHPUnit_Framework_Error
+     * @expectedException InvalidArgumentException
      * @expectedExceptionMessageRegExp #.*must implement.*DataStorageInterface.*#
      */
     public function testConstructorThrowsExceptionIfWrongStorageTypeIsPassed()
     {
+        set_error_handler(function($errno, $errstr) {
+            // This is a one time error handler, so we need to restore the previous one if we end up in here.
+            restore_error_handler();
+            if (E_RECOVERABLE_ERROR === $errno) {
+                throw new \InvalidArgumentException($errstr, $errno);
+                return true;
+            }
+            return false;
+        });
         new LinkedIn(self::APP_ID, self::APP_SECRET, new \stdClass());
+        // Don't forget to restore the error handler to its previous value even if we don't hit an error above. If we
+        // do hit an error, this line won't ever be reached, so we'll only restore the error handler once either way
+        restore_error_handler();
     }
     
     public function testInitProperlyAssignsPassedInStorage()
