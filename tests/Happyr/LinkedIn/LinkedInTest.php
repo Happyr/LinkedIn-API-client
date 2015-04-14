@@ -3,6 +3,7 @@
 namespace Happyr\LinkedIn;
 
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Happyr\LinkedIn\Storage\SessionStorage;
 use Mockery as m;
 
@@ -36,8 +37,8 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessageRegExp #.*\$storage.*DataStorageInterface.*#
+     * @expectedException PHPUnit_Framework_Error
+     * @expectedExceptionMessageRegExp #.*must implement.*DataStorageInterface.*#
      */
     public function testConstructorThrowsExceptionIfWrongStorageTypeIsPassed()
     {
@@ -49,6 +50,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $sessionStorage = new SessionStorage();
         $ln = new LinkedIn(self::APP_ID, self::APP_SECRET, $sessionStorage);
         $this->assertEquals($sessionStorage, $ln->getStorage());
+    }
+
+    public function testInitProperlyUsesSessionStorageObjectByDefault()
+    {
+        $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $ln->getStorage());
     }
 
     public function testApi()
@@ -566,7 +573,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
  */
 class LinkedInDummy extends LinkedIn
 {
-    public function init($storage=null, $request=null, $generator=null)
+    public function init(DataStorageInterface $storage=null, $request=null, $generator=null)
     {
         if (!$storage) {
             $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface');
