@@ -85,6 +85,64 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 
 ```
 
+You can easily implement your own session storage device and use it with this library. Just make sure your session
+storage class implements the `\Happyr\LinkedIn\Storage\DataStorageInterface` interface (or write an adapter that
+uses your class and implements that interface as shown below).
+
+```php
+<?php
+
+/**
+ * First write a class or an adapter that implements DataStorageInterface
+ */
+use \Happyr\LinkedIn\Storage\DataStorageInterface;
+
+class CacheManagerHappyrLinkedInAdapter implements DataStorageInterface
+{
+	public function __construct($cacheManager) {}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key
+	 * @param array $value
+	 * @return void
+	 */
+	public function set($key, $value) {}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @param string $key
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public function get($key, $default = false) {}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key
+	 * @return void
+	 */
+	public function clear($key) {}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @return void
+	 */
+	public function clearAll() {}
+}
+
+/**
+ * Now you can use your custom class as the session storage for this library
+ */
+$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+// The line of code below is how you tell the library to use your custom session storage
+$linkedIn->setStorage(new CacheManagerHappyrLinkedInAdapter());
+
+```
 
 ### Framework integration
 
