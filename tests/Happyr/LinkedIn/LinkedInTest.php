@@ -41,28 +41,28 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     {
         $sessionStorage = new IlluminateSessionStorage();
         $ln = new LinkedIn(self::APP_ID, self::APP_SECRET, $sessionStorage);
-	    $this->assertAttributeSame($sessionStorage, 'storage', $ln);
+        $this->assertAttributeSame($sessionStorage, 'storage', $ln);
     }
 
     public function testInitProperlyUsesSessionStorageObjectByDefault()
     {
         $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
-	    $this->assertAttributeEquals(null, 'storage', $ln);
+        $this->assertAttributeEquals(null, 'storage', $ln);
     }
-	
-	public function testGetStorageProperlyReturnsStoredMemberVariable()
-	{
-		$sessionStorage = new IlluminateSessionStorage();
-		$ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
-		$ln->setStorage($sessionStorage);
-		$this->assertSame($sessionStorage, $ln->getStorage());
-	}
 
-	public function testGetStorageProperlyReturnsDefaultMemberVariable()
-	{
-		$ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
-		$this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $ln->getStorage());
-	}
+    public function testGetStorageProperlyReturnsStoredMemberVariable()
+    {
+        $sessionStorage = new IlluminateSessionStorage();
+        $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $ln->setStorage($sessionStorage);
+        $this->assertSame($sessionStorage, $ln->getStorage());
+    }
+
+    public function testGetStorageProperlyReturnsDefaultMemberVariable()
+    {
+        $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $ln->getStorage());
+    }
 
     public function testApi()
     {

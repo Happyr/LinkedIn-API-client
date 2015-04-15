@@ -572,9 +572,9 @@ class LinkedIn
      */
     public function getStorage()
     {
-	    if (null == $this->storage) {
-		    $this->storage = new SessionStorage();
-	    }
+        if (null == $this->storage) {
+            $this->storage = new SessionStorage();
+        }
         return $this->storage;
     }
 
