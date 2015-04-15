@@ -112,12 +112,7 @@ class LinkedIn
     {
         $this->urlGenerator = new UrlGenerator();
         $this->request = new GuzzleRequest();
-
-        if ($storage) {
-            $this->storage = $storage;
-        } else {
-            $this->storage = new SessionStorage();
-        }
+        $this->storage = $storage;
     }
 
     /**
@@ -577,6 +572,9 @@ class LinkedIn
      */
     public function getStorage()
     {
+	    if (null == $this->storage) {
+		    $this->storage = new SessionStorage();
+	    }
         return $this->storage;
     }
 

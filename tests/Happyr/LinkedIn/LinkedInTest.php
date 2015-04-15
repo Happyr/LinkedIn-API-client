@@ -4,6 +4,7 @@ namespace Happyr\LinkedIn;
 
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
+use Happyr\LinkedIn\Storage\IlluminateSessionStorage;
 use Happyr\LinkedIn\Storage\SessionStorage;
 use Mockery as m;
 
@@ -38,16 +39,30 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testInitProperlyAssignsPassedInStorage()
     {
-        $sessionStorage = new SessionStorage();
+        $sessionStorage = new IlluminateSessionStorage();
         $ln = new LinkedIn(self::APP_ID, self::APP_SECRET, $sessionStorage);
-        $this->assertEquals($sessionStorage, $ln->getStorage());
+	    $this->assertAttributeSame($sessionStorage, 'storage', $ln);
     }
 
     public function testInitProperlyUsesSessionStorageObjectByDefault()
     {
         $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
-        $this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $ln->getStorage());
+	    $this->assertAttributeEquals(null, 'storage', $ln);
     }
+	
+	public function testGetStorageProperlyReturnsStoredMemberVariable()
+	{
+		$sessionStorage = new IlluminateSessionStorage();
+		$ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
+		$ln->setStorage($sessionStorage);
+		$this->assertSame($sessionStorage, $ln->getStorage());
+	}
+
+	public function testGetStorageProperlyReturnsDefaultMemberVariable()
+	{
+		$ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
+		$this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $ln->getStorage());
+	}
 
     public function testApi()
     {
