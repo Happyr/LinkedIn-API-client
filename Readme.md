@@ -99,7 +99,7 @@ use \Happyr\LinkedIn\Storage\DataStorageInterface;
 
 class CacheManagerHappyrLinkedInAdapter implements DataStorageInterface
 {
-	public function __construct($cacheManager) {}
+	public function __construct() {}
 
 	/**
 	 * {@inheritDoc}
