@@ -3,6 +3,8 @@
 namespace Happyr\LinkedIn;
 
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Storage\DataStorageInterface;
+use Happyr\LinkedIn\Storage\IlluminateSessionStorage;
 use Happyr\LinkedIn\Storage\SessionStorage;
 use Mockery as m;
 
@@ -33,6 +35,26 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
             'Expect the App ID to be set.');
         $this->assertEquals($this->ln->getAppSecret(), '987654321',
             'Expect the API secret to be set.');
+    }
+
+    public function testInitDoesNotAssignSessionStorageByDefault()
+    {
+        $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $this->assertAttributeEquals(null, 'storage', $ln);
+    }
+
+    public function testGetStorageProperlyReturnsStoredMemberVariable()
+    {
+        $sessionStorage = new IlluminateSessionStorage();
+        $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $ln->setStorage($sessionStorage);
+        $this->assertSame($sessionStorage, $ln->getStorage());
+    }
+
+    public function testGetStorageProperlyReturnsDefaultMemberVariable()
+    {
+        $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $ln->getStorage());
     }
 
     public function testApi()
@@ -550,7 +572,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
  */
 class LinkedInDummy extends LinkedIn
 {
-    public function init($storage=null, $request=null, $generator=null)
+    public function init(DataStorageInterface $storage=null, $request=null, $generator=null)
     {
         if (!$storage) {
             $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface');
