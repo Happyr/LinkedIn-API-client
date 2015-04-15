@@ -37,14 +37,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
             'Expect the API secret to be set.');
     }
 
-    public function testInitProperlyAssignsPassedInStorage()
-    {
-        $sessionStorage = new IlluminateSessionStorage();
-        $ln = new LinkedIn(self::APP_ID, self::APP_SECRET, $sessionStorage);
-        $this->assertAttributeSame($sessionStorage, 'storage', $ln);
-    }
-
-    public function testInitProperlyUsesSessionStorageObjectByDefault()
+    public function testInitDoesNotAssignSessionStorageByDefault()
     {
         $ln = new LinkedIn(self::APP_ID, self::APP_SECRET);
         $this->assertAttributeEquals(null, 'storage', $ln);

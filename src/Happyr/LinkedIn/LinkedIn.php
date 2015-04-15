@@ -90,29 +90,25 @@ class LinkedIn
      *
      * @param string $appId
      * @param string $appSecret
-     * @param DataStorageInterface $storage [optional] the session storage object to use
      */
-    public function __construct($appId, $appSecret, DataStorageInterface $storage=null)
+    public function __construct($appId, $appSecret)
     {
         //save app stuff
         $this->appId = $appId;
         $this->appSecret = $appSecret;
 
-        $this->init($storage);
+        $this->init();
     }
 
     /**
      * Init the API by creating some classes.
      *
      * This function could be overwritten if you want to change any of these classes
-     * 
-     * @param DataStorageInterface $storage [optional] the session storage object to use
      */
-    protected function init(DataStorageInterface $storage=null)
+    protected function init()
     {
         $this->urlGenerator = new UrlGenerator();
         $this->request = new GuzzleRequest();
-        $this->storage = $storage;
     }
 
     /**
@@ -572,7 +568,7 @@ class LinkedIn
      */
     public function getStorage()
     {
-        if (null == $this->storage) {
+        if (null === $this->storage) {
             $this->storage = new SessionStorage();
         }
         return $this->storage;
