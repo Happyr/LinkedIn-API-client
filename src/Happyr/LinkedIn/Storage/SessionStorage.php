@@ -12,9 +12,8 @@ use Happyr\LinkedIn\Exceptions\LinkedInApiException;
  * @author Tobias Nyholm
  *
  */
-class SessionStorage implements DataStorageInterface
+class SessionStorage extends BaseDataStorage
 {
-    public static $validKeys = array('state', 'code', 'access_token', 'user');
 
     public function __construct()
     {
@@ -65,27 +64,5 @@ class SessionStorage implements DataStorageInterface
         if (isset($_SESSION[$name])) {
             unset($_SESSION[$name]);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function clearAll()
-    {
-        foreach (self::$validKeys as $key) {
-            $this->clear($key);
-        }
-    }
-
-    /**
-     * Generate a session name
-     *
-     * @param $key
-     *
-     * @return string
-     */
-    protected function constructSessionVariableName($key)
-    {
-        return 'linkedIn_'.$key;
     }
 }
