@@ -3,6 +3,7 @@
 namespace Happyr\LinkedIn\Http;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\TransferException;
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 
@@ -22,7 +23,21 @@ class GuzzleRequest implements RequestInterface
 
         try {
             $response = $client->send($request);
+        } catch (ClientException $guzzleException) {
+
+            $e = new LinkedInApiException(
+                array(
+                    'error_code' => $guzzleException->getCode(),
+                    'error' => array(
+                        'message' => $this->parseErrorMessage($guzzleException),
+                        'type' => 'GuzzleException',
+                    ),
+                )
+            );
+
+            throw $e;
         } catch (TransferException $guzzleException) {
+
             $e = new LinkedInApiException(
                 array(
                     'error_code' => $guzzleException->getCode(),
@@ -89,4 +104,36 @@ class GuzzleRequest implements RequestInterface
             'User-Agent' => 'linkedin-php-client',
         ));
     }
+
+    /**
+     * Parse an exception and return its body's error message.
+     *
+     * @param ClientException $guzzleException
+     * @return string
+     */
+    private function parseErrorMessage(ClientException $guzzleException)
+    {
+        $guzzleResponse = $guzzleException->getResponse();
+        $guzzleResponse = $guzzleResponse->getBody();
+
+        $body = html_entity_decode($guzzleResponse->getContents());
+
+        if (!extension_loaded('simplexml')) {
+            $xml = simplexml_load_string($body);
+            $json = json_encode($xml);
+            $array = json_decode($json,TRUE);
+
+            return $array['message'];
+        }
+
+        $parser = xml_parser_create();
+        $values = array();
+        $index = array();
+
+        xml_parse_into_struct($parser, $body, $values, $index);
+        xml_parser_free($parser);
+
+        return $values[$index['MESSAGE'][0]]['value'];
+    }
+
 }
