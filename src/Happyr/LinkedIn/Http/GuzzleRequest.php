@@ -17,6 +17,7 @@ class GuzzleRequest implements RequestInterface
      */
     public function send($url, $params = array(), $method = 'GET', $contentType = null)
     {
+
         $client = $this->getClient();
         $options = $this->createOptions($params, $method, $contentType);
         $request = $client->createRequest($method, $url, $options);
@@ -24,12 +25,12 @@ class GuzzleRequest implements RequestInterface
         try {
             $response = $client->send($request);
         } catch (ClientException $guzzleException) {
-
+            $contentType = $contentType===null?'xml':$contentType;
             $e = new LinkedInApiException(
                 array(
                     'error_code' => $guzzleException->getCode(),
                     'error' => array(
-                        'message' => $this->parseErrorMessage($guzzleException),
+                        'message' => $this->parseErrorMessage($guzzleException, $contentType),
                         'type' => 'GuzzleException',
                     ),
                 )
@@ -111,29 +112,17 @@ class GuzzleRequest implements RequestInterface
      * @param ClientException $guzzleException
      * @return string
      */
-    private function parseErrorMessage(ClientException $guzzleException)
+    private function parseErrorMessage(ClientException $guzzleException, $contentType)
     {
         $guzzleResponse = $guzzleException->getResponse();
-        $guzzleResponse = $guzzleResponse->getBody();
 
-        $body = html_entity_decode($guzzleResponse->getContents());
-
-        if (!extension_loaded('simplexml')) {
-            $xml = simplexml_load_string($body);
-            $json = json_encode($xml);
-            $array = json_decode($json,TRUE);
+        if ($contentType === 'json') {
+            $array = $guzzleResponse->json();
 
             return $array['message'];
         }
 
-        $parser = xml_parser_create();
-        $values = array();
-        $index = array();
+        return (string) $guzzleResponse->xml()->message;
 
-        xml_parse_into_struct($parser, $body, $values, $index);
-        xml_parser_free($parser);
-
-        return $values[$index['MESSAGE'][0]]['value'];
     }
-
 }
