@@ -25,6 +25,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->ln = new LinkedInDummy(self::APP_ID, self::APP_SECRET);
+        $this->ln->init();
     }
 
     public function testConstructor()
@@ -61,12 +62,13 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
             ->shouldReceive('send')->once()->with($url, $postParams, $method, $format)->andReturn(json_encode($expected))
             ->getMock();
 
-        $linkedIn=m::mock('Happyr\LinkedIn\LinkedIn[getAccessToken,getUrlGenerator,getRequest]', array('id', 'secret'))
-            ->shouldReceive('getAccessToken')->once()->andReturn($token)
-            ->shouldReceive('getUrlGenerator')->once()->andReturn($generator)
-            ->shouldReceive('getRequest')->once()->andReturn($request)
+        $linkedIn=$this->getMockBuilder('Happyr\LinkedIn\LinkedIn')
+            ->setConstructorArgs(array('id', 'secret'))
+            ->setMethods(array('getAccessToken', 'getUrlGenerator', 'getRequest'))
             ->getMock();
-
+        $linkedIn->expects($this->once())->method('getAccessToken')->willReturn($token);
+        $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
+        $linkedIn->expects($this->once())->method('getRequest')->willReturn($request);
 
         $result=$linkedIn->api($resource, $urlParams, $method, $postParams);
         $this->assertEquals($expected, $result);
@@ -564,9 +566,9 @@ class LinkedInDummy extends LinkedIn
             $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
         }
 
-        $this->storage=$storage;
-        $this->request=$request;
-        $this->urlGenerator=$generator;
+        $this->setStorage($storage);
+        $this->setRequest($request);
+        $this->setUrlGenerator($generator);
     }
 
     public function  getUserFromAvailableData()
@@ -607,5 +609,20 @@ class LinkedInDummy extends LinkedIn
     public function setState($state)
     {
         return parent::setState($state);
+    }
+
+    public function getUrlGenerator()
+    {
+        return parent::getUrlGenerator();
+    }
+
+    public function getStorage()
+    {
+        return parent::getStorage();
+    }
+
+    public function getRequest()
+    {
+        return parent::getRequest();
     }
 }
