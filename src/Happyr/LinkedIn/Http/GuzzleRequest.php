@@ -3,6 +3,7 @@
 namespace Happyr\LinkedIn\Http;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\TransferException;
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 
@@ -16,13 +17,28 @@ class GuzzleRequest implements RequestInterface
      */
     public function send($url, $params = array(), $method = 'GET', $contentType = null)
     {
+
         $client = $this->getClient();
         $options = $this->createOptions($params, $method, $contentType);
         $request = $client->createRequest($method, $url, $options);
 
         try {
             $response = $client->send($request);
+        } catch (ClientException $guzzleException) {
+            $contentType = $contentType===null?'xml':$contentType;
+            $e = new LinkedInApiException(
+                array(
+                    'error_code' => $guzzleException->getCode(),
+                    'error' => array(
+                        'message' => $this->parseErrorMessage($guzzleException, $contentType),
+                        'type' => 'GuzzleException',
+                    ),
+                )
+            );
+
+            throw $e;
         } catch (TransferException $guzzleException) {
+
             $e = new LinkedInApiException(
                 array(
                     'error_code' => $guzzleException->getCode(),
@@ -88,5 +104,25 @@ class GuzzleRequest implements RequestInterface
         return new Client(array(
             'User-Agent' => 'linkedin-php-client',
         ));
+    }
+
+    /**
+     * Parse an exception and return its body's error message.
+     *
+     * @param ClientException $guzzleException
+     * @return string
+     */
+    private function parseErrorMessage(ClientException $guzzleException, $contentType)
+    {
+        $guzzleResponse = $guzzleException->getResponse();
+
+        if ($contentType === 'json') {
+            $array = $guzzleResponse->json();
+
+            return $array['message'];
+        }
+
+        return (string) $guzzleResponse->xml()->message;
+
     }
 }
