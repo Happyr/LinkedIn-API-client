@@ -71,19 +71,19 @@ class LinkedIn
      * @var DataStorageInterface storage
      *
      */
-    protected $storage;
+    private $storage;
 
     /**
      * @var UrlGeneratorInterface urlGenerator
      *
      */
-    protected $urlGenerator;
+    private $urlGenerator;
 
     /**
      * @var \Happyr\LinkedIn\Http\RequestInterface request
      *
      */
-    protected $request;
+    private $request;
 
     /**
      * Constructor
@@ -96,26 +96,6 @@ class LinkedIn
         //save app stuff
         $this->appId = $appId;
         $this->appSecret = $appSecret;
-
-        $this->init();
-    }
-
-    /**
-     * Init the API by creating some classes.
-     *
-     * This function could be overwritten if you want to change any of these classes
-     */
-    protected function init()
-    {
-        $this->urlGenerator = new UrlGenerator();
-        $this->request = new GuzzleRequest();
-
-        // Use the Illuminate Session storage if it is available
-        if (class_exists('\Illuminate\Support\Facades\Session')) {
-            $this->storage = new IlluminateSessionStorage();
-        } else {
-            $this->storage = new SessionStorage();
-        }
     }
 
     /**
@@ -550,8 +530,12 @@ class LinkedIn
      *
      * @return UrlGeneratorInterface
      */
-    public function getUrlGenerator()
+    protected function getUrlGenerator()
     {
+        if ($this->urlGenerator === null) {
+            $this->urlGenerator = new UrlGenerator();
+        }
+
         return $this->urlGenerator;
     }
 
@@ -573,8 +557,12 @@ class LinkedIn
      *
      * @return DataStorageInterface
      */
-    public function getStorage()
+    protected function getStorage()
     {
+        if ($this->storage === null) {
+            $this->storage = new SessionStorage();
+        }
+
         return $this->storage;
     }
 
@@ -595,14 +583,17 @@ class LinkedIn
      *
      * @return RequestInterface
      */
-    public function getRequest()
+    protected function getRequest()
     {
+        if ($this->request === null) {
+            $this->request = new GuzzleRequest();
+        }
+
         return $this->request;
     }
 
     /**
      * If the user has canceled the login we will return with an error
-     *
      *
      * @return bool
      */
