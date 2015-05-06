@@ -32,9 +32,9 @@ class CurlRequest implements RequestInterface
      * make the request.
      *
      */
-    public function send($url, $params = array(), $method = 'GET', $contentType = null)
+    public function send($method, $url, array $options = array())
     {
-        $opts = $this->prepareParams($url, $params, $method, $contentType);
+        $opts = $this->prepareParams($url, $options, $method);
 
         $ch = curl_init();
         curl_setopt_array($ch, $opts);
@@ -57,6 +57,10 @@ class CurlRequest implements RequestInterface
 
         curl_close($ch);
 
+        if ($options['headers']['Content-Type']==='application/json') {
+            return json_decode($result, true);
+        }
+
         return $result;
     }
 
@@ -64,24 +68,22 @@ class CurlRequest implements RequestInterface
      * Prepare Curl parameters
      *
      * @param string $url
-     * @param array $params
+     * @param array $options
      * @param string $method
-     * @param string $contentType
      *
      * @return array
      */
-    protected function prepareParams($url, $params, $method, $contentType)
+    protected function prepareParams($url, $options, $method)
     {
         $opts = self::$curlOptions;
-        $opts[CURLOPT_POST] = strtoupper($method) == 'POST';
+
+        if ($options['json']) {
+            $options['body'] = json_encode($options['json']);
+        }
+
+        $opts[CURLOPT_POST] = strtoupper($method) === 'POST';
         if ($opts[CURLOPT_POST]) {
-            if ($contentType == 'json') {
-                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : json_encode($params);
-            } elseif ($contentType == 'xml') {
-                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : $params->asXML();
-            } else {
-                $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
-            }
+            $opts[CURLOPT_POSTFIELDS] = $options['body'];
         }
 
         $opts[CURLOPT_URL] = $url;
@@ -90,9 +92,8 @@ class CurlRequest implements RequestInterface
         // for 2 seconds if the server does not support this header.
         $opts[CURLOPT_HTTPHEADER] = array('Expect:');
 
-        if ($contentType) {
-            $mimeType = $contentType == 'xml' ? 'text/xml' : 'application/json';
-            $opts[CURLOPT_HTTPHEADER][] = "Content-Type: {$mimeType}";
+        foreach($options['headers'] as $name => $value) {
+            $opts[CURLOPT_HTTPHEADER][] = "{$name}: {$value}";
         }
 
         return $opts;

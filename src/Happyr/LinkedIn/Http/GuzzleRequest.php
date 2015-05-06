@@ -15,22 +15,27 @@ class GuzzleRequest implements RequestInterface
     /**
      * {@inheritdoc}
      */
-    public function send($url, $params = array(), $method = 'GET', $contentType = null)
+    public function send($method, $url, array $options = array())
     {
-
         $client = $this->getClient();
-        $options = $this->createOptions($params, $method, $contentType);
         $request = $client->createRequest($method, $url, $options);
+
+        // Do we use json or simple_xml for this request?
+        $json = $options['headers']['Content-Type']==='application/json';
+        $xml=false;
+        if (isset($options['simple_xml'])) {
+            $xml = (bool) $options['simple_xml'];
+            unset($options['simple_xml']);
+        }
 
         try {
             $response = $client->send($request);
         } catch (ClientException $guzzleException) {
-            $contentType = $contentType===null?'xml':$contentType;
             $e = new LinkedInApiException(
                 array(
                     'error_code' => $guzzleException->getCode(),
                     'error' => array(
-                        'message' => $this->parseErrorMessage($guzzleException, $contentType),
+                        'message' => $this->parseErrorMessage($guzzleException, $json),
                         'type' => 'GuzzleException',
                     ),
                 )
@@ -52,47 +57,15 @@ class GuzzleRequest implements RequestInterface
             throw $e;
         }
 
+        if ($json) {
+            return $response->json();
+        }
+
+        if ($xml) {
+            return $response->xml();
+        }
+
         return (string) $response->getBody();
-    }
-
-    /**
-     * Create options for Guzzle request
-     *
-     * @param mixed $params
-     * @param string $method
-     * @param string $contentType
-     *
-     * @return array
-     */
-    protected function createOptions($params, $method, $contentType)
-    {
-        if (strtoupper($method) == 'POST') {
-            if ($contentType == 'json') {
-                $options = array('json' => $params);
-            } elseif ($contentType == 'xml') {
-                $options = array('body' => is_string($params) ? $params : $params->asXML());
-            } else {
-                $options = array('body' => $params);
-            }
-        }
-
-        if ($contentType) {
-            $options['headers']['Content-Type'] = $contentType == 'xml' ? 'text/xml' : 'application/json';
-        }
-
-        $this->modifyOptions($options);
-
-        return $options;
-    }
-
-
-    /**
-     * Override this function if you modify the options
-     *
-     * @param $options
-     */
-    protected function modifyOptions(&$options)
-    {
     }
 
     /**
@@ -110,13 +83,15 @@ class GuzzleRequest implements RequestInterface
      * Parse an exception and return its body's error message.
      *
      * @param ClientException $guzzleException
+     * @param bool $json
+     *
      * @return string
      */
-    private function parseErrorMessage(ClientException $guzzleException, $contentType)
+    private function parseErrorMessage(ClientException $guzzleException, $json)
     {
         $guzzleResponse = $guzzleException->getResponse();
 
-        if ($contentType === 'json') {
+        if ($json) {
             $array = $guzzleResponse->json();
 
             return $array['message'];
