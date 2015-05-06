@@ -16,7 +16,7 @@ class CurlRequest implements RequestInterface
     /**
      * @var array lastHeaders
      */
-    private $lastHeaders;
+    protected $lastHeaders;
 
     /**
      * Default options for curl.
@@ -62,25 +62,7 @@ class CurlRequest implements RequestInterface
         $headerLength = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         curl_close($ch);
 
-        $this->lastHeaders = substr($response, 0, $headerLength);
-        $body = substr($response, $headerLength);
-
-        if (isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] === 'application/json') {
-            return json_decode($body, true);
-        }
-
-        if (isset($options['simple_xml']) && $options['simple_xml']) {
-            try {
-                return new \SimpleXMLElement((string) $body ?: '<root />');
-            } catch (\Exception $e) {
-                throw new LinkedInApiException(array('error' => array(
-                    'message' => 'Unable to parse response body into XML: '.$e->getMessage(),
-                    'type' => 'XmlParseException',
-                )));
-            }
-        }
-
-        return $body;
+        return $this->prepareResponse($options, $response, $headerLength);
     }
 
     /**
@@ -143,5 +125,41 @@ class CurlRequest implements RequestInterface
         }
 
         return $opts;
+    }
+
+    /**
+     * @param array $options
+     * @param       $response
+     * @param       $headerLength
+     *
+     * @return mixed|\SimpleXMLElement|string
+     *
+     * @throws LinkedInApiException
+     */
+    protected function prepareResponse(array $options, $response, $headerLength)
+    {
+        $this->lastHeaders = substr($response, 0, $headerLength);
+        $body = substr($response, $headerLength);
+
+        if (isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] === 'application/json') {
+            return json_decode($body, true);
+        }
+
+        if (isset($options['simple_xml']) && $options['simple_xml']) {
+            try {
+                return new \SimpleXMLElement((string) $body ?: '<root />');
+            } catch (\Exception $e) {
+                throw new LinkedInApiException(
+                    array(
+                        'error' => array(
+                            'message' => 'Unable to parse response body into XML: '.$e->getMessage(),
+                            'type' => 'XmlParseException',
+                        ),
+                    )
+                );
+            }
+        }
+
+        return $body;
     }
 }

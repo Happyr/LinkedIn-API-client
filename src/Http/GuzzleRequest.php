@@ -100,7 +100,7 @@ class GuzzleRequest implements RequestInterface
      *
      * @return string
      */
-    private function parseErrorMessage(ClientException $guzzleException, $json)
+    protected function parseErrorMessage(ClientException $guzzleException, $json)
     {
         $guzzleResponse = $guzzleException->getResponse();
 

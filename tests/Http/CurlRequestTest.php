@@ -43,6 +43,81 @@ class CurlRequestTest extends \PHPUnit_Framework_TestCase
         $result = $dummy->prepareParams('url', array('body' => $params), 'post');
         $this->assertEquals($params, $result[CURLOPT_POSTFIELDS]);
     }
+
+    public function testPrepareResponseJson()
+    {
+        $dummy = new Dummy();
+
+        $body = '{foo:bar}';
+        $response = $this->getTestHeaders().$body;
+        $length = strlen($this->getTestHeaders());
+        $options['headers']['Content-Type'] = 'application/json';
+
+        $result = $dummy->prepareResponse($options, $response, $length);
+        $this->assertEquals(json_decode($body, true), $result);
+    }
+
+    public function testPrepareResponseXml()
+    {
+        $dummy = new Dummy();
+
+        $body = 'foobar';
+        $response = $this->getTestHeaders().$body;
+        $length = strlen($this->getTestHeaders());
+        $options = array();
+
+        $result = $dummy->prepareResponse($options, $response, $length);
+        $this->assertEquals($body, $result);
+    }
+
+    public function testPrepareResponseSimpleXml()
+    {
+        $dummy = new Dummy();
+
+        $body = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<person>
+  <firstname>foo</firstname>
+  <lastname>bar</lastname>
+</person>
+';
+        $response = $this->getTestHeaders().$body;
+        $length = strlen($this->getTestHeaders());
+        $options = array('simple_xml' => true);
+
+        $result = $dummy->prepareResponse($options, $response, $length);
+        $this->assertInstanceOf('\SimpleXMLElement', $result);
+        $this->assertEquals('foo', $result->firstname);
+    }
+
+    public function testGetHeadersFromLastResponse()
+    {
+        $dummy = new Dummy();
+        $this->assertNull($dummy->getHeadersFromLastResponse());
+        $dummy->setLastHeaders($this->getTestHeaders());
+
+        $headers = $dummy->getHeadersFromLastResponse();
+        $this->assertCount(7, $headers);
+        $this->assertCount(2, $headers['x-li-format']);
+        $this->assertEquals('Foo', $headers['Server'][0]);
+    }
+
+    /**
+     * @return string
+     */
+    private function getTestHeaders()
+    {
+        return 'HTTP/1.1 200 OK
+Server: Foo
+Vary: *
+x-li-format: json
+x-li-format: json2
+Content-Type: application/json;charset=UTF-8
+Date: Wed, 06 May 2015 11:09:00 GMT
+Connection: keep-alive
+Set-Cookie: lidc="b=TB84:g=59:u=47:i=325235:t=235235:s=25235325-sfdf"; Expires=Thu, 07 May 2015 07:08:45 GMT; domain=.linkedin.com; Path=/
+
+';
+    }
 }
 
 /**
@@ -53,5 +128,17 @@ class Dummy extends CurlRequest
     public function prepareParams($url, $options, $method)
     {
         return parent::prepareParams($url, $options, $method);
+    }
+
+    public function setLastHeaders($lastHeaders)
+    {
+        $this->lastHeaders = $lastHeaders;
+
+        return $this;
+    }
+
+    public function prepareResponse(array $options, $response, $headerLength)
+    {
+        return parent::prepareResponse($options, $response, $headerLength);
     }
 }
