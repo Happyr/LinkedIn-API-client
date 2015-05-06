@@ -42,7 +42,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $expected = array('foobar' => 'test');
         $url = 'http://example.com/test';
 
-        $headers = array('Content-Type' => 'application/json', 'x-li-format' => 'json');
+        $headers = array('Content-Type' => 'application/json', 'x-li-format' => 'json', 'Authorization'=>'Bearer '.$token);
 
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getUrl')->once()->with(
@@ -50,7 +50,6 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
                 $resource,
                 array(
                     'url' => 'foo',
-                    'oauth2_access_token' => $token,
                     'format' => 'json',
                 ))->andReturn($url)
             ->getMock();

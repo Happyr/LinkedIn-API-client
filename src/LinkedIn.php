@@ -131,7 +131,7 @@ class LinkedIn
         /*
          * Add token and format
          */
-        $options['query']['oauth2_access_token'] = (string) $this->getAccessToken();
+        $options['headers']['Authorization'] = sprintf('Bearer %s', (string) $this->getAccessToken());
         if (isset($options['json'])) {
             $options['format'] = 'json';
         } elseif (!isset($options['format'])) {
@@ -156,7 +156,7 @@ class LinkedIn
         unset($options['format']);
 
         //generate an url
-        $url = $this->getUrlGenerator()->getUrl('api', $resource, $options['query']);
+        $url = $this->getUrlGenerator()->getUrl('api', $resource, isset($options['query'])?$options['query']:array());
         unset($options['query']);
 
         //$method that url
@@ -237,9 +237,9 @@ class LinkedIn
     }
 
     /**
-     * Get the user array.
+     * Get the user response.
      *
-     * @return array|null
+     * @return mixed|null
      */
     public function getUser()
     {
@@ -255,7 +255,7 @@ class LinkedIn
      *  Determines the connected user by first considering an authorization code, and then
      * falling back to any persistent store storing the user.
      *
-     * @return array|null get an user array or null
+     * @return mixed|null get an user array or null
      */
     protected function getUserFromAvailableData()
     {
@@ -291,7 +291,7 @@ class LinkedIn
      *
      * You should override this function if you want to change the default user array
      *
-     * @return array|null
+     * @return mixed|null null if we could not get user data
      */
     protected function getUserFromAccessToken()
     {
