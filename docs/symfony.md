@@ -52,7 +52,7 @@ class LinkedInService extends LinkedIn
      */
     protected function getUserFromAccessToken() {
         try {
-            return $this->api('/v1/people/~:(id,firstName,lastName,headline,email-address)');
+            return $this->api('GET', '/v1/people/~:(id,firstName,lastName,headline,email-address)');
         } catch (LinkedInApiException $e) {
             return null;
         }
