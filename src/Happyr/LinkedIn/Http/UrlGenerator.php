@@ -3,10 +3,9 @@
 namespace Happyr\LinkedIn\Http;
 
 /**
- * Class UrlGenerator
+ * Class UrlGenerator.
  *
  * @author Tobias Nyholm
- *
  */
 class UrlGenerator implements UrlGeneratorInterface
 {
@@ -43,7 +42,7 @@ class UrlGenerator implements UrlGeneratorInterface
      *
      * @return string The URL for the given parameters
      */
-    public function getUrl($name, $path='', $params=array())
+    public function getUrl($name, $path = '', $params = array())
     {
         $url = self::$domainMap[$name];
         if ($path) {
@@ -60,7 +59,7 @@ class UrlGenerator implements UrlGeneratorInterface
             foreach ($params as $key => $value) {
                 $url .= sprintf('%s=%s&', rawurlencode($key), rawurlencode($value));
             }
-            $url=rtrim($url, '&');
+            $url = rtrim($url, '&');
         }
 
         return $url;
@@ -74,7 +73,7 @@ class UrlGenerator implements UrlGeneratorInterface
      */
     public function getCurrentUrl()
     {
-        $protocol = $this->getHttpProtocol() . '://';
+        $protocol = $this->getHttpProtocol().'://';
         $host = $this->getHttpHost();
         $currentUrl = $protocol.$host.$_SERVER['REQUEST_URI'];
         $parts = parse_url($currentUrl);
@@ -82,7 +81,7 @@ class UrlGenerator implements UrlGeneratorInterface
         $query = '';
         if (!empty($parts['query'])) {
             // drop known linkedin params
-            $query=$this->dropLinkedInParams($parts['query']);
+            $query = $this->dropLinkedInParams($parts['query']);
         }
 
         // use port if non default
@@ -90,14 +89,14 @@ class UrlGenerator implements UrlGeneratorInterface
             isset($parts['port']) &&
             (($protocol === 'http://' && $parts['port'] !== 80) ||
                 ($protocol === 'https://' && $parts['port'] !== 443))
-                ? ':' . $parts['port'] : '';
+                ? ':'.$parts['port'] : '';
 
         // rebuild
-        return $protocol . $parts['host'] . $port . $parts['path'] . $query;
+        return $protocol.$parts['host'].$port.$parts['path'].$query;
     }
 
     /**
-     * Drop known LinkedIn params. Ie those in self::$knownLinkeInParams
+     * Drop known LinkedIn params. Ie those in self::$knownLinkeInParams.
      *
      * @param string $query
      *
@@ -105,7 +104,7 @@ class UrlGenerator implements UrlGeneratorInterface
      */
     protected function dropLinkedInParams($query)
     {
-        if ($query=='') {
+        if ($query == '') {
             return '';
         }
 
@@ -115,7 +114,7 @@ class UrlGenerator implements UrlGeneratorInterface
              * A key or key/value pair might me 'foo=bar', 'foo=', or 'foo'.
              */
             //get the first value of the array you will get when you explode()
-            list($key)=explode('=', $param, 2);
+            list($key) = explode('=', $param, 2);
             if (in_array($key, self::$knownLinkedInParams)) {
                 unset($params[$i]);
             }
@@ -130,7 +129,7 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * Get the host
+     * Get the host.
      *
      *
      * @return mixed
@@ -140,11 +139,12 @@ class UrlGenerator implements UrlGeneratorInterface
         if ($this->trustForwarded && isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
             return $_SERVER['HTTP_X_FORWARDED_HOST'];
         }
+
         return $_SERVER['HTTP_HOST'];
     }
 
     /**
-     * Get the protocol
+     * Get the protocol.
      *
      *
      * @return string
@@ -175,7 +175,6 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     *
      * @param boolean $trustForwarded
      *
      * @return $this

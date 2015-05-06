@@ -1,35 +1,32 @@
 <?php
 
-
 namespace Happyr\LinkedIn\Storage;
 
 use Mockery as m;
 
 /**
- * Class SessionStorageTest
+ * Class SessionStorageTest.
  *
  * @author Tobias Nyholm
- *
  */
 class SessionStorageTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var \Happyr\LinkedIn\Storage\SessionStorage storage
-     *
      */
     protected $storage;
 
-    protected $prefix='linkedIn_';
+    protected $prefix = 'linkedIn_';
 
     public function setUp()
     {
-        $this->storage=new SessionStorage();
+        $this->storage = new SessionStorage();
     }
 
     public function testSet()
     {
         $this->storage->set('code', 'foobar');
-        $this->assertEquals($_SESSION[$this->prefix.'code'],'foobar');
+        $this->assertEquals($_SESSION[$this->prefix.'code'], 'foobar');
     }
 
     /**
@@ -42,25 +39,23 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testGet()
     {
-        $expected='foobar';
-        $result=$this->storage->get('code', $expected);
+        $expected = 'foobar';
+        $result = $this->storage->get('code', $expected);
         $this->assertEquals($expected, $result);
 
-        $expected='foobar';
-        $result=$this->storage->get('nono', $expected);
+        $expected = 'foobar';
+        $result = $this->storage->get('nono', $expected);
         $this->assertEquals($expected, $result);
 
-
-        $expected='foobar';
-        $_SESSION[$this->prefix.'code']=$expected;
-        $result=$this->storage->get('code');
+        $expected = 'foobar';
+        $_SESSION[$this->prefix.'code'] = $expected;
+        $result = $this->storage->get('code');
         $this->assertEquals($expected, $result);
     }
 
-
     public function testClear()
     {
-        $_SESSION[$this->prefix.'code']='foobar';
+        $_SESSION[$this->prefix.'code'] = 'foobar';
         $this->storage->clear('code');
         $this->assertFalse(isset($_SESSION[$this->prefix.'code']));
     }
@@ -75,16 +70,15 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testClearAll()
     {
-        $validKeys=SessionStorage::$validKeys;
+        $validKeys = SessionStorage::$validKeys;
 
         $storage = m::mock('Happyr\LinkedIn\Storage\SessionStorage[clear]')
             ->shouldReceive('clear')->times(count($validKeys))
-            ->with(m::on(function($arg) use ($validKeys){
+            ->with(m::on(function ($arg) use ($validKeys) {
                 return in_array($arg, $validKeys);
             }))
             ->getMock();
 
         $storage->clearAll();
     }
-
 }

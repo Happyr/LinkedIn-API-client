@@ -20,7 +20,7 @@ abstract class BaseDataStorage implements DataStorageInterface
     }
 
     /**
-     * Generate a session name
+     * Generate a session name.
      *
      * @param $key
      *

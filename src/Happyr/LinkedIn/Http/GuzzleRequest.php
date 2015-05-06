@@ -21,8 +21,8 @@ class GuzzleRequest implements RequestInterface
         $request = $client->createRequest($method, $url, $options);
 
         // Do we use json or simple_xml for this request?
-        $json = isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] ==='application/json';
-        $xml=false;
+        $json = isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] === 'application/json';
+        $xml = false;
         if (isset($options['simple_xml'])) {
             $xml = (bool) $options['simple_xml'];
             unset($options['simple_xml']);
@@ -43,7 +43,6 @@ class GuzzleRequest implements RequestInterface
 
             throw $e;
         } catch (TransferException $guzzleException) {
-
             $e = new LinkedInApiException(
                 array(
                     'error_code' => $guzzleException->getCode(),
@@ -69,7 +68,6 @@ class GuzzleRequest implements RequestInterface
     }
 
     /**
-     *
      * @return Client
      */
     protected function getClient()
@@ -83,7 +81,7 @@ class GuzzleRequest implements RequestInterface
      * Parse an exception and return its body's error message.
      *
      * @param ClientException $guzzleException
-     * @param bool $json
+     * @param bool            $json
      *
      * @return string
      */
@@ -98,6 +96,5 @@ class GuzzleRequest implements RequestInterface
         }
 
         return (string) $guzzleResponse->xml()->message;
-
     }
 }

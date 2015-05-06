@@ -66,7 +66,7 @@ class AccessToken
      *
      * @return $this
      */
-    public function setExpiresAt(\DateTime $expiresAt=null)
+    public function setExpiresAt(\DateTime $expiresAt = null)
     {
         $this->expiresAt = $expiresAt;
 

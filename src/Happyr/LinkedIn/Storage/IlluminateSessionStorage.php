@@ -6,12 +6,11 @@ use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 use Illuminate\Support\Facades\Session;
 
 /**
- * Class SessionStorage
+ * Class SessionStorage.
  *
  * Store data in the session.
  *
  * @author Andreas Creten
- *
  */
 class IlluminateSessionStorage extends BaseDataStorage
 {
@@ -25,6 +24,7 @@ class IlluminateSessionStorage extends BaseDataStorage
         }
 
         $name = $this->constructSessionVariableName($key);
+
         return Session::put($name, $value);
     }
 
@@ -38,6 +38,7 @@ class IlluminateSessionStorage extends BaseDataStorage
         }
 
         $name = $this->constructSessionVariableName($key);
+
         return Session::get($name);
     }
 
@@ -51,6 +52,7 @@ class IlluminateSessionStorage extends BaseDataStorage
         }
 
         $name = $this->constructSessionVariableName($key);
+
         return Session::forget($name);
     }
 }

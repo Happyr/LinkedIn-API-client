@@ -5,12 +5,11 @@ namespace Happyr\LinkedIn\Http;
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 
 /**
- * Class Request
+ * Class Request.
  *
  * Makes an HTTP request with curl
  *
  * @author Tobias Nyholm
- *
  */
 class CurlRequest implements RequestInterface
 {
@@ -30,7 +29,6 @@ class CurlRequest implements RequestInterface
      * This method can be overridden by subclasses if
      * developers want to do fancier things or use something other than curl to
      * make the request.
-     *
      */
     public function send($method, $url, array $options = array())
     {
@@ -57,7 +55,7 @@ class CurlRequest implements RequestInterface
 
         curl_close($ch);
 
-        if (isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] ==='application/json') {
+        if (isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] === 'application/json') {
             return json_decode($result, true);
         }
 
@@ -65,10 +63,10 @@ class CurlRequest implements RequestInterface
     }
 
     /**
-     * Prepare Curl parameters
+     * Prepare Curl parameters.
      *
      * @param string $url
-     * @param array $options
+     * @param array  $options
      * @param string $method
      *
      * @return array
@@ -83,7 +81,7 @@ class CurlRequest implements RequestInterface
 
         $opts[CURLOPT_POST] = strtoupper($method) === 'POST';
         if ($opts[CURLOPT_POST] && isset($options['body'])) {
-            $opts[CURLOPT_POSTFIELDS] = is_array($options['body'])?http_build_query($options['body'], null, '&'):$options['body'];
+            $opts[CURLOPT_POSTFIELDS] = is_array($options['body']) ? http_build_query($options['body'], null, '&') : $options['body'];
         }
 
         $opts[CURLOPT_URL] = $url;

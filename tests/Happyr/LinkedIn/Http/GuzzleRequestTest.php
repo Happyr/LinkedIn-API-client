@@ -5,10 +5,9 @@ namespace Happyr\LinkedIn\Http;
 use GuzzleHttp\Exception\TransferException;
 
 /**
- * Class RequestTest
+ * Class RequestTest.
  *
  * @author Tobias Nyholm
- *
  */
 class GuzzleRequestTest extends \PHPUnit_Framework_TestCase
 {

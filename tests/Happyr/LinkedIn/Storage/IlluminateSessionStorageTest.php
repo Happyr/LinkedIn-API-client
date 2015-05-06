@@ -2,20 +2,17 @@
 
 namespace Happyr\LinkedIn\Storage;
 
-use Mockery as m;
 use Illuminate\Support\Facades\Session;
 
 /**
- * Class SessionStorageTest
+ * Class SessionStorageTest.
  *
  * @author Andreas Creten
- *
  */
 class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var \Happyr\LinkedIn\Storage\SessionStorage storage
-     *
      */
     protected $storage;
 
@@ -45,7 +42,6 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testGet()
     {
-
         $expected = 'foobar';
         Session::shouldReceive('get')->once()->with($this->prefix.'code')->andReturn($expected);
         $result = $this->storage->get('code', $expected);
@@ -56,7 +52,6 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
         $result = $this->storage->get('nono', $expected);
         $this->assertEquals($expected, $result);
     }
-
 
     public function testClear()
     {

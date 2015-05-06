@@ -3,22 +3,19 @@
 namespace Happyr\LinkedIn\Exceptions;
 
 /**
- * Class LoginError
+ * Class LoginError.
  *
  * @author Tobias Nyholm
- *
  */
 class LoginError
 {
     /**
      * @var string name
-     *
      */
     protected $name;
 
     /**
      * @var string description
-     *
      */
     protected $description;
 
@@ -33,7 +30,6 @@ class LoginError
     }
 
     /**
-     *
      * @return string
      */
     public function getDescription()
@@ -42,7 +38,6 @@ class LoginError
     }
 
     /**
-     *
      * @return string
      */
     public function getName()

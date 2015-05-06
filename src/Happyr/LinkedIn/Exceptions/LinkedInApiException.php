@@ -3,10 +3,9 @@
 namespace Happyr\LinkedIn\Exceptions;
 
 /**
- * Class LinkedInApiException
+ * Class LinkedInApiException.
  *
  * @author Tobias Nyholm
- *
  */
 class LinkedInApiException extends \Exception
 {
@@ -88,10 +87,11 @@ class LinkedInApiException extends \Exception
      */
     public function __toString()
     {
-        $str = $this->getType() . ': ';
+        $str = $this->getType().': ';
         if ($this->code != 0) {
-            $str .= $this->code . ': ';
+            $str .= $this->code.': ';
         }
-        return $str . $this->message;
+
+        return $str.$this->message;
     }
 }
