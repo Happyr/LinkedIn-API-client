@@ -52,7 +52,7 @@ class UrlGenerator implements UrlGeneratorInterface
             $url .= $path;
         }
 
-        if ($params) {
+        if (!empty($params)) {
             //it needs to be PHP_QUERY_RFC3986. We want to have %20 between scopes
             // we cant run http_build_query($params, null, '&', PHP_QUERY_RFC3986); because it is not supported in php 5.3 or hhvm
             $url .= '?';

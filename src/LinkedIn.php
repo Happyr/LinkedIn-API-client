@@ -48,7 +48,7 @@ class LinkedIn
     /**
      * An array with default user stuff.
      *
-     * @var array
+     * @var mixed
      */
     protected $user;
 
@@ -128,38 +128,17 @@ class LinkedIn
      */
     public function api($method, $resource, array $options = array())
     {
-        /*
-         * Add token and format
-         */
+        // Add access token to the headers
         $options['headers']['Authorization'] = sprintf('Bearer %s', (string) $this->getAccessToken());
-        if (isset($options['json'])) {
-            $options['format'] = 'json';
-        } elseif (!isset($options['format'])) {
-            $options['format'] = $this->getFormat();
-        }
 
-        // Set correct headers for this format
-        switch ($options['format']) {
-            case 'simple_xml':
-                $options['simple_xml'] = true;
-            case 'xml':
-                $options['headers']['Content-Type'] = 'text/xml';
-                break;
-            case 'json':
-                $options['headers']['Content-Type'] = 'application/json';
-                $options['headers']['x-li-format'] = 'json';
-                $options['query']['format'] = 'json';
-                break;
-            default:
-                // Do nothing
-        }
-        unset($options['format']);
+        // Do logic and adjustments to the options
+        $this->filterRequestOption($options);
 
-        //generate an url
-        $url = $this->getUrlGenerator()->getUrl('api', $resource, isset($options['query'])?$options['query']:array());
+        // Generate an url
+        $url = $this->getUrlGenerator()->getUrl('api', $resource, isset($options['query']) ? $options['query'] : array());
         unset($options['query']);
 
-        //$method that url
+        // $method that url
         $result = $this->getRequest()->send($method, $url, $options);
 
         return $result;
@@ -272,9 +251,9 @@ class LinkedIn
          * 1: We got an access token
          * 2: The access token has changed or if we don't got a user.
          */
-        if ($accessToken && !($user && $persistedAccessToken == $accessToken)) {
+        if ($accessToken && !($user !== null && $persistedAccessToken == $accessToken)) {
             $user = $this->getUserFromAccessToken();
-            if ($user) {
+            if ($user !== null) {
                 $storage->set('user', $user);
             } else {
                 $storage->clearAll();
@@ -360,7 +339,7 @@ class LinkedIn
         }
 
         $newAccessToken = $this->fetchNewAccessToken();
-        if ($newAccessToken) {
+        if ($newAccessToken !== null) {
             $this->setAccessToken($newAccessToken);
         }
 
@@ -372,7 +351,7 @@ class LinkedIn
      * Determines and returns the user access token using the authorization code. The intent is to
      * return a valid user access token, or null if one is determined to not be available.
      *
-     * @return string|null A valid user access token, or null if one could not be determined.
+     * @return string|AccessToken|null A valid user access token, or null if one could not be determined.
      *
      * @throws LinkedInApiException
      */
@@ -381,7 +360,7 @@ class LinkedIn
         $storage = $this->getStorage();
         $code = $this->getCode();
 
-        if ($code) {
+        if ($code !== null) {
             $accessToken = $this->getAccessTokenFromCode($code);
             if ($accessToken) {
                 $storage->set('code', $code);
@@ -679,5 +658,37 @@ class LinkedIn
     public function getLastHeaders()
     {
         return $this->getRequest()->getHeadersFromLastResponse();
+    }
+
+    /**
+     * Modify and filter the request options. Make sure we use the correct query parameters and headers.
+     *
+     * @param array $options
+     */
+    protected function filterRequestOption(array &$options)
+    {
+        if (isset($options['json'])) {
+            $options['format'] = 'json';
+        } elseif (!isset($options['format'])) {
+            $options['format'] = $this->getFormat();
+        }
+
+        // Set correct headers for this format
+        switch ($options['format']) {
+            case 'simple_xml':
+                $options['simple_xml'] = true;
+            // simple_xml is still xml. This should fall through
+            case 'xml':
+                $options['headers']['Content-Type'] = 'text/xml';
+                break;
+            case 'json':
+                $options['headers']['Content-Type'] = 'application/json';
+                $options['headers']['x-li-format'] = 'json';
+                $options['query']['format'] = 'json';
+                break;
+            default:
+                // Do nothing
+        }
+        unset($options['format']);
     }
 }
