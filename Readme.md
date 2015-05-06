@@ -121,6 +121,22 @@ $options = array('body'=> '<share>
 </share>');
 ```
 
+### The api options
+
+The third parameter of `LinkedIn::api` is an array with options. They will eventually be past to a Request client but 
+before that we do some modifications. Below is a list of array keys that you may use. 
+
+* **body**: The body of a HTTP request. Put your xml string here. 
+* **format**: Set this to 'json' or 'xml' to override the default value. 
+* **headers**: This is HTTP headers to the request
+* **json**: This is an array with json data that will be encoded to a json string. Using this option you do need to specify a format. 
+* **query**: This is an array with query parameters 
+
+If you are using the `GuzzleRequest` (default) you may want to have a look at [its documentation](http://docs.guzzlephp.org/en/latest/clients.html?highlight=format#request-options)
+to find out what more options that are available. 
+
+
+
 ### Use different Request or Session classes
 
 You might want to use an other storage than the default `SessionStorage`. If you are using Laravel
