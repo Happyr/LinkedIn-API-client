@@ -150,6 +150,19 @@ $linkedIn->setStorage(new IlluminateSessionStorage());
 You can inject any class implementing `DataStorageInterface`. You can also inject different
 request and urlGenerator classes.
 
+### Using different scopes
+
+If you want to define special scopes when you authenticate the user you should specify them when you are generating the 
+login url. If you don't specify scopes LinkedIn will use the default scopes that you have configured for the app.  
+
+```php
+$scope = 'r_fullprofile,r_emailaddress,w_share';
+//or 
+$scope = array('rw_groups', 'r_contactinfo', 'r_fullprofile', 'w_messages');
+
+$url = $linkedIn->getLoginUrl(array('scope'=>$scope));
+echo "<a href='$url'>Login with LinkedIn</a>";
+```
 
 ### Framework integration
 
