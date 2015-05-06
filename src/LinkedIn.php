@@ -90,7 +90,7 @@ class LinkedIn
      *
      * @param string $appId
      * @param string $appSecret
-     * @param string $format    'xml' or 'json'
+     * @param string $format    'json', 'xml' or 'simple_xml'
      */
     public function __construct($appId, $appSecret, $format = 'json')
     {
@@ -122,9 +122,9 @@ class LinkedIn
      * @param array  $options  [optional] This is the options you may pass to the request. You might be interested
      *                         in setting values for 'query', 'headers', 'body' or 'json'. See the readme for more.
      *
-     * @return string|array|\SimpleXmlElement What the function return depends on what format is used. If 'json'
+     * @return array|\SimpleXMLElement|string What the function return depends on what format is used. If 'json'
      *                                        you will get an array back. If 'xml' you will get a string. If you are setting the option 'simple_xml' to true
-     *                                        and using the Guzzle request you will get a \SimpleXmlElement back.
+     *                                        you will get a \SimpleXmlElement back.
      */
     public function api($method, $resource, array $options = array())
     {
@@ -140,6 +140,8 @@ class LinkedIn
 
         // Set correct headers for this format
         switch ($options['format']) {
+            case 'simple_xml':
+                $options['simple_xml'] = true;
             case 'xml':
                 $options['headers']['Content-Type'] = 'text/xml';
                 break;
@@ -169,7 +171,7 @@ class LinkedIn
      * @param string $resource
      * @param array  $options
      *
-     * @return array|\SimpleXmlElement|string
+     * @return array|\SimpleXMLElement|string
      */
     public function get($resource, array $options = array())
     {
@@ -182,7 +184,7 @@ class LinkedIn
      * @param string $resource
      * @param array  $options
      *
-     * @return array|\SimpleXmlElement|string
+     * @return array|\SimpleXMLElement|string
      */
     public function post($resource, array $options = array())
     {

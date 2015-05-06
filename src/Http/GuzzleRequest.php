@@ -17,16 +17,16 @@ class GuzzleRequest implements RequestInterface
      */
     public function send($method, $url, array $options = array())
     {
-        $client = $this->getClient();
-        $request = $client->createRequest($method, $url, $options);
-
         // Do we use json or simple_xml for this request?
         $json = isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] === 'application/json';
-        $xml = false;
+        $simpleXml = false;
         if (isset($options['simple_xml'])) {
-            $xml = (bool) $options['simple_xml'];
+            $simpleXml = (bool) $options['simple_xml'];
             unset($options['simple_xml']);
         }
+
+        $client = $this->getClient();
+        $request = $client->createRequest($method, $url, $options);
 
         try {
             $response = $client->send($request);
@@ -60,7 +60,7 @@ class GuzzleRequest implements RequestInterface
             return $response->json();
         }
 
-        if ($xml) {
+        if ($simpleXml) {
             return $response->xml();
         }
 
