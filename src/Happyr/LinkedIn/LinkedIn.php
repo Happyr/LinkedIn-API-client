@@ -10,7 +10,6 @@ use Happyr\LinkedIn\Http\UrlGenerator;
 use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Happyr\LinkedIn\Storage\SessionStorage;
-use Happyr\LinkedIn\Storage\IlluminateSessionStorage;
 
 /**
  * Class LinkedIn lets you talk to LinkedIn api.
@@ -86,16 +85,25 @@ class LinkedIn
     private $request;
 
     /**
+     * @var string format
+     */
+    private $format;
+
+    /**
      * Constructor
      *
      * @param string $appId
      * @param string $appSecret
+     * @param string $format 'xml' or 'json'
+     *
      */
-    public function __construct($appId, $appSecret)
+    public function __construct($appId, $appSecret, $format='json')
     {
         //save app stuff
         $this->appId = $appId;
         $this->appSecret = $appSecret;
+
+        $this->format = $format;
     }
 
     /**
@@ -112,39 +120,78 @@ class LinkedIn
     /**
      * Make an API call.
      *
-     * $linkedIn->api('/v1/people/~:(id,firstName,lastName,headline)');
+     * $linkedIn->api('GET', '/v1/people/~:(id,firstName,lastName,headline)');
      *
-     * @param string $resource everything after the domain.
-     * @param array $urlParams [optional] This is the URL params
-     * @param string $method [optional] This is the HTTP verb
-     * @param mixed $postParams [optional] If you are using a POST you might want to have some more parameters
+     * @param string $method This is the HTTP verb
+     * @param string $resource everything after the domain in the URL.
+     * @param array $options [optional] This is the options you may pass to the request. You might be interested
+     *  in setting values for 'query', 'header', 'body' or 'json'. See the readme for more.
      *
-     * @return string|array The default is an assoc array from json_decode. But if you specify
-     *                      $urlParams['format']='xml' you will get the raw result.
+     * @return string|array|\SimpleXmlElement What the function return depends on what format is used. If 'json'
+     *  you will get an array back. If 'xml' you will get a string. If you are setting the option 'simple_xml' to true
+     *  and using the Guzzle request you will get a \SimpleXmlElement back.
      */
-    public function api($resource, array $urlParams=array(), $method='GET', $postParams=array())
+    public function api($method, $resource, array $options=array())
     {
         /*
          * Add token and format
          */
-        if (!isset($urlParams['oauth2_access_token'])) {
-            $urlParams['oauth2_access_token'] = $this->getAccessToken();
+        $options['query']['oauth2_access_token'] = (string) $this->getAccessToken();
+        if (!isset($options['format'])) {
+            $options['format'] = $this->getFormat();
         }
-        if (!isset($urlParams['format'])) {
-            $urlParams['format'] = 'json';
+
+        if (isset($options['json'])) {
+            $options['format'] = 'json';
         }
+
+        switch ($options['format'])  {
+            case 'xml':
+                $options['headers']['Content-Type'] = 'text/xml';
+                break;
+            case 'json':
+                $options['headers']['Content-Type'] = 'application/json';
+                $options['headers']['x-li-format'] = 'json';
+                $options['query']['format']='json';
+                break;
+            default:
+                // Do nothing
+        }
+        unset($options['format']);
 
         //generate an url
-        $url=$this->getUrlGenerator()->getUrl('api', $resource, $urlParams);
+        $url=$this->getUrlGenerator()->getUrl('api', $resource, $options['query']);
 
         //$method that url
-        $result = $this->getRequest()->send($url, $postParams, $method, $urlParams['format']);
-
-        if ($urlParams['format']=='json') {
-            return json_decode($result, true);
-        }
+        $result = $this->getRequest()->send($method, $url, $options);
 
         return $result;
+    }
+
+    /**
+     * See docs for LinkedIn::api
+     *
+     * @param string      $resource
+     * @param array $options
+     *
+     * @return array|\SimpleXmlElement|string
+     */
+    public function get($resource, array $options=array())
+    {
+        return $this->api('GET', $resource, $options);
+    }
+
+    /**
+     * See docs for LinkedIn::api
+     *
+     * @param string      $resource
+     * @param array $options
+     *
+     * @return array|\SimpleXmlElement|string
+     */
+    public function post($resource, array $options=array())
+    {
+        return $this->api('POST', $resource, $options);
     }
 
     /**
@@ -252,7 +299,7 @@ class LinkedIn
     protected function getUserFromAccessToken()
     {
         try {
-            return $this->api('/v1/people/~:(id,firstName,lastName,headline)');
+            return $this->api('GET', '/v1/people/~:(id,firstName,lastName,headline)');
         } catch (LinkedInApiException $e) {
             return null;
         }
@@ -614,5 +661,25 @@ class LinkedIn
         }
 
         return new LoginError($_GET['error'], isset($_GET['error_description'])?$_GET['error_description']:null);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
+    /**
+     * @param string $format
+     *
+     * @return $this
+     */
+    public function setFormat($format)
+    {
+        $this->format = $format;
+
+        return $this;
     }
 }

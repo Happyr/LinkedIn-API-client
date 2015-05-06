@@ -70,7 +70,7 @@ $linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
 
 if ($linkedIn->isAuthenticated()) {
     //we know that the user is authenticated now. Start query the API
-    $user=$linkedIn->api('v1/people/~:(firstName,lastName)');
+    $user=$linkedIn->get('v1/people/~:(firstName,lastName)');
     echo "Welcome ".$user['firstName'];
 
     exit();
@@ -85,6 +85,42 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 
 ```
 
+### Post on user's wall
+
+```php
+$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn->setAccessToken('access_token_from_db');
+
+$options = array('json'=>
+    array(
+        'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client',
+        'visibility' => array(
+            'code' => 'anyone'
+        )
+    )
+);
+
+$result = $linkedIn->post('v1/people/~/shares', $options);
+
+var_dump($result);
+
+// Prints: 
+// array (size=2)
+//   'updateKey' => string 'UPDATE-01234567-0123456789012345678' (length=35)
+//   'updateUrl' => string 'https://www.linkedin.com/updates?discuss=&scope=01234567&stype=M&topic=0123456789012345678&type=U&a=mVKU' (length=104)
+
+```
+
+You may of course do the same in xml. Use the following options array.
+```php
+$options = array('body'=> '<share>
+ <comment>Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client</comment>
+ <visibility>
+   <code>anyone</code>
+ </visibility>
+</share>');
+```
+
 ### Use different Request or Session classes
 
 You might want to use an other storage than the default `SessionStorage`. If you are using Laravel
@@ -96,7 +132,7 @@ $linkedIn->setStorage(new IlluminateSessionStorage());
 ```
 
 You can inject any class implementing `DataStorageInterface`. You can also inject different
-request and urlGenerator classes. 
+request and urlGenerator classes.
 
 
 ### Framework integration
