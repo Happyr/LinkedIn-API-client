@@ -85,6 +85,19 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 
 ```
 
+### Use different Request or Session classes
+
+You might want to use an other storage than the default `SessionStorage`. If you are using Laravel
+you are more likely to inject the `IlluminateSessionStorage`.  
+```php
+
+$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn->setStorage(new IlluminateSessionStorage());
+```
+
+You can inject any class implementing `DataStorageInterface`. You can also inject different
+request and urlGenerator classes. 
+
 
 ### Framework integration
 
