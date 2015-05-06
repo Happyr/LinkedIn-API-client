@@ -17,7 +17,7 @@ class LinkedInApiException extends \Exception
     /**
      * Make a new API Exception with the given result.
      *
-     * @param array $result The result from the API server
+     * @param mixed $result The result from the API server
      */
     public function __construct($result)
     {

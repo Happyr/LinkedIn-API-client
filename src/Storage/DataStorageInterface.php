@@ -17,7 +17,7 @@ interface DataStorageInterface
      * getPersistentData($key) return $value. This call may be in another request.
      *
      * @param string $key
-     * @param array  $value
+     * @param mixed  $value
      */
     public function set($key, $value);
 
@@ -25,7 +25,7 @@ interface DataStorageInterface
      * Get the data for $key, persisted by BaseFacebook::setPersistentData().
      *
      * @param string  $key     The key of the data to retrieve
-     * @param boolean $default The default value to return if $key is not found
+     * @param mixed $default The default value to return if $key is not found
      *
      * @return mixed
      */

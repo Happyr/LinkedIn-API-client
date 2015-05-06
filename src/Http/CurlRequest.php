@@ -14,7 +14,7 @@ use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 class CurlRequest implements RequestInterface
 {
     /**
-     * @var array lastHeaders
+     * @var mixed lastHeaders
      */
     protected $lastHeaders;
 
