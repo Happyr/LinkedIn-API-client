@@ -14,6 +14,11 @@ use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 class CurlRequest implements RequestInterface
 {
     /**
+     * @var array lastHeaders
+     */
+    private $lastHeaders;
+
+    /**
      * Default options for curl.
      */
     public static $curlOptions = array(
@@ -21,6 +26,8 @@ class CurlRequest implements RequestInterface
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 60,
         CURLOPT_USERAGENT      => 'linkedin-php-client',
+        CURLOPT_VERBOSE        => true,
+        CURLOPT_HEADER         => true,
     );
 
     /**
@@ -36,9 +43,9 @@ class CurlRequest implements RequestInterface
 
         $ch = curl_init();
         curl_setopt_array($ch, $opts);
-        $result = curl_exec($ch);
+        $response = curl_exec($ch);
 
-        if ($result === false) {
+        if ($response === false) {
             $e = new LinkedInApiException(
                 array(
                     'error_code' => curl_errno($ch),
@@ -52,16 +59,19 @@ class CurlRequest implements RequestInterface
             curl_close($ch);
             throw $e;
         }
-
+        $headerLength = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         curl_close($ch);
 
+        $this->lastHeaders = substr($response, 0, $headerLength);
+        $body = substr($response, $headerLength);
+
         if (isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] === 'application/json') {
-            return json_decode($result, true);
+            return json_decode($body, true);
         }
 
         if (isset($options['simple_xml']) && $options['simple_xml']) {
             try {
-                return new \SimpleXMLElement((string) $result ?: '<root />');
+                return new \SimpleXMLElement((string) $body ?: '<root />');
             } catch (\Exception $e) {
                 throw new LinkedInApiException(array('error' => array(
                     'message' => 'Unable to parse response body into XML: '.$e->getMessage(),
@@ -70,7 +80,32 @@ class CurlRequest implements RequestInterface
             }
         }
 
-        return $result;
+        return $body;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHeadersFromLastResponse()
+    {
+        if (empty($this->lastHeaders)) {
+            return;
+        }
+
+        if (is_array($this->lastHeaders)) {
+            return $this->lastHeaders;
+        }
+
+        $headers = explode("\n", trim($this->lastHeaders));
+        $this->lastHeaders = array();
+        // Remove HTTP status line
+        array_shift($headers);
+        foreach ($headers as $line) {
+            list($name, $value) = explode(':', $line, 2);
+            $this->lastHeaders[trim($name)][] = trim($value);
+        }
+
+        return $this->lastHeaders;
     }
 
     /**

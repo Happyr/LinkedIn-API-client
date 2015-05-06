@@ -670,4 +670,14 @@ class LinkedIn
 
         return $this;
     }
+
+    /**
+     * Get headers from last response.
+     *
+     * @return array|null
+     */
+    public function getLastHeaders()
+    {
+        return $this->getRequest()->getHeadersFromLastResponse();
+    }
 }
