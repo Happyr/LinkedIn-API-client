@@ -59,6 +59,17 @@ class CurlRequest implements RequestInterface
             return json_decode($result, true);
         }
 
+        if (isset($options['simple_xml']) && $options['simple_xml']) {
+            try {
+                return new \SimpleXMLElement((string) $result ?: '<root />');
+            } catch (\Exception $e) {
+                throw new LinkedInApiException(array('error' => array(
+                    'message' => 'Unable to parse response body into XML: '.$e->getMessage(),
+                    'type' => 'XmlParseException',
+                )));
+            }
+        }
+
         return $result;
     }
 
