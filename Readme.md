@@ -113,7 +113,9 @@ var_dump($result);
 
 You may of course do the same in xml. Use the following options array.
 ```php
-$options = array('body'=> '<share>
+$options = array(
+'format' => 'xml',
+'body' => '<share>
  <comment>Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client</comment>
  <visibility>
    <code>anyone</code>
