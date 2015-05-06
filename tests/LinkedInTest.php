@@ -22,7 +22,6 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->ln = new LinkedInDummy(self::APP_ID, self::APP_SECRET);
-        $this->ln->init();
     }
 
     public function testConstructor()
@@ -471,6 +470,9 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testRequestAccessors()
     {
+        // test default
+        $this->assertInstanceOf('Happyr\LinkedIn\Http\GuzzleRequest', $this->ln->getRequest());
+
         $object = m::mock('Happyr\LinkedIn\Http\RequestInterface');
         $this->ln->setRequest($object);
         $this->assertEquals($object, $this->ln->getRequest());
@@ -478,6 +480,9 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testGeneratorAccessors()
     {
+        // test default
+        $this->assertInstanceOf('Happyr\LinkedIn\Http\UrlGenerator', $this->ln->getUrlGenerator());
+
         $object = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
         $this->ln->setUrlGenerator($object);
         $this->assertEquals($object, $this->ln->getUrlGenerator());
@@ -485,6 +490,9 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testStorageAccessors()
     {
+        // test default
+        $this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $this->ln->getStorage());
+
         $object = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface');
         $this->ln->setStorage($object);
         $this->assertEquals($object, $this->ln->getStorage());
@@ -529,6 +537,16 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('foo', $this->ln->getError()->getName());
         $this->assertNull($this->ln->getError()->getDescription());
+    }
+
+    public function testFormatAccessors()
+    {
+        //test default
+        $this->assertEquals('json', $this->ln->getFormat());
+
+        $format = 'foo';
+        $this->ln->setFormat($format);
+        $this->assertEquals($format, $this->ln->getFormat());
     }
 }
 

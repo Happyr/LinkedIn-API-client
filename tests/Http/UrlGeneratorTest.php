@@ -2,7 +2,6 @@
 
 namespace Happyr\LinkedIn\Http;
 
-
 /**
  * Class UrlGeneratorTest.
  *

@@ -2,6 +2,7 @@
 
 namespace Happyr\LinkedIn\Http;
 
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\TransferException;
 
 /**
@@ -78,6 +79,41 @@ class GuzzleRequestTest extends \PHPUnit_Framework_TestCase
         $guzzleRequest->expects($this->once())->method('getClient')->willReturn($client);
 
         $client->expects($this->once())->method('send')->with($this->equalTo($request))->will($this->throwException(new TransferException()));
+
+        $guzzleRequest->send('method', 'url', $options);
+    }
+
+    /**
+     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     */
+    public function testSendFail400()
+    {
+        $options = array('options');
+
+        $request = $this->getMockBuilder('GuzzleHttp\Message\Request')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $client = $this->getMockBuilder('GuzzleHttp\Client')
+            ->disableOriginalConstructor()
+            ->setMethods(array('send', 'createRequest'))
+            ->getMock();
+
+        $client->expects($this->once())->method('createRequest')->with(
+            $this->equalTo('method'),
+            $this->equalTo('url'),
+            $this->equalTo($options))
+            ->willReturn($request);
+
+        $guzzleRequest = $this->getMockBuilder('Happyr\LinkedIn\Http\GuzzleRequest')
+            ->disableOriginalConstructor()
+            ->setMethods(array('getClient', 'parseErrorMessage'))
+            ->getMock();
+
+        $guzzleRequest->expects($this->once())->method('getClient')->willReturn($client);
+        $guzzleRequest->expects($this->once())->method('parseErrorMessage')->willReturn('foo-message');
+
+        $client->expects($this->once())->method('send')->with($this->equalTo($request))->will($this->throwException(new ClientException('{foo: bar}', $request)));
 
         $guzzleRequest->send('method', 'url', $options);
     }

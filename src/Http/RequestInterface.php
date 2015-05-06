@@ -23,4 +23,9 @@ interface RequestInterface
      * @throws \Happyr\LinkedIn\Exceptions\LinkedInApiException
      */
     public function send($method, $url, array $options);
+
+    /**
+     * @return array|null with HTTP headers. The header name is the array key. Returns null of no previous request.
+     */
+    public function getHeadersFromLastResponse();
 }

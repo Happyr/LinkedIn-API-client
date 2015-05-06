@@ -13,6 +13,11 @@ use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 class GuzzleRequest implements RequestInterface
 {
     /**
+     * @var array lastHeaders
+     */
+    private $lastHeaders;
+
+    /**
      * {@inheritdoc}
      */
     public function send($method, $url, array $options = array())
@@ -56,6 +61,8 @@ class GuzzleRequest implements RequestInterface
             throw $e;
         }
 
+        $this->lastHeaders = $response->getHeaders();
+
         if ($json) {
             return $response->json();
         }
@@ -65,6 +72,14 @@ class GuzzleRequest implements RequestInterface
         }
 
         return (string) $response->getBody();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHeadersFromLastResponse()
+    {
+        return $this->lastHeaders;
     }
 
     /**
@@ -85,7 +100,7 @@ class GuzzleRequest implements RequestInterface
      *
      * @return string
      */
-    private function parseErrorMessage(ClientException $guzzleException, $json)
+    protected function parseErrorMessage(ClientException $guzzleException, $json)
     {
         $guzzleResponse = $guzzleException->getResponse();
 
