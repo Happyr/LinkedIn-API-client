@@ -40,4 +40,4 @@ The default format when communicating with LinkedIn API is changed to  json.
 
 ## Updated RequestInterface
 
-The `RequestInterface` was updated with a new signature. 
+The `RequestInterface::send` was updated with a new signature. We did also introduce `RequestInterface::getHeadersFromLastResponse`. 
