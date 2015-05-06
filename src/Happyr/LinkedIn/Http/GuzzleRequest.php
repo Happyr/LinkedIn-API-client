@@ -21,7 +21,7 @@ class GuzzleRequest implements RequestInterface
         $request = $client->createRequest($method, $url, $options);
 
         // Do we use json or simple_xml for this request?
-        $json = $options['headers']['Content-Type']==='application/json';
+        $json = isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] ==='application/json';
         $xml=false;
         if (isset($options['simple_xml'])) {
             $xml = (bool) $options['simple_xml'];

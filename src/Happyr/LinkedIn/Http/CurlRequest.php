@@ -57,7 +57,7 @@ class CurlRequest implements RequestInterface
 
         curl_close($ch);
 
-        if ($options['headers']['Content-Type']==='application/json') {
+        if (isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] ==='application/json') {
             return json_decode($result, true);
         }
 
@@ -77,13 +77,13 @@ class CurlRequest implements RequestInterface
     {
         $opts = self::$curlOptions;
 
-        if ($options['json']) {
+        if (isset($options['json'])) {
             $options['body'] = json_encode($options['json']);
         }
 
         $opts[CURLOPT_POST] = strtoupper($method) === 'POST';
-        if ($opts[CURLOPT_POST]) {
-            $opts[CURLOPT_POSTFIELDS] = $options['body'];
+        if ($opts[CURLOPT_POST] && isset($options['body'])) {
+            $opts[CURLOPT_POSTFIELDS] = is_array($options['body'])?http_build_query($options['body'], null, '&'):$options['body'];
         }
 
         $opts[CURLOPT_URL] = $url;
@@ -92,8 +92,10 @@ class CurlRequest implements RequestInterface
         // for 2 seconds if the server does not support this header.
         $opts[CURLOPT_HTTPHEADER] = array('Expect:');
 
-        foreach($options['headers'] as $name => $value) {
-            $opts[CURLOPT_HTTPHEADER][] = "{$name}: {$value}";
+        if (isset($options['headers'])) {
+            foreach ($options['headers'] as $name => $value) {
+                $opts[CURLOPT_HTTPHEADER][] = "{$name}: {$value}";
+            }
         }
 
         return $opts;

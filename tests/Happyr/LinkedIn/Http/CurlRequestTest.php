@@ -26,36 +26,22 @@ class CurlRequestTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Expect:',$result[CURLOPT_HTTPHEADER][0]);
     }
 
-    public function testPrepareParamsContentType()
-    {
-        $dummy=new Dummy();
-        $result=$dummy->prepareParams('url', array(), 'GET', null);
-        $this->assertFalse(in_array('Content-Type: application/json', $result[CURLOPT_HTTPHEADER]));
-        $this->assertFalse(in_array('Content-Type: text/xml', $result[CURLOPT_HTTPHEADER]));
-
-        $result=$dummy->prepareParams('url', array(), 'GET', 'json');
-        $this->assertTrue(in_array('Content-Type: application/json', $result[CURLOPT_HTTPHEADER]));
-
-        $result=$dummy->prepareParams('url', array(), 'GET', 'xml');
-        $this->assertTrue(in_array('Content-Type: text/xml', $result[CURLOPT_HTTPHEADER]));
-    }
-
     public function testPrepareParamsPost()
     {
         $dummy=new Dummy();
-        $result=$dummy->prepareParams('url', array('foo'=>'bar', 'baz'=>'biz'), 'post', null);
+        $result=$dummy->prepareParams('url', array('body'=>array('foo'=>'bar', 'baz'=>'biz')), 'post');
         $this->assertEquals('foo=bar&baz=biz', $result[CURLOPT_POSTFIELDS]);
 
         $params=array('foo'=>'bar', 'baz'=>'biz');
-        $result=$dummy->prepareParams('url', $params, 'post', 'json');
+        $result=$dummy->prepareParams('url', array('json'=>$params), 'post');
         $this->assertEquals(json_encode($params), $result[CURLOPT_POSTFIELDS]);
 
         //make sure we don't json encode a json encoded string
-        $result=$dummy->prepareParams('url', json_encode($params), 'post', 'json');
+        $result=$dummy->prepareParams('url', array('body'=>json_encode($params)), 'post');
         $this->assertEquals(json_encode($params), $result[CURLOPT_POSTFIELDS]);
 
         $params='<xml><param>1</param></xml>';
-        $result=$dummy->prepareParams('url', $params, 'post', 'xml');
+        $result=$dummy->prepareParams('url', array('body'=>$params), 'post');
         $this->assertEquals($params, $result[CURLOPT_POSTFIELDS]);
     }
 }
@@ -65,8 +51,8 @@ class CurlRequestTest extends \PHPUnit_Framework_TestCase
  */
 class Dummy extends CurlRequest
 {
-    public function prepareParams($url, $params, $method, $contentType)
+    public function prepareParams($url, $options, $method)
     {
-        return parent::prepareParams($url, $params, $method, $contentType);
+        return parent::prepareParams($url, $options, $method);
     }
 }

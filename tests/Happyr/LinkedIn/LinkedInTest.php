@@ -45,7 +45,8 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $method='GET';
         $expected=array('foobar'=>'test');
         $url='http://example.com/test';
-        $format='json';
+
+        $headers=array('Content-Type'=> 'application/json', 'x-li-format'=> 'json');
 
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getUrl')->once()->with(
@@ -54,12 +55,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
                 array(
                     'url'=>'foo',
                     'oauth2_access_token'=>$token,
-                    'format'=>$format,
+                    'format'=>'json',
                 ))->andReturn($url)
             ->getMock();
 
         $request = m::mock('Happyr\LinkedIn\Http\RequestInterface')
-            ->shouldReceive('send')->once()->with($url, $postParams, $method, $format)->andReturn(json_encode($expected))
+            ->shouldReceive('send')->once()->with($method, $url, array('json'=>$postParams, 'headers'=>$headers))->andReturn($expected)
             ->getMock();
 
         $linkedIn=$this->getMockBuilder('Happyr\LinkedIn\LinkedIn')
@@ -70,9 +71,8 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
         $linkedIn->expects($this->once())->method('getRequest')->willReturn($request);
 
-        $result=$linkedIn->api($resource, $urlParams, $method, $postParams);
+        $result=$linkedIn->api($method, $resource, array('query'=>$urlParams, 'json'=>$postParams));
         $this->assertEquals($expected, $result);
-
     }
 
     public function testIsAuthenticated()
@@ -273,7 +273,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
             )->andReturn('url')
             ->getMock();
         $request = m::mock('Happyr\LinkedIn\Http\RequestInterface')
-            ->shouldReceive('send')->once()->with('url', array(), 'POST')->andReturn($response)
+            ->shouldReceive('send')->once()->with('POST', 'url', array())->andReturn($response)
             ->getMock();
 
         $linkedIn=$this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getRequest', 'getUrlGenerator'), array(self::APP_ID, self::APP_SECRET));

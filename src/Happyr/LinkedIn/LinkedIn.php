@@ -125,7 +125,7 @@ class LinkedIn
      * @param string $method This is the HTTP verb
      * @param string $resource everything after the domain in the URL.
      * @param array $options [optional] This is the options you may pass to the request. You might be interested
-     *  in setting values for 'query', 'header', 'body' or 'json'. See the readme for more.
+     *  in setting values for 'query', 'headers', 'body' or 'json'. See the readme for more.
      *
      * @return string|array|\SimpleXmlElement What the function return depends on what format is used. If 'json'
      *  you will get an array back. If 'xml' you will get a string. If you are setting the option 'simple_xml' to true
@@ -137,14 +137,13 @@ class LinkedIn
          * Add token and format
          */
         $options['query']['oauth2_access_token'] = (string) $this->getAccessToken();
-        if (!isset($options['format'])) {
+        if (isset($options['json'])) {
+            $options['format'] = 'json';
+        } elseif (!isset($options['format'])) {
             $options['format'] = $this->getFormat();
         }
 
-        if (isset($options['json'])) {
-            $options['format'] = 'json';
-        }
-
+        // Set correct headers for this format
         switch ($options['format'])  {
             case 'xml':
                 $options['headers']['Content-Type'] = 'text/xml';
@@ -161,6 +160,7 @@ class LinkedIn
 
         //generate an url
         $url=$this->getUrlGenerator()->getUrl('api', $resource, $options['query']);
+        unset($options['query']);
 
         //$method that url
         $result = $this->getRequest()->send($method, $url, $options);
@@ -429,6 +429,7 @@ class LinkedIn
 
         try {
             $response = $this->getRequest()->send(
+                'POST',
                 $this->getUrlGenerator()->getUrl(
                     'www',
                     'uas/oauth2/accessToken',
@@ -440,8 +441,7 @@ class LinkedIn
                         'client_secret' => $this->getAppSecret(),
                     )
                 ),
-                array(),
-                'POST'
+                array()
             );
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
