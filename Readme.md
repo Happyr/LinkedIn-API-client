@@ -135,6 +135,30 @@ before that we do some modifications. Below is a list of array keys that you may
 If you are using the `GuzzleRequest` (default) you may want to have a look at [its documentation](http://docs.guzzlephp.org/en/latest/clients.html?highlight=format#request-options)
 to find out what more options that are available. 
 
+### Changing format
+
+The default format when communicating with LinkedIn API is json. This means that you will get an array back as a response when you call `LinkedIn::api`. It is easy to change the format.
+
+```php
+// By constructor argument
+$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret', 'xml');
+
+// By setter
+$linkedIn->setFormat('xml');
+
+// Set format for just one request
+$linkedIn->get('v1/people/~:(firstName,lastName)', array('format'=>'xml'));
+```
+
+There is one exception to the *format* option: When you specifying $options['json'=>...] then the format will always be json.
+
+Below is a table that specifies what format returns what when you call `LinkedIn::api`.
+
+| Format | Return value 
+| ------ | ------------
+| json | An assosiative array
+| xml | The XML response body as a string
+| simple_xml | A SimpleXMLElement. See [PHP manual](http://php.net/manual/en/class.simplexmlelement.php)
 
 
 ### Use different Request or Session classes
