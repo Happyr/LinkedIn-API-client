@@ -34,6 +34,10 @@ $linkedIn->setStorage(new IlluminateSessionStorage());
 
 If you don't know about `IlluminateSessionStorage` you are probably good ignoring this. 
 
+## Default format 
+
+The default format when communicating with LinkedIn API is changed to  json. 
+
 ## Updated RequestInterface
 
 The `RequestInterface` was updated with a new signature. 
