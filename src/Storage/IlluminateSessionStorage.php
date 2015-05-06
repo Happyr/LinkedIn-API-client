@@ -3,28 +3,17 @@
 namespace Happyr\LinkedIn\Storage;
 
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
+use Illuminate\Support\Facades\Session;
 
 /**
- * Class SessionStorage
+ * Class SessionStorage.
  *
  * Store data in the session.
  *
- * @author Tobias Nyholm
- *
+ * @author Andreas Creten
  */
-class SessionStorage extends BaseDataStorage
+class IlluminateSessionStorage extends BaseDataStorage
 {
-
-    public function __construct()
-    {
-        //start the session if it not already been started
-        if (php_sapi_name() !== 'cli') {
-            if (session_id() === '') {
-                session_start();
-            }
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -35,7 +24,8 @@ class SessionStorage extends BaseDataStorage
         }
 
         $name = $this->constructSessionVariableName($key);
-        $_SESSION[$name] = $value;
+
+        return Session::put($name, $value);
     }
 
     /**
@@ -48,7 +38,8 @@ class SessionStorage extends BaseDataStorage
         }
 
         $name = $this->constructSessionVariableName($key);
-        return isset($_SESSION[$name]) ? $_SESSION[$name] : $default;
+
+        return Session::get($name);
     }
 
     /**
@@ -61,8 +52,7 @@ class SessionStorage extends BaseDataStorage
         }
 
         $name = $this->constructSessionVariableName($key);
-        if (isset($_SESSION[$name])) {
-            unset($_SESSION[$name]);
-        }
+
+        return Session::forget($name);
     }
 }

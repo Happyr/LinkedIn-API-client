@@ -3,12 +3,11 @@
 namespace Happyr\LinkedIn\Http;
 
 /**
- * Class UrlGeneratorInterface
+ * Class UrlGeneratorInterface.
  *
  * Time to time we need build a URL or get the current URL
  *
  * @author Tobias Nyholm
- *
  */
 interface UrlGeneratorInterface
 {

@@ -10,7 +10,6 @@ use Happyr\LinkedIn\Http\UrlGenerator;
 use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Happyr\LinkedIn\Storage\SessionStorage;
-use Happyr\LinkedIn\Storage\IlluminateSessionStorage;
 
 /**
  * Class LinkedIn lets you talk to LinkedIn api.
@@ -29,7 +28,6 @@ use Happyr\LinkedIn\Storage\IlluminateSessionStorage;
  *     the "*code* for access token exchange" (6-8).
  *
  * @author Tobias Nyholm
- *
  */
 class LinkedIn
 {
@@ -69,33 +67,38 @@ class LinkedIn
 
     /**
      * @var DataStorageInterface storage
-     *
      */
     private $storage;
 
     /**
      * @var UrlGeneratorInterface urlGenerator
-     *
      */
     private $urlGenerator;
 
     /**
      * @var \Happyr\LinkedIn\Http\RequestInterface request
-     *
      */
     private $request;
 
     /**
-     * Constructor
+     * @var string format
+     */
+    private $format;
+
+    /**
+     * Constructor.
      *
      * @param string $appId
      * @param string $appSecret
+     * @param string $format    'xml' or 'json'
      */
-    public function __construct($appId, $appSecret)
+    public function __construct($appId, $appSecret, $format = 'json')
     {
         //save app stuff
         $this->appId = $appId;
         $this->appSecret = $appSecret;
+
+        $this->format = $format;
     }
 
     /**
@@ -112,39 +115,78 @@ class LinkedIn
     /**
      * Make an API call.
      *
-     * $linkedIn->api('/v1/people/~:(id,firstName,lastName,headline)');
+     * $linkedIn->api('GET', '/v1/people/~:(id,firstName,lastName,headline)');
      *
-     * @param string $resource everything after the domain.
-     * @param array $urlParams [optional] This is the URL params
-     * @param string $method [optional] This is the HTTP verb
-     * @param mixed $postParams [optional] If you are using a POST you might want to have some more parameters
+     * @param string $method   This is the HTTP verb
+     * @param string $resource everything after the domain in the URL.
+     * @param array  $options  [optional] This is the options you may pass to the request. You might be interested
+     *                         in setting values for 'query', 'headers', 'body' or 'json'. See the readme for more.
      *
-     * @return string|array The default is an assoc array from json_decode. But if you specify
-     *                      $urlParams['format']='xml' you will get the raw result.
+     * @return string|array|\SimpleXmlElement What the function return depends on what format is used. If 'json'
+     *                                        you will get an array back. If 'xml' you will get a string. If you are setting the option 'simple_xml' to true
+     *                                        and using the Guzzle request you will get a \SimpleXmlElement back.
      */
-    public function api($resource, array $urlParams=array(), $method='GET', $postParams=array())
+    public function api($method, $resource, array $options = array())
     {
         /*
          * Add token and format
          */
-        if (!isset($urlParams['oauth2_access_token'])) {
-            $urlParams['oauth2_access_token'] = $this->getAccessToken();
+        $options['query']['oauth2_access_token'] = (string) $this->getAccessToken();
+        if (isset($options['json'])) {
+            $options['format'] = 'json';
+        } elseif (!isset($options['format'])) {
+            $options['format'] = $this->getFormat();
         }
-        if (!isset($urlParams['format'])) {
-            $urlParams['format'] = 'json';
+
+        // Set correct headers for this format
+        switch ($options['format']) {
+            case 'xml':
+                $options['headers']['Content-Type'] = 'text/xml';
+                break;
+            case 'json':
+                $options['headers']['Content-Type'] = 'application/json';
+                $options['headers']['x-li-format'] = 'json';
+                $options['query']['format'] = 'json';
+                break;
+            default:
+                // Do nothing
         }
+        unset($options['format']);
 
         //generate an url
-        $url=$this->getUrlGenerator()->getUrl('api', $resource, $urlParams);
+        $url = $this->getUrlGenerator()->getUrl('api', $resource, $options['query']);
+        unset($options['query']);
 
         //$method that url
-        $result = $this->getRequest()->send($url, $postParams, $method, $urlParams['format']);
-
-        if ($urlParams['format']=='json') {
-            return json_decode($result, true);
-        }
+        $result = $this->getRequest()->send($method, $url, $options);
 
         return $result;
+    }
+
+    /**
+     * See docs for LinkedIn::api.
+     *
+     * @param string $resource
+     * @param array  $options
+     *
+     * @return array|\SimpleXmlElement|string
+     */
+    public function get($resource, array $options = array())
+    {
+        return $this->api('GET', $resource, $options);
+    }
+
+    /**
+     * See docs for LinkedIn::api.
+     *
+     * @param string $resource
+     * @param array  $options
+     *
+     * @return array|\SimpleXmlElement|string
+     */
+    public function post($resource, array $options = array())
+    {
+        return $this->api('POST', $resource, $options);
     }
 
     /**
@@ -160,7 +202,7 @@ class LinkedIn
      *
      * @return string The URL for the login flow
      */
-    public function getLoginUrl($params=array())
+    public function getLoginUrl($params = array())
     {
         $this->establishCSRFTokenState();
         $currentUrl = $this->getUrlGenerator()->getCurrentUrl();
@@ -182,7 +224,7 @@ class LinkedIn
             'uas/oauth2/authorization',
             array_merge(
                 array(
-                    'response_type'=>'code',
+                    'response_type' => 'code',
                     'client_id' => $this->getAppId(),
                     'redirect_uri' => $currentUrl, // possibly overwritten
                     'state' => $this->getState(),
@@ -193,7 +235,7 @@ class LinkedIn
     }
 
     /**
-     * Get the user array
+     * Get the user array.
      *
      * @return array|null
      */
@@ -226,7 +268,7 @@ class LinkedIn
         /**
          * This is true if both statements are true:
          * 1: We got an access token
-         * 2: The access token has changed or if we don't got a user
+         * 2: The access token has changed or if we don't got a user.
          */
         if ($accessToken && !($user && $persistedAccessToken == $accessToken)) {
             $user = $this->getUserFromAccessToken();
@@ -252,9 +294,9 @@ class LinkedIn
     protected function getUserFromAccessToken()
     {
         try {
-            return $this->api('/v1/people/~:(id,firstName,lastName,headline)');
+            return $this->api('GET', '/v1/people/~:(id,firstName,lastName,headline)');
         } catch (LinkedInApiException $e) {
-            return null;
+            return;
         }
     }
 
@@ -264,6 +306,7 @@ class LinkedIn
      * discoverable.
      *
      * @return string|null The authorization code, or null if the authorization code could not be determined.
+     *
      * @throws LinkedInApiException
      */
     protected function getCode()
@@ -273,7 +316,7 @@ class LinkedIn
         if (isset($_REQUEST['code'])) {
             if ($storage->get('code') === $_REQUEST['code']) {
                 //we have already validated this code
-                return null;
+                return;
             }
 
             //if stored state does not exists
@@ -298,7 +341,7 @@ class LinkedIn
             return $_REQUEST['code'];
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -328,6 +371,7 @@ class LinkedIn
      * return a valid user access token, or null if one is determined to not be available.
      *
      * @return string|null A valid user access token, or null if one could not be determined.
+     *
      * @throws LinkedInApiException
      */
     protected function fetchNewAccessToken()
@@ -340,6 +384,7 @@ class LinkedIn
             if ($accessToken) {
                 $storage->set('code', $code);
                 $storage->set('access_token', $accessToken);
+
                 return $accessToken;
             }
 
@@ -363,17 +408,17 @@ class LinkedIn
      * and the user for which it was generated all match, and the user is
      * either logged in to LinkedIn or has granted an offline access permission.
      *
-     * @param string $code An authorization code.
+     * @param string $code        An authorization code.
      * @param string $redirectUri Where the user should be redirected after token is generated.
      *                            Default is the current url
      *
      * @return AccessToken|null An access token exchanged for the authorization code, or
-     *               null if an access token could not be generated.
+     *                          null if an access token could not be generated.
      */
     protected function getAccessTokenFromCode($code, $redirectUri = null)
     {
         if (empty($code)) {
-            return null;
+            return;
         }
 
         if ($redirectUri === null) {
@@ -382,6 +427,7 @@ class LinkedIn
 
         try {
             $response = $this->getRequest()->send(
+                'POST',
                 $this->getUrlGenerator()->getUrl(
                     'www',
                     'uas/oauth2/accessToken',
@@ -393,24 +439,23 @@ class LinkedIn
                         'client_secret' => $this->getAppSecret(),
                     )
                 ),
-                array(),
-                'POST'
+                array()
             );
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.
-            return null;
+            return;
         }
 
         if (empty($response)) {
-            return null;
+            return;
         }
 
         $token = new AccessToken();
         $token->constructFromJson($response);
 
         if (!$token->hasToken()) {
-            return null;
+            return;
         }
 
         return $token;
@@ -418,7 +463,6 @@ class LinkedIn
 
     /**
      * Lays down a CSRF state token for this process.
-     *
      */
     protected function establishCSRFTokenState()
     {
@@ -429,7 +473,7 @@ class LinkedIn
     }
 
     /**
-     * Get the state, use this to verify the CSRF token
+     * Get the state, use this to verify the CSRF token.
      *
      *
      * @return string|null
@@ -444,38 +488,35 @@ class LinkedIn
     }
 
     /**
-     *
-     *
      * @param $state
      *
      * @return $this
      */
     protected function setState($state)
     {
-        $this->state=$state;
+        $this->state = $state;
 
         return $this;
     }
 
-
     /**
-     * Get the id of the current user
+     * Get the id of the current user.
      *
      * @return string|null returns null if no user found
      */
     public function getUserId()
     {
-        $user=$this->getUser();
+        $user = $this->getUser();
 
         if (isset($user['id'])) {
             return $user['id'];
         }
 
-        return null;
+        return;
     }
 
     /**
-     * Get the app id
+     * Get the app id.
      *
      * @return string
      */
@@ -485,7 +526,7 @@ class LinkedIn
     }
 
     /**
-     * Get the app secret
+     * Get the app secret.
      *
      * @return string
      */
@@ -495,7 +536,7 @@ class LinkedIn
     }
 
     /**
-     * Get the access token
+     * Get the access token.
      *
      * @param string|AccessToken $accessToken
      *
@@ -513,8 +554,6 @@ class LinkedIn
     }
 
     /**
-     *
-     *
      * @param UrlGeneratorInterface $urlGenerator
      *
      * @return $this
@@ -527,7 +566,6 @@ class LinkedIn
     }
 
     /**
-     *
      * @return UrlGeneratorInterface
      */
     protected function getUrlGenerator()
@@ -540,8 +578,6 @@ class LinkedIn
     }
 
     /**
-     *
-     *
      * @param DataStorageInterface $storage
      *
      * @return $this
@@ -554,7 +590,6 @@ class LinkedIn
     }
 
     /**
-     *
      * @return DataStorageInterface
      */
     protected function getStorage()
@@ -567,7 +602,6 @@ class LinkedIn
     }
 
     /**
-     *
      * @param RequestInterface $request
      *
      * @return $this
@@ -580,7 +614,6 @@ class LinkedIn
     }
 
     /**
-     *
      * @return RequestInterface
      */
     protected function getRequest()
@@ -593,7 +626,7 @@ class LinkedIn
     }
 
     /**
-     * If the user has canceled the login we will return with an error
+     * If the user has canceled the login we will return with an error.
      *
      * @return bool
      */
@@ -603,16 +636,36 @@ class LinkedIn
     }
 
     /**
-     * Returns a LoginError or null
+     * Returns a LoginError or null.
      *
      * @return LoginError|null
      */
     public function getError()
     {
         if (!$this->hasError()) {
-            return null;
+            return;
         }
 
-        return new LoginError($_GET['error'], isset($_GET['error_description'])?$_GET['error_description']:null);
+        return new LoginError($_GET['error'], isset($_GET['error_description']) ? $_GET['error_description'] : null);
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
+    /**
+     * @param string $format
+     *
+     * @return $this
+     */
+    public function setFormat($format)
+    {
+        $this->format = $format;
+
+        return $this;
     }
 }

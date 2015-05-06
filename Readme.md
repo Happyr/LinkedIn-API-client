@@ -70,7 +70,7 @@ $linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
 
 if ($linkedIn->isAuthenticated()) {
     //we know that the user is authenticated now. Start query the API
-    $user=$linkedIn->api('v1/people/~:(firstName,lastName)');
+    $user=$linkedIn->get('v1/people/~:(firstName,lastName)');
     echo "Welcome ".$user['firstName'];
 
     exit();
@@ -85,6 +85,58 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 
 ```
 
+### Post on user's wall
+
+```php
+$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn->setAccessToken('access_token_from_db');
+
+$options = array('json'=>
+    array(
+        'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client',
+        'visibility' => array(
+            'code' => 'anyone'
+        )
+    )
+);
+
+$result = $linkedIn->post('v1/people/~/shares', $options);
+
+var_dump($result);
+
+// Prints: 
+// array (size=2)
+//   'updateKey' => string 'UPDATE-01234567-0123456789012345678' (length=35)
+//   'updateUrl' => string 'https://www.linkedin.com/updates?discuss=&scope=01234567&stype=M&topic=0123456789012345678&type=U&a=mVKU' (length=104)
+
+```
+
+You may of course do the same in xml. Use the following options array.
+```php
+$options = array('body'=> '<share>
+ <comment>Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client</comment>
+ <visibility>
+   <code>anyone</code>
+ </visibility>
+</share>');
+```
+
+### The api options
+
+The third parameter of `LinkedIn::api` is an array with options. They will eventually be past to a Request client but 
+before that we do some modifications. Below is a list of array keys that you may use. 
+
+* **body**: The body of a HTTP request. Put your xml string here. 
+* **format**: Set this to 'json' or 'xml' to override the default value. 
+* **headers**: This is HTTP headers to the request
+* **json**: This is an array with json data that will be encoded to a json string. Using this option you do need to specify a format. 
+* **query**: This is an array with query parameters 
+
+If you are using the `GuzzleRequest` (default) you may want to have a look at [its documentation](http://docs.guzzlephp.org/en/latest/clients.html?highlight=format#request-options)
+to find out what more options that are available. 
+
+
+
 ### Use different Request or Session classes
 
 You might want to use an other storage than the default `SessionStorage`. If you are using Laravel
@@ -96,8 +148,21 @@ $linkedIn->setStorage(new IlluminateSessionStorage());
 ```
 
 You can inject any class implementing `DataStorageInterface`. You can also inject different
-request and urlGenerator classes. 
+request and urlGenerator classes.
 
+### Using different scopes
+
+If you want to define special scopes when you authenticate the user you should specify them when you are generating the 
+login url. If you don't specify scopes LinkedIn will use the default scopes that you have configured for the app.  
+
+```php
+$scope = 'r_fullprofile,r_emailaddress,w_share';
+//or 
+$scope = array('rw_groups', 'r_contactinfo', 'r_fullprofile', 'w_messages');
+
+$url = $linkedIn->getLoginUrl(array('scope'=>$scope));
+echo "<a href='$url'>Login with LinkedIn</a>";
+```
 
 ### Framework integration
 

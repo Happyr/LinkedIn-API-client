@@ -3,19 +3,16 @@
 namespace Happyr\LinkedIn\Storage;
 
 use Mockery as m;
-use Illuminate\Support\Facades\Session;
 
 /**
- * Class SessionStorageTest
+ * Class SessionStorageTest.
  *
- * @author Andreas Creten
- *
+ * @author Tobias Nyholm
  */
-class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
+class SessionStorageTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var \Happyr\LinkedIn\Storage\SessionStorage storage
-     *
      */
     protected $storage;
 
@@ -23,14 +20,13 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->storage = new IlluminateSessionStorage();
+        $this->storage = new SessionStorage();
     }
 
     public function testSet()
     {
-        Session::shouldReceive('put')->once()->with($this->prefix.'code', 'foobar');
-
         $this->storage->set('code', 'foobar');
+        $this->assertEquals($_SESSION[$this->prefix.'code'], 'foobar');
     }
 
     /**
@@ -38,30 +34,30 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetFail()
     {
-        Session::shouldReceive('put')->once()->with($this->prefix.'code', 'baz')->andThrow('\Happyr\LinkedIn\Exceptions\LinkedInApiException');
-
         $this->storage->set('foobar', 'baz');
     }
 
     public function testGet()
     {
-
         $expected = 'foobar';
-        Session::shouldReceive('get')->once()->with($this->prefix.'code')->andReturn($expected);
         $result = $this->storage->get('code', $expected);
         $this->assertEquals($expected, $result);
 
         $expected = 'foobar';
-        Session::shouldReceive('get')->once()->with($this->prefix.'code')->andReturn(false);
         $result = $this->storage->get('nono', $expected);
+        $this->assertEquals($expected, $result);
+
+        $expected = 'foobar';
+        $_SESSION[$this->prefix.'code'] = $expected;
+        $result = $this->storage->get('code');
         $this->assertEquals($expected, $result);
     }
 
-
     public function testClear()
     {
-        Session::shouldReceive('forget')->once()->with($this->prefix.'code')->andReturn(true);
+        $_SESSION[$this->prefix.'code'] = 'foobar';
         $this->storage->clear('code');
+        $this->assertFalse(isset($_SESSION[$this->prefix.'code']));
     }
 
     /**
@@ -70,5 +66,19 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     public function testClearFail()
     {
         $this->storage->clear('foobar');
+    }
+
+    public function testClearAll()
+    {
+        $validKeys = SessionStorage::$validKeys;
+
+        $storage = m::mock('Happyr\LinkedIn\Storage\SessionStorage[clear]')
+            ->shouldReceive('clear')->times(count($validKeys))
+            ->with(m::on(function ($arg) use ($validKeys) {
+                return in_array($arg, $validKeys);
+            }))
+            ->getMock();
+
+        $storage->clearAll();
     }
 }

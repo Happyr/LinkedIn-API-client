@@ -5,12 +5,11 @@ namespace Happyr\LinkedIn\Http;
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 
 /**
- * Class Request
+ * Class Request.
  *
  * Makes an HTTP request with curl
  *
  * @author Tobias Nyholm
- *
  */
 class CurlRequest implements RequestInterface
 {
@@ -30,11 +29,10 @@ class CurlRequest implements RequestInterface
      * This method can be overridden by subclasses if
      * developers want to do fancier things or use something other than curl to
      * make the request.
-     *
      */
-    public function send($url, $params = array(), $method = 'GET', $contentType = null)
+    public function send($method, $url, array $options = array())
     {
-        $opts = $this->prepareParams($url, $params, $method, $contentType);
+        $opts = $this->prepareParams($url, $options, $method);
 
         $ch = curl_init();
         curl_setopt_array($ch, $opts);
@@ -57,31 +55,33 @@ class CurlRequest implements RequestInterface
 
         curl_close($ch);
 
+        if (isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] === 'application/json') {
+            return json_decode($result, true);
+        }
+
         return $result;
     }
 
     /**
-     * Prepare Curl parameters
+     * Prepare Curl parameters.
      *
      * @param string $url
-     * @param array $params
+     * @param array  $options
      * @param string $method
-     * @param string $contentType
      *
      * @return array
      */
-    protected function prepareParams($url, $params, $method, $contentType)
+    protected function prepareParams($url, $options, $method)
     {
         $opts = self::$curlOptions;
-        $opts[CURLOPT_POST] = strtoupper($method) == 'POST';
-        if ($opts[CURLOPT_POST]) {
-            if ($contentType == 'json') {
-                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : json_encode($params);
-            } elseif ($contentType == 'xml') {
-                $opts[CURLOPT_POSTFIELDS] = is_string($params) ? $params : $params->asXML();
-            } else {
-                $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
-            }
+
+        if (isset($options['json'])) {
+            $options['body'] = json_encode($options['json']);
+        }
+
+        $opts[CURLOPT_POST] = strtoupper($method) === 'POST';
+        if ($opts[CURLOPT_POST] && isset($options['body'])) {
+            $opts[CURLOPT_POSTFIELDS] = is_array($options['body']) ? http_build_query($options['body'], null, '&') : $options['body'];
         }
 
         $opts[CURLOPT_URL] = $url;
@@ -90,9 +90,10 @@ class CurlRequest implements RequestInterface
         // for 2 seconds if the server does not support this header.
         $opts[CURLOPT_HTTPHEADER] = array('Expect:');
 
-        if ($contentType) {
-            $mimeType = $contentType == 'xml' ? 'text/xml' : 'application/json';
-            $opts[CURLOPT_HTTPHEADER][] = "Content-Type: {$mimeType}";
+        if (isset($options['headers'])) {
+            foreach ($options['headers'] as $name => $value) {
+                $opts[CURLOPT_HTTPHEADER][] = "{$name}: {$value}";
+            }
         }
 
         return $opts;
