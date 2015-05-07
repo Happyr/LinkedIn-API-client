@@ -25,7 +25,7 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 * Handles CSRF protection for you
 * Not developed for a specific framework. 
 * More than 85% test coverage.
-* 580 lines of code, 540 lines of comments.
+* 800 lines of code, 650 lines of comments.
 
 ## Installation
 
