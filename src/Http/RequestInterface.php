@@ -11,6 +11,8 @@ namespace Happyr\LinkedIn\Http;
  */
 interface RequestInterface
 {
+    const USER_AGENT = 'Happyr/0.5';
+
     /**
      * Makes an HTTP request.
      *
