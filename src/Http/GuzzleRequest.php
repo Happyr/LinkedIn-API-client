@@ -88,7 +88,7 @@ class GuzzleRequest implements RequestInterface
     protected function getClient()
     {
         return new Client(array(
-            'User-Agent' => 'linkedin-php-client',
+            'User-Agent' => RequestInterface::USER_AGENT,
         ));
     }
 
