@@ -50,7 +50,8 @@ class LinkedInService extends LinkedIn
     /**
      * I override this function because I want the default user array to include email-address
      */
-    protected function getUserFromAccessToken() {
+    protected function getUserFromAccessToken() 
+    {
         try {
             return $this->api('GET', '/v1/people/~:(id,firstName,lastName,headline,email-address)');
         } catch (LinkedInApiException $e) {
@@ -104,8 +105,8 @@ class LinkedInController extends Controller
 
         }
 
-        $redirectUrl=$this->generateUrl('_public_linkedin_login', array(), true);
-        $url=$linkedIn->getLoginUrl(array('redirect_uri'=>$redirectUrl));
+        $redirectUrl = $this->generateUrl('_public_linkedin_login', array(), true);
+        $url = $linkedIn->getLoginUrl(array('redirect_uri' => $redirectUrl));
 
         return $this->redirect($url);
     }
