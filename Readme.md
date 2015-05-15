@@ -163,7 +163,7 @@ Below is a table that specifies what format returns what when you call `LinkedIn
 | ------ | ------------
 | json | An assosiative array
 | xml | The XML response body as a string
-| simple_xml | A SimpleXMLElement. See [PHP manual](http://php.net/manual/en/class.simplexmlelement.php)
+| simple_xml | A SimpleXMLElement. See [PHP manual](http://php.net/manual/en/class.simplexmlelement.php).
 
 
 ### Use different Request or Session classes
@@ -177,7 +177,7 @@ $linkedIn->setStorage(new IlluminateSessionStorage());
 ```
 
 You can inject any class implementing `DataStorageInterface`. You can also inject different
-request and urlGenerator classes.
+request and url generator classes.
 
 ### Using different scopes
 
