@@ -109,7 +109,7 @@ class LinkedIn
      */
     public function isAuthenticated()
     {
-        return $this->getUserId() !== null;
+        return $this->getUser() !== null;
     }
 
     /**
@@ -409,18 +409,16 @@ class LinkedIn
         try {
             $response = $this->getRequest()->send(
                 'POST',
-                $this->getUrlGenerator()->getUrl(
-                    'www',
-                    'uas/oauth2/accessToken',
-                    array(
+                $this->getUrlGenerator()->getUrl('www', 'uas/oauth2/accessToken'),
+                [
+                    'body'=>array(
                         'grant_type' => 'authorization_code',
                         'code' => $code,
                         'redirect_uri' => $redirectUri,
                         'client_id' => $this->getAppId(),
                         'client_secret' => $this->getAppSecret(),
                     )
-                ),
-                array()
+                ]
             );
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
@@ -432,8 +430,7 @@ class LinkedIn
             return;
         }
 
-        $token = new AccessToken();
-        $token->constructFromJson($response);
+        $token = new AccessToken($response['access_token'], $response['expires_in']);
 
         if (!$token->hasToken()) {
             return;
@@ -484,6 +481,7 @@ class LinkedIn
      * Get the id of the current user.
      *
      * @return string|null returns null if no user found
+     * @deprecated will be removed in 0.6
      */
     public function getUserId()
     {

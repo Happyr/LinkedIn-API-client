@@ -22,8 +22,7 @@ class GuzzleRequest implements RequestInterface
      */
     public function send($method, $url, array $options = array())
     {
-        // Do we use json or simple_xml for this request?
-        $json = isset($options['headers']['Content-Type']) && $options['headers']['Content-Type'] === 'application/json';
+        // Do we use simple_xml for this request?
         $simpleXml = false;
         if (isset($options['simple_xml'])) {
             $simpleXml = (bool) $options['simple_xml'];
@@ -40,7 +39,7 @@ class GuzzleRequest implements RequestInterface
                 array(
                     'error_code' => $guzzleException->getCode(),
                     'error' => array(
-                        'message' => $this->parseErrorMessage($guzzleException, $json),
+                        'message' => $this->parseErrorMessage($guzzleException),
                         'type' => 'GuzzleException',
                     ),
                 )
@@ -63,7 +62,7 @@ class GuzzleRequest implements RequestInterface
 
         $this->lastHeaders = $response->getHeaders();
 
-        if ($json) {
+        if ($this->isJsonResponse($response)) {
             return $response->json();
         }
 
@@ -96,20 +95,35 @@ class GuzzleRequest implements RequestInterface
      * Parse an exception and return its body's error message.
      *
      * @param ClientException $guzzleException
-     * @param bool            $json
      *
      * @return string
      */
-    protected function parseErrorMessage(ClientException $guzzleException, $json)
+    protected function parseErrorMessage(ClientException $guzzleException)
     {
-        $guzzleResponse = $guzzleException->getResponse();
+        $response = $guzzleException->getResponse();
 
-        if ($json) {
-            $array = $guzzleResponse->json();
+        if ($this->isJsonResponse($response)) {
+            $array = $response->json();
 
-            return $array['message'];
+            if (isset($array['message'])) {
+                return $array['message'];
+            };
+
+            if (isset($array['error_description'])) {
+                return $array['error_description'];
+            };
         }
 
-        return (string) $guzzleResponse->xml()->message;
+        return (string) $response->xml()->message;
     }
+
+    /**
+     * @param $guzzleResponse
+     *
+     * @return bool
+     */
+    protected function isJsonResponse($guzzleResponse)
+    {
+        return false !== strstr($guzzleResponse->getHeader('Content-Type'), 'application/json');
+}
 }

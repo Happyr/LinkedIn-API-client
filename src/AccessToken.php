@@ -18,13 +18,20 @@ class AccessToken
     private $expiresAt;
 
     /**
-     * @param string    $token
-     * @param \DateTime $expiresIn
+     * @param string        $token
+     * @param \DateTime|int $expiresIn
      */
-    public function __construct($token = null, \DateTime $expiresIn = null)
+    public function __construct($token = null, $expiresIn = null)
     {
         $this->token = $token;
-        $this->expiresAt = $expiresIn;
+
+        if ($expiresIn !== null) {
+            if ($expiresIn instanceof \DateTime) {
+                $this->expiresAt = $expiresIn;
+            } else {
+                $this->expiresAt = new \DateTime(sprintf('+%dseconds', $expiresIn));
+            }
+        }
     }
 
     /**
@@ -43,22 +50,6 @@ class AccessToken
     public function hasToken()
     {
         return !empty($this->token);
-    }
-
-    /**
-     * @param string $json
-     */
-    public function constructFromJson($json)
-    {
-        $data = json_decode($json, true);
-
-        if (isset($data['access_token'])) {
-            $this->token = $data['access_token'];
-        }
-
-        if (isset($data['expires_in'])) {
-            $this->expiresAt = new \DateTime(sprintf('+%dseconds', $data['expires_in']));
-        }
     }
 
     /**
