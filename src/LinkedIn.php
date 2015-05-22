@@ -361,7 +361,7 @@ class LinkedIn
         $code = $this->getCode();
 
         if ($code !== null) {
-            $accessToken = $this->getAccessTokenFromCode($code);
+            $accessToken = (string)$this->getAccessTokenFromCode($code);
             if ($accessToken) {
                 $storage->set('code', $code);
                 $storage->set('access_token', $accessToken);
@@ -439,7 +439,7 @@ class LinkedIn
             return;
         }
 
-        return $token->getToken();
+        return $token;
     }
 
     /**
