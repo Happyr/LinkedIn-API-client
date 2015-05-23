@@ -430,7 +430,8 @@ class LinkedIn
             return;
         }
 
-        $token = new AccessToken($response['access_token'], $response['expires_in']);
+        $tokenData = array_merge(array('access_token' => null, 'expires_in' => null), $response);
+        $token = new AccessToken($tokenData['access_token'], $tokenData['expires_in']);
 
         if (!$token->hasToken()) {
             return;

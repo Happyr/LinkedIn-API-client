@@ -42,7 +42,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $expected = array('foobar' => 'test');
         $url = 'http://example.com/test';
 
-        $headers = array('Content-Type' => 'application/json', 'x-li-format' => 'json', 'Authorization'=>'Bearer '.$token);
+        $headers = array('Content-Type' => 'application/json', 'x-li-format' => 'json', 'Authorization' => 'Bearer '.$token);
 
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getUrl')->once()->with(
@@ -72,13 +72,13 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testIsAuthenticated()
     {
-        $linkedIn = m::mock('Happyr\LinkedIn\LinkedIn[getUserId]', array(1, 2))
-            ->shouldReceive('getUserId')->once()->andReturn(null)
+        $linkedIn = m::mock('Happyr\LinkedIn\LinkedIn[getUser]', array(1, 2))
+            ->shouldReceive('getUser')->once()->andReturn(null)
             ->getMock();
         $this->assertFalse($linkedIn->isAuthenticated());
 
-        $linkedIn = m::mock('Happyr\LinkedIn\LinkedIn[getUserId]', array(1, 2))
-            ->shouldReceive('getUserId')->once()->andReturn(3)
+        $linkedIn = m::mock('Happyr\LinkedIn\LinkedIn[getUser]', array(1, 2))
+            ->shouldReceive('getUser')->once()->andReturn(3)
             ->getMock();
         $this->assertTrue($linkedIn->isAuthenticated());
     }
@@ -222,13 +222,13 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testGetAccessTokenFromCode()
     {
         $code = 'code';
-        $response = json_encode(array('access_token' => 'foobar', 'expires_in' => 10));
+        $response = array('access_token' => 'foobar', 'expires_in' => 10);
         $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
 
         $token = $linkedIn->getAccessTokenFromCode($code);
         $this->assertEquals('foobar', $token, 'Standard get access token form code');
 
-        $response = json_encode(array('foo' => 'bar'));
+        $response = array('foo' => 'bar');
         $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
 
         $this->assertNull($linkedIn->getAccessTokenFromCode($code), 'Found array but no access token');
@@ -254,18 +254,17 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
             ->shouldReceive('getCurrentUrl')->once()->andReturn($currentUrl)
             ->shouldReceive('getUrl')->once()->with(
                 'www',
-                'uas/oauth2/accessToken',
-                array(
-                    'grant_type' => 'authorization_code',
-                    'code' => $code,
-                    'redirect_uri' => $currentUrl,
-                    'client_id' => self::APP_ID,
-                    'client_secret' => self::APP_SECRET,
-                )
+                'uas/oauth2/accessToken'
             )->andReturn('url')
             ->getMock();
         $request = m::mock('Happyr\LinkedIn\Http\RequestInterface')
-            ->shouldReceive('send')->once()->with('POST', 'url', array())->andReturn($response)
+            ->shouldReceive('send')->once()->with('POST', 'url', array('body' => array(
+                'grant_type' => 'authorization_code',
+                'code' => $code,
+                'redirect_uri' => $currentUrl,
+                'client_id' => self::APP_ID,
+                'client_secret' => self::APP_SECRET,
+            )))->andReturn($response)
             ->getMock();
 
         $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getRequest', 'getUrlGenerator'), array(self::APP_ID, self::APP_SECRET));

@@ -16,18 +16,24 @@ class AccessTokenTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foobar', $token);
     }
 
-    public function testConstructFromJson()
+    public function testConstructor()
     {
-        $token = new AccessToken();
-        $token->constructFromJson(json_encode(array('access_token' => 'foobar', 'expires_in' => 10)));
-
+        $token = new AccessToken('foobar', 10);
         $this->assertInstanceOf('\DateTime', $token->getExpiresAt());
         $this->assertEquals('foobar', $token->getToken());
 
         $token = new AccessToken();
-        $token->constructFromJson(json_encode(array('baz' => 'foobar')));
-
         $this->assertNull($token->getExpiresAt());
         $this->assertEmpty($token->getToken());
+
+        $token = new AccessToken(null, new \DateTime('+2minutes'));
+        $this->assertInstanceOf('\DateTime', $token->getExpiresAt());
+    }
+
+    public function testSetExpiresAt()
+    {
+        $token = new AccessToken();
+        $token->setExpiresAt(new \DateTime('+2minutes'));
+        $this->assertInstanceOf('\DateTime', $token->getExpiresAt());
     }
 }
