@@ -1,3 +1,17 @@
+# Upgrade from 0.5 to 0.6
+
+## Changes
+
+* When exchanging the code for an access token we are now using the post body instead of query parameters
+* Better error handling when exchange from code to access token fails
+
+## BC breaks
+
+There are a few minor BC breaks. We removed the functions below: 
+
+* `LinkedIn::getUserId`, use `LinkedIn::getUser` instead
+* `AccessToken::constructFromJson`, Use the constructor instead. 
+
 # Upgrade from 0.4 to 0.5
 
 ## Changed signature of `LinkedIn::api`
