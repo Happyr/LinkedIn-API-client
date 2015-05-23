@@ -125,5 +125,5 @@ class GuzzleRequest implements RequestInterface
     protected function isJsonResponse($guzzleResponse)
     {
         return false !== strstr($guzzleResponse->getHeader('Content-Type'), 'application/json');
-}
+    }
 }

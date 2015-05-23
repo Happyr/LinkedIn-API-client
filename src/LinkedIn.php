@@ -24,7 +24,7 @@ use Happyr\LinkedIn\Storage\SessionStorage;
  * 7. fetchNewAccessToken() gets the *code* and calls getAccessTokenFromCode()
  * 8. getAccessTokenFromCode() makes a request to www.linkedin.com and exchanges the *code* for an access token
  * 9. With a valid access token we can query the api for the user
- * 10. When yuo make a second request to the api you skip the authorization (1-3) and
+ * 10. When you make a second request to the api you skip the authorization (1-3) and
  *     the "*code* for access token exchange" (6-8).
  *
  * @author Tobias Nyholm
@@ -334,7 +334,7 @@ class LinkedIn
     public function getAccessToken()
     {
         if ($this->accessToken !== null) {
-            // we've done this already and cached it.  Just return.
+            // we've done this already and cached it. Just return.
             return $this->accessToken;
         }
 
@@ -343,7 +343,7 @@ class LinkedIn
             $this->setAccessToken($newAccessToken);
         }
 
-        //return the new access token or null
+        // return the new access token or null
         return $this->accessToken;
     }
 
@@ -411,13 +411,13 @@ class LinkedIn
                 'POST',
                 $this->getUrlGenerator()->getUrl('www', 'uas/oauth2/accessToken'),
                 [
-                    'body'=>array(
+                    'body' => array(
                         'grant_type' => 'authorization_code',
                         'code' => $code,
                         'redirect_uri' => $redirectUri,
                         'client_id' => $this->getAppId(),
                         'client_secret' => $this->getAppSecret(),
-                    )
+                    ),
                 ]
             );
         } catch (LinkedInApiException $e) {
@@ -481,6 +481,7 @@ class LinkedIn
      * Get the id of the current user.
      *
      * @return string|null returns null if no user found
+     *
      * @deprecated will be removed in 0.6
      */
     public function getUserId()
