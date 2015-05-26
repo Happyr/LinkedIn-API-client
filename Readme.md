@@ -115,7 +115,7 @@ $options = array(
 </share>');
 ```
 
-## Configurations
+## Configuration
 
 ### The api options
 
