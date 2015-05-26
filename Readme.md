@@ -8,8 +8,7 @@
 
 A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
 token and when authenticated it helps you to send API requests. You will not get *everything* for free though... You
-have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API. We just help you
-with the boring stuff.
+have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API. 
 
 To get an overview what this library actually is doing for you. Take a look at the authentication page from
 the [API docs][api-doc-authentication].
@@ -28,21 +27,11 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 
 ## Installation
 
-Install it with Composer!
+Install it with Composer.
 
-```js
-// composer.json
-{
-    // ...
-    require: {
-        // ...
-        "happyr/linkedin-api-client": "dev-master",
-    }
-}
+```bash
+php composer.phar require happyr/linkedin-api-client:dev-master
 ```
-
-Then, you can install the new dependencies by running the ``composer update``
-command from the directory where your ``composer.json`` file is located:
 
 ## Usage
 
@@ -50,7 +39,9 @@ In order to use this API client (or any other LinkedIn clients) you have to [reg
 with LinkedIn to receive an API key. Once you've registered your LinkedIn app, you will be provided with
 an *API Key* and *Secret Key*.
 
-This example below is a nicer way of connecting to LinkedIn compared to [their code samples][linkedin-code-samples].
+### LinkedIn login
+
+This example below is showing how to login with LinkedIn.
 
 ```php 
 <?php
@@ -84,7 +75,9 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 
 ```
 
-### Post on user's wall
+### How to post on LinkedIn wall
+
+The example below shows how you can post on a users wall. The access token is fetched from the database. 
 
 ```php
 $linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
@@ -121,6 +114,8 @@ $options = array(
  </visibility>
 </share>');
 ```
+
+## Configuration
 
 ### The api options
 
@@ -192,7 +187,7 @@ $url = $linkedIn->getLoginUrl(array('scope'=>$scope));
 echo "<a href='$url'>Login with LinkedIn</a>";
 ```
 
-### Framework integration
+## Framework integration
 
 See how I integrated this with [Symfony2](docs/symfony.md).
 
