@@ -142,17 +142,6 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($user, $linkedIn->getUser());
     }
 
-    public function testGetUserId()
-    {
-        $linkedIn = m::mock('Happyr\LinkedIn\LinkedIn[getUser]', array(self::APP_ID, self::APP_SECRET))
-            ->shouldReceive('getUser')->andReturn(array('id' => 'foobar'), array(), null)
-            ->getMock();
-
-        $this->assertEquals('foobar', $linkedIn->getUserId());
-        $this->assertEquals(null, $linkedIn->getUserId());
-        $this->assertEquals(null, $linkedIn->getUserId());
-    }
-
     public function testFetchNewAccessToken()
     {
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
