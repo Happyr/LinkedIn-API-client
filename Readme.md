@@ -33,6 +33,8 @@ Install it with Composer.
 php composer.phar require happyr/linkedin-api-client:dev-master
 ```
 
+If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
+
 ## Usage
 
 In order to use this API client (or any other LinkedIn clients) you have to [register your application][register-app]
