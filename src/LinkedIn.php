@@ -479,24 +479,6 @@ class LinkedIn
     }
 
     /**
-     * Get the id of the current user.
-     *
-     * @return string|null returns null if no user found
-     *
-     * @deprecated will be removed in 0.6
-     */
-    public function getUserId()
-    {
-        $user = $this->getUser();
-
-        if (isset($user['id'])) {
-            return $user['id'];
-        }
-
-        return;
-    }
-
-    /**
      * Get the app id.
      *
      * @return string
