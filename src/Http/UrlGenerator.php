@@ -53,13 +53,16 @@ class UrlGenerator implements UrlGeneratorInterface
         }
 
         if (!empty($params)) {
-            //it needs to be PHP_QUERY_RFC3986. We want to have %20 between scopes
-            // we cant run http_build_query($params, null, '&', PHP_QUERY_RFC3986); because it is not supported in php 5.3 or hhvm
-            $url .= '?';
-            foreach ($params as $key => $value) {
-                $url .= sprintf('%s=%s&', rawurlencode($key), rawurlencode($value));
+            // does it exist a query string?
+            $queryString = parse_url($url, PHP_URL_QUERY);
+            if (empty($queryString)) {
+                $url .= '?';
+            } else {
+                $url .= '&';
             }
-            $url = rtrim($url, '&');
+
+            // it needs to be PHP_QUERY_RFC3986. We want to have %20 between scopes
+            $url .= http_build_query($params, null, '&', PHP_QUERY_RFC3986);
         }
 
         return $url;

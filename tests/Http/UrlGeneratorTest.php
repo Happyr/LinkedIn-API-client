@@ -75,6 +75,18 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEquals($notExpected, $gen->getUrl('api', 'foobar', array('bar' => 'baz a b')), 'Dont use PHP_QUERY_RFC1738');
     }
 
+    public function testGetUrlWithParams()
+    {
+        $gen = new UrlGenerator();
+
+        $expected = 'https://api.linkedin.com/endpoint?bar=baz&format=json';
+        $this->assertEquals($expected, $gen->getUrl('api', 'endpoint?bar=baz', array('format' => 'json')));
+
+        $expected = 'https://api.linkedin.com/endpoint?bar=baz&bar=baz';
+        $this->assertEquals($expected, $gen->getUrl('api', 'endpoint?bar=baz', array('bar' => 'baz')));
+
+    }
+
     public function testGetCurrentURL()
     {
         $gen = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
