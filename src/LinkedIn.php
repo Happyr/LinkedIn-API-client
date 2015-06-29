@@ -277,7 +277,7 @@ class LinkedIn
         try {
             return $this->api('GET', '/v1/people/~:(id,firstName,lastName,headline)');
         } catch (LinkedInApiException $e) {
-            return;
+            return null;
         }
     }
 
@@ -297,7 +297,7 @@ class LinkedIn
         if (isset($_REQUEST['code'])) {
             if ($storage->get('code') === $_REQUEST['code']) {
                 //we have already validated this code
-                return;
+                return null;
             }
 
             //if stored state does not exists
@@ -322,7 +322,7 @@ class LinkedIn
             return $_REQUEST['code'];
         }
 
-        return;
+        return null;
     }
 
     /**
@@ -399,7 +399,7 @@ class LinkedIn
     protected function getAccessTokenFromCode($code, $redirectUri = null)
     {
         if (empty($code)) {
-            return;
+            return null;
         }
 
         if ($redirectUri === null) {
@@ -423,18 +423,18 @@ class LinkedIn
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.
-            return;
+            return null;
         }
 
         if (empty($response)) {
-            return;
+            return null;
         }
 
         $tokenData = array_merge(array('access_token' => null, 'expires_in' => null), $response);
         $token = new AccessToken($tokenData['access_token'], $tokenData['expires_in']);
 
         if (!$token->hasToken()) {
-            return;
+            return null;
         }
 
         return $token;
@@ -606,7 +606,7 @@ class LinkedIn
     public function getError()
     {
         if (!$this->hasError()) {
-            return;
+            return null;
         }
 
         return new LoginError($_GET['error'], isset($_GET['error_description']) ? $_GET['error_description'] : null);
@@ -659,7 +659,8 @@ class LinkedIn
         switch ($options['format']) {
             case 'simple_xml':
                 $options['simple_xml'] = true;
-            // simple_xml is still xml. This should fall through
+                $options['headers']['Content-Type'] = 'text/xml';
+                break;
             case 'xml':
                 $options['headers']['Content-Type'] = 'text/xml';
                 break;
