@@ -22,12 +22,12 @@ class UrlGenerator implements UrlGeneratorInterface
      * Maps aliases to LinkedIn domains.
      */
     public static $domainMap = array(
-        'api'         => 'https://api.linkedin.com/',
-        'www'         => 'https://www.linkedin.com/',
+        'api' => 'https://api.linkedin.com/',
+        'www' => 'https://www.linkedin.com/',
     );
 
     /**
-     * @var boolean
+     * @var bool
      *
      * Indicates if we trust HTTP_X_FORWARDED_* headers.
      */
@@ -178,7 +178,7 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * @param boolean $trustForwarded
+     * @param bool $trustForwarded
      *
      * @return $this
      */

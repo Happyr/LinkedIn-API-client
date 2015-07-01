@@ -246,7 +246,7 @@ class LinkedIn
 
         $accessToken = $this->getAccessToken();
 
-        /**
+        /*
          * This is true if both statements are true:
          * 1: We got an access token
          * 2: The access token has changed or if we don't got a user.
@@ -659,7 +659,8 @@ class LinkedIn
         switch ($options['format']) {
             case 'simple_xml':
                 $options['simple_xml'] = true;
-            // simple_xml is still xml. This should fall through
+                $options['headers']['Content-Type'] = 'text/xml';
+                break;
             case 'xml':
                 $options['headers']['Content-Type'] = 'text/xml';
                 break;

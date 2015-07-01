@@ -33,7 +33,7 @@ interface UrlGeneratorInterface
     /**
      * Should we trust forwarded headers?
      *
-     * @param boolean $trustForwarded
+     * @param bool $trustForwarded
      *
      * @return $this
      */

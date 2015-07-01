@@ -24,10 +24,10 @@ class CurlRequest implements RequestInterface
     public static $curlOptions = array(
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 60,
-        CURLOPT_USERAGENT      => RequestInterface::USER_AGENT,
-        CURLOPT_VERBOSE        => true,
-        CURLOPT_HEADER         => true,
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_USERAGENT => RequestInterface::USER_AGENT,
+        CURLOPT_VERBOSE => true,
+        CURLOPT_HEADER => true,
     );
 
     /**

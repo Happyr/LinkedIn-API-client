@@ -32,6 +32,14 @@ class LoginError
     /**
      * @return string
      */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
     public function getDescription()
     {
         return $this->description;
@@ -40,8 +48,8 @@ class LoginError
     /**
      * @return string
      */
-    public function getName()
+    public function __toString()
     {
-        return $this->name;
+        return 'Name: '.$this->getName().', Description: '.$this->getDescription();
     }
 }
