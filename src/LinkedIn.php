@@ -246,7 +246,7 @@ class LinkedIn
 
         $accessToken = $this->getAccessToken();
 
-        /**
+        /*
          * This is true if both statements are true:
          * 1: We got an access token
          * 2: The access token has changed or if we don't got a user.
@@ -277,7 +277,7 @@ class LinkedIn
         try {
             return $this->api('GET', '/v1/people/~:(id,firstName,lastName,headline)');
         } catch (LinkedInApiException $e) {
-            return null;
+            return;
         }
     }
 
@@ -297,7 +297,7 @@ class LinkedIn
         if (isset($_REQUEST['code'])) {
             if ($storage->get('code') === $_REQUEST['code']) {
                 //we have already validated this code
-                return null;
+                return;
             }
 
             //if stored state does not exists
@@ -322,7 +322,7 @@ class LinkedIn
             return $_REQUEST['code'];
         }
 
-        return null;
+        return;
     }
 
     /**
@@ -399,7 +399,7 @@ class LinkedIn
     protected function getAccessTokenFromCode($code, $redirectUri = null)
     {
         if (empty($code)) {
-            return null;
+            return;
         }
 
         if ($redirectUri === null) {
@@ -423,18 +423,18 @@ class LinkedIn
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.
-            return null;
+            return;
         }
 
         if (empty($response)) {
-            return null;
+            return;
         }
 
         $tokenData = array_merge(array('access_token' => null, 'expires_in' => null), $response);
         $token = new AccessToken($tokenData['access_token'], $tokenData['expires_in']);
 
         if (!$token->hasToken()) {
-            return null;
+            return;
         }
 
         return $token;
@@ -606,7 +606,7 @@ class LinkedIn
     public function getError()
     {
         if (!$this->hasError()) {
-            return null;
+            return;
         }
 
         return new LoginError($_GET['error'], isset($_GET['error_description']) ? $_GET['error_description'] : null);

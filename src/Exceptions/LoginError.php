@@ -50,6 +50,6 @@ class LoginError
      */
     public function __toString()
     {
-        return 'Name: ' . $this->getName() . ', Description: ' . $this->getDescription();
+        return 'Name: '.$this->getName().', Description: '.$this->getDescription();
     }
 }
