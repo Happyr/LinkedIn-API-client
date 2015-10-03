@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Session;
 class IlluminateSessionStorage extends BaseDataStorage
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function set($key, $value)
     {
@@ -29,7 +29,7 @@ class IlluminateSessionStorage extends BaseDataStorage
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function get($key, $default = false)
     {
@@ -43,7 +43,7 @@ class IlluminateSessionStorage extends BaseDataStorage
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function clear($key)
     {

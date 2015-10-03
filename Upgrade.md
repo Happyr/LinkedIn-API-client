@@ -1,3 +1,21 @@
+# Upgrade from 0.6 to dev-master
+
+## Changes
+
+* Introduced PHP-HTTP and PSR-7 messages
+* Added constructor argument for responseDataType
+* Added setResponseDataType()
+
+To make sure you can upgrade you need to install a HTTP adapter.
+
+```bash
+php composer.phar require php-http/guzzle5-adapter:^0.1.0
+```
+
+## BC breaks
+
+* Removed `LinkedIn::setRequest` in favor to `LinkedIn::setHttpAdapter`
+
 # Upgrade from 0.5 to 0.6
 
 ## Changes
