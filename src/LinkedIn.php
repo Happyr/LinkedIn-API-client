@@ -4,12 +4,16 @@ namespace Happyr\LinkedIn;
 
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 use Happyr\LinkedIn\Exceptions\LoginError;
-use Happyr\LinkedIn\Http\GuzzleRequest;
-use Happyr\LinkedIn\Http\RequestInterface;
+use Happyr\LinkedIn\Http\GlobalVariableGetter;
+use Happyr\LinkedIn\Http\ResponseConverter;
 use Happyr\LinkedIn\Http\UrlGenerator;
 use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Happyr\LinkedIn\Storage\SessionStorage;
+use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class LinkedIn lets you talk to LinkedIn api.
@@ -76,9 +80,9 @@ class LinkedIn
     private $urlGenerator;
 
     /**
-     * @var \Happyr\LinkedIn\Http\RequestInterface request
+     * @var \Http\Client\HttpClient
      */
-    private $request;
+    private $httpClient;
 
     /**
      * @var string format
@@ -86,19 +90,31 @@ class LinkedIn
     private $format;
 
     /**
+     * @var string responseFormat
+     */
+    private $responseDataType;
+
+    /**
+     * @var ResponseInterface
+     */
+    private $lastResponse;
+
+    /**
      * Constructor.
      *
      * @param string $appId
      * @param string $appSecret
-     * @param string $format    'json', 'xml' or 'simple_xml'
+     * @param string $format           'json', 'xml'
+     * @param string $responseDataType 'array', 'string', 'simple_xml' 'psr7', 'stream'
      */
-    public function __construct($appId, $appSecret, $format = 'json')
+    public function __construct($appId, $appSecret, $format = 'json', $responseDataType = 'array')
     {
         //save app stuff
         $this->appId = $appId;
         $this->appSecret = $appSecret;
 
         $this->format = $format;
+        $this->responseDataType = $responseDataType;
     }
 
     /**
@@ -132,16 +148,23 @@ class LinkedIn
         $options['headers']['Authorization'] = sprintf('Bearer %s', (string) $this->getAccessToken());
 
         // Do logic and adjustments to the options
-        $this->filterRequestOption($options);
+        $requestFormat = $this->filterRequestOption($options);
 
         // Generate an url
         $url = $this->getUrlGenerator()->getUrl('api', $resource, isset($options['query']) ? $options['query'] : array());
-        unset($options['query']);
 
-        // $method that url
-        $result = $this->getRequest()->send($method, $url, $options);
+        //Get the reponse data format
+        if (isset($options['responseDataType'])) {
+            $responseDataType = $options['responseDataType'];
+        } else {
+            $responseDataType = $this->getResponseDataType();
+        }
 
-        return $result;
+        $body = isset($options['body']) ? $options['body'] : null;
+        $request = $this->createRequest($method, $url, $options['headers'], $body);
+        $this->lastResponse = $this->getHttpClient()->sendRequest($request);
+
+        return ResponseConverter::convert($this->lastResponse, $requestFormat, $responseDataType);
     }
 
     /**
@@ -296,8 +319,8 @@ class LinkedIn
     {
         $storage = $this->getStorage();
 
-        if (isset($_REQUEST['code'])) {
-            if ($storage->get('code') === $_REQUEST['code']) {
+        if (GlobalVariableGetter::has('code')) {
+            if ($storage->get('code') === GlobalVariableGetter::get('code')) {
                 //we have already validated this code
                 return;
             }
@@ -308,12 +331,12 @@ class LinkedIn
             }
 
             //if state exists in the request
-            if (!isset($_REQUEST['state'])) {
+            if (!GlobalVariableGetter::has('state')) {
                 throw new LinkedInApiException('Could not find a CSRF state token in the request.');
             }
 
             //if state exists in session and in request and if they are not equal
-            if ($state !== $_REQUEST['state']) {
+            if ($state !== GlobalVariableGetter::get('state')) {
                 throw new LinkedInApiException('The CSRF state token from the request does not match the stored token.');
             }
 
@@ -321,7 +344,7 @@ class LinkedIn
             $this->setState(null);
             $storage->clear('state');
 
-            return $_REQUEST['code'];
+            return GlobalVariableGetter::get('code');
         }
 
         return;
@@ -409,19 +432,19 @@ class LinkedIn
         }
 
         try {
-            $response = $this->getRequest()->send(
+            $request = $this->createRequest(
                 'POST',
                 $this->getUrlGenerator()->getUrl('www', 'uas/oauth2/accessToken'),
-                [
-                    'body' => array(
-                        'grant_type' => 'authorization_code',
-                        'code' => $code,
-                        'redirect_uri' => $redirectUri,
-                        'client_id' => $this->getAppId(),
-                        'client_secret' => $this->getAppSecret(),
-                    ),
-                ]
-            );
+                ['Content-Type' => 'application/x-www-form-urlencoded'],
+                http_build_query([
+                    'grant_type' => 'authorization_code',
+                    'code' => $code,
+                    'redirect_uri' => $redirectUri,
+                    'client_id' => $this->getAppId(),
+                    'client_secret' => $this->getAppSecret(),
+                ]));
+
+            $response = ResponseConverter::convertToArray($this->getHttpClient()->sendRequest($request));
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.
@@ -482,6 +505,7 @@ class LinkedIn
 
     /**
      * Get the app id.
+     * @deprecated
      *
      * @return string
      *
@@ -494,6 +518,7 @@ class LinkedIn
 
     /**
      * Get the app secret.
+     * @deprecated
      *
      * @return string
      *
@@ -571,29 +596,37 @@ class LinkedIn
     }
 
     /**
-     * @param RequestInterface $request
+     * Clear the storage. This will forget everything about the user.
+     */
+    public function clearStorage()
+    {
+        $this->getStorage()->clearAll();
+    }
+
+    /**
+     * @param HttpClient $client
      *
      * @return $this
      *
      * @deprecated This function will be removed in 0.7.0. It will be replaced by setHttpAdapter
      */
-    public function setRequest(RequestInterface $request)
+    public function setHttpClient(HttpClient $client)
     {
-        $this->request = $request;
+        $this->httpClient = $client;
 
         return $this;
     }
 
     /**
-     * @return RequestInterface
+     * @return HttpClient
      */
-    protected function getRequest()
+    protected function getHttpClient()
     {
-        if ($this->request === null) {
-            $this->request = new GuzzleRequest();
+        if ($this->httpClient === null) {
+            $this->httpClient = HttpClientDiscovery::find();
         }
 
-        return $this->request;
+        return $this->httpClient;
     }
 
     /**
@@ -641,6 +674,26 @@ class LinkedIn
     }
 
     /**
+     * @return string
+     */
+    public function getResponseDataType()
+    {
+        return $this->responseDataType;
+    }
+
+    /**
+     * @param string $responseDataType
+     *
+     * @return LinkedIn
+     */
+    public function setResponseDataType($responseDataType)
+    {
+        $this->responseDataType = $responseDataType;
+
+        return $this;
+    }
+
+    /**
      * Get headers from last response.
      *
      * @return array|null
@@ -649,28 +702,31 @@ class LinkedIn
      */
     public function getLastHeaders()
     {
-        return $this->getRequest()->getHeadersFromLastResponse();
+        if ($this->lastResponse === null) {
+            return [];
+        }
+
+        return $this->lastResponse->getHeaders();
     }
 
     /**
      * Modify and filter the request options. Make sure we use the correct query parameters and headers.
      *
      * @param array $options
+     *
+     * @return string
      */
     protected function filterRequestOption(array &$options)
     {
         if (isset($options['json'])) {
             $options['format'] = 'json';
+            $options['body'] = json_encode($options['json']);
         } elseif (!isset($options['format'])) {
             $options['format'] = $this->getFormat();
         }
 
         // Set correct headers for this format
         switch ($options['format']) {
-            case 'simple_xml':
-                $options['simple_xml'] = true;
-                $options['headers']['Content-Type'] = 'text/xml';
-                break;
             case 'xml':
                 $options['headers']['Content-Type'] = 'text/xml';
                 break;
@@ -682,6 +738,22 @@ class LinkedIn
             default:
                 // Do nothing
         }
+        $format = $options['format'];
         unset($options['format']);
+
+        return $format;
+    }
+
+    /**
+     * @param string $method
+     * @param string $url
+     * @param mixed $body
+     * @param array $options
+     *
+     * @return \Psr\Http\Message\RequestInterface
+     */
+    protected function createRequest($method, $url, array $headers = array(), $body = null)
+    {
+        return MessageFactoryDiscovery::find()->createRequest($method, $url, $headers, $body);
     }
 }

@@ -10,7 +10,7 @@ abstract class BaseDataStorage implements DataStorageInterface
     public static $validKeys = array('state', 'code', 'access_token', 'user');
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function clearAll()
     {

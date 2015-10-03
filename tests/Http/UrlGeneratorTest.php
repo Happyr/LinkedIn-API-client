@@ -84,7 +84,6 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
 
         $expected = 'https://api.linkedin.com/endpoint?bar=baz&bar=baz';
         $this->assertEquals($expected, $gen->getUrl('api', 'endpoint?bar=baz', array('bar' => 'baz')));
-
     }
 
     public function testGetCurrentURL()

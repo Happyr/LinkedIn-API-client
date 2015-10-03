@@ -33,6 +33,15 @@ Install it with Composer.
 php composer.phar require happyr/linkedin-api-client:dev-master
 ```
 
+You do also need to choose what library to use when you are sending http messages. Consult the
+[php-http/adapter-implementation](https://packagist.org/providers/php-http/adapter-implementation) virtual package to
+find adapters to use. For more information about virtual packages please refer to 
+[Httplug](http://docs.httplug.io/en/latest/virtual-package/). Example:
+
+```bash
+php composer.phar require php-http/guzzle6-adapter:dev-master
+```
+
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
 ## Usage
@@ -127,8 +136,7 @@ before that we do some modifications. Below is a table of array keys that you ma
 | Option name | Description
 | ----------- | -----------
 | body | The body of a HTTP request. Put your xml string here. 
-| debug | This will echo the all the request and response headers. (Works with the Guzzle client only)
-| format | Set this to 'json', 'xml' or 'simple_xml' to override the default value. 
+| format | Set this to 'json', 'xml' or 'simple_xml' to override the default value.
 | headers | This is HTTP headers to the request
 | json | This is an array with json data that will be encoded to a json string. Using this option you do need to specify a format. 
 | query | This is an array with query parameters
@@ -136,7 +144,7 @@ before that we do some modifications. Below is a table of array keys that you ma
 If you are using the `GuzzleRequest` (default) you may want to have a look at [its documentation](http://docs.guzzlephp.org/en/latest/clients.html?highlight=format#request-options)
 to find out what more options that are available. 
 
-### Changing format
+### Changing request format
 
 The default format when communicating with LinkedIn API is json. This means that you will get an array back as a response when you call `LinkedIn::api`. It is easy to change the format.
 
@@ -153,16 +161,32 @@ $linkedIn->get('v1/people/~:(firstName,lastName)', array('format'=>'xml'));
 
 There is one exception to the *format* option: When you specifying $options['json'=>...] then the format will always be json.
 
-Below is a table that specifies what format returns what when you call `LinkedIn::api`.
+### Understanding response data type
 
-| Format | Return value 
+The data type returned from `LinkedIn::api` can be configured. You may use the forth construtor argument or the
+`LinkedIn::setResponseDataType`.
+
+```php
+// By constructor argument
+$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret', 'json', 'array');
+
+// By setter
+$linkedIn->setResponseDataType('simple_xml');
+
+```
+
+Below is a table that specifies what the possible return data types are when you call `LinkedIn::api`.
+
+| Type | Description
 | ------ | ------------
-| json | An assosiative array
-| xml | The XML response body as a string
-| simple_xml | A SimpleXMLElement. See [PHP manual](http://php.net/manual/en/class.simplexmlelement.php).
+| array | An assosiative array. This can only be used with the `json` format.
+| simple_xml | A SimpleXMLElement. See [PHP manual](http://php.net/manual/en/class.simplexmlelement.php). This can only be used with the `xml` format.
+| psr7 | A PSR7 response.
+| stream | A file stream.
+| string | A plain old string.
 
 
-### Use different Request or Session classes
+### Use different Session classes
 
 You might want to use an other storage than the default `SessionStorage`. If you are using Laravel
 you are more likely to inject the `IlluminateSessionStorage`.  
@@ -172,8 +196,7 @@ $linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
 $linkedIn->setStorage(new IlluminateSessionStorage());
 ```
 
-You can inject any class implementing `DataStorageInterface`. You can also inject different
-request and url generator classes.
+You can inject any class implementing `DataStorageInterface`. You can also inject different `UrlGenerator` classes.
 
 ### Using different scopes
 

@@ -13,9 +13,13 @@
     ],
     "require": {
         "php": ">=5.4",
-        "guzzlehttp/guzzle": "~5.0"
+        "php-http/client-implementation": "1.0",
+        "php-http/discovery": "~0.1"
     },
     "require-dev": {
+        "php-http/guzzle5-adapter": "dev-master",
+        "php-http/httplug": "v1.0.0-beta",
+        "guzzlehttp/psr7": "^1.2",
         "mockery/mockery": "*",
         "illuminate/support": "*"
     },

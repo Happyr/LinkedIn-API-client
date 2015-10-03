@@ -24,7 +24,7 @@ class SessionStorage extends BaseDataStorage
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function set($key, $value)
     {
@@ -37,7 +37,7 @@ class SessionStorage extends BaseDataStorage
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function get($key, $default = false)
     {
@@ -51,7 +51,7 @@ class SessionStorage extends BaseDataStorage
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function clear($key)
     {
