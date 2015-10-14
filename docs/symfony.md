@@ -112,3 +112,46 @@ class LinkedInController extends Controller
     }
 }
 ```
+
+
+```php
+<?php
+
+namespace Acme\LinkedInBundle\Service;
+
+/* --- */
+
+class FooService
+{
+    /* --- */
+
+    /**
+     * Post a message on a users wall
+     *
+     * @return bool
+     */
+    public function postOnUsersWall($user, $message)
+    {
+        $linkedIn=$this->container->get('linkedin');
+
+        $accessToken = $this->getAccessTokenStoredInDatabase($user);
+
+        if ($accessToken === null) {
+            return false;
+        }
+
+        $options = array('json'=>
+            array(
+                'comment' => $message,
+                'visibility' => array(
+                    'code' => 'anyone'
+                )
+            )
+        );
+
+        $linkedIn->post('v1/people/~/shares', $options);
+
+        return true;
+    }
+}
+```
