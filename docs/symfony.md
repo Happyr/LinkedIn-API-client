@@ -135,10 +135,11 @@ class FooService
         $linkedIn=$this->container->get('linkedin');
 
         $accessToken = $this->getAccessTokenStoredInDatabase($user);
-
         if ($accessToken === null) {
             return false;
         }
+
+        $linkedIn->setAccessToken($accessToken);
 
         $options = array('json'=>
             array(
