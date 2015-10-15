@@ -183,10 +183,14 @@ class LinkedIn
      *
      * @return string The URL for the login flow
      */
-    public function getLoginUrl($params = array())
+    public function getLoginUrl($params = array(), $redirect_uri)
     {
         $this->establishCSRFTokenState();
-        $currentUrl = $this->getUrlGenerator()->getCurrentUrl();
+        if(!empty($redirect_uri)) {
+            $currentUrl = $redirect_uri;
+        } else {
+            $currentUrl = $this->getUrlGenerator()->getCurrentUrl();
+        }
 
         // if 'scope' is passed as an array, convert to space separated list
         $scopeParams = isset($params['scope']) ? $params['scope'] : null;
