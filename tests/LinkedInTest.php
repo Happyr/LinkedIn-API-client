@@ -2,6 +2,7 @@
 
 namespace Happyr\LinkedIn;
 
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 use Mockery as m;
@@ -41,6 +42,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $postParams = array('post' => 'bar');
         $method = 'GET';
         $expected = array('foobar' => 'test');
+        $request = new Request('GET', 'foo');
         $response = new Response(200, [], json_encode($expected));
         $url = 'http://example.com/test';
 
@@ -56,14 +58,21 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
                 ))->andReturn($url)
             ->getMock();
 
-        $httpClient = m::mock('Happyr\HttpAutoDiscovery\Client')
-            ->shouldReceive('send')->once()->with($method, $url, $headers, json_encode($postParams))->andReturn($response)
+        $httpClient = m::mock('Http\Client\HttpClient')
+            ->shouldReceive('sendRequest')->once()->with($request)->andReturn($response)
             ->getMock();
 
         $linkedIn = $this->getMockBuilder('Happyr\LinkedIn\LinkedIn')
             ->setConstructorArgs(array('id', 'secret'))
-            ->setMethods(array('getAccessToken', 'getUrlGenerator', 'getHttpClient'))
+            ->setMethods(array('getAccessToken', 'getUrlGenerator', 'getHttpClient', 'createRequest'))
             ->getMock();
+        $linkedIn->expects($this->once())->method('createRequest')->with(
+            $this->equalTo($method),
+            $this->equalTo($url),
+            $this->equalTo(json_encode($postParams)),
+            $this->equalTo($headers)
+        )->willReturn($request);
+
         $linkedIn->expects($this->once())->method('getAccessToken')->willReturn($token);
         $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
         $linkedIn->expects($this->once())->method('getHttpClient')->willReturn($httpClient);
@@ -463,11 +472,11 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     public function testRequestAccessors()
     {
         // test default
-        $this->assertInstanceOf('Happyr\HttpAutoDiscovery\Client', $this->ln->getHttpClient());
+        $this->assertInstanceOf('Http\Client\HttpClient', $this->ln->getHttpClient());
 
-        $object = m::mock('Http\Adapter\Guzzle5HttpAdapter');
-        $this->ln->setHttpAdapter($object);
-        $this->assertEquals($object, $this->ln->getHttpClient()->getAdapter());
+        $object = m::mock('Http\Adapter\Guzzle6HttpAdapter');
+        $this->ln->setHttpClient($object);
+        $this->assertEquals($object, $this->ln->getHttpClient());
     }
 
     public function testGeneratorAccessors()

@@ -162,7 +162,7 @@ class LinkedIn
         }
 
         $body = isset($options['body']) ? $options['body'] : null;
-        $request = MessageFactoryDiscovery::find()->createRequest($method, $url, '1.1', $options['headers'], $body);
+        $request = $this->createRequest($method, $url, $body, $options['headers']);
         $this->lastResponse = $this->getHttpClient()->sendRequest($request);
 
         return ResponseConverter::convert($this->lastResponse, $requestFormat, $responseDataType);
@@ -725,5 +725,18 @@ class LinkedIn
         unset($options['format']);
 
         return $format;
+    }
+
+    /**
+     * @param string $method
+     * @param string $url
+     * @param mixed $body
+     * @param array $options
+     *
+     * @return \Psr\Http\Message\RequestInterface
+     */
+    protected function createRequest($method, $url, $body, array $options)
+    {
+        return MessageFactoryDiscovery::find()->createRequest($method, $url, '1.1', $options['headers'], $body);
     }
 }
