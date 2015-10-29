@@ -33,14 +33,13 @@ Install it with Composer.
 php composer.phar require happyr/linkedin-api-client:dev-master
 ```
 
-You do also need to choose what library to use when you are sending messages. Consult the
+You do also need to choose what library to use when you are sending http messages. Consult the
 [php-http/adapter-implementation](https://packagist.org/providers/php-http/adapter-implementation) virtual package to
 find adapters to use. Example:
 
 ```bash
-php composer.phar require php-http/guzzle6-adapter:^0.1.0
+php composer.phar require php-http/guzzle6-adapter:^1.0
 ```
-
 
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
