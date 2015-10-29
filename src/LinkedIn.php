@@ -9,9 +9,9 @@ use Happyr\LinkedIn\Http\UrlGenerator;
 use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Happyr\LinkedIn\Storage\SessionStorage;
-use Happyr\HttpAutoDiscovery\Client as HttpClient;
-use Http\Adapter\HttpAdapter;
-use Http\Message\MessageFactory;
+use Http\Client\HttpClient;
+use Http\Discovery\HttpAdapterDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -79,7 +79,7 @@ class LinkedIn
     private $urlGenerator;
 
     /**
-     * @var HttpClient
+     * @var \Http\Client\HttpClient
      */
     private $httpClient;
 
@@ -162,7 +162,8 @@ class LinkedIn
         }
 
         $body = isset($options['body']) ? $options['body'] : null;
-        $this->lastResponse = $this->getHttpClient()->send($method, $url, $options['headers'], $body);
+        $request = MessageFactoryDiscovery::find()->createRequest($method, $url, '1.1', $options['headers'], $body);
+        $this->lastResponse = $this->getHttpClient()->sendRequest($request);
 
         return ResponseConverter::convert($this->lastResponse, $requestFormat, $responseDataType);
     }
@@ -590,14 +591,13 @@ class LinkedIn
     }
 
     /**
-     * @param HttpAdapter         $httpAdapter
-     * @param MessageFactory|null $factory
+     * @param HttpClient $client
      *
      * @return $this
      */
-    public function setHttpAdapter(HttpAdapter $httpAdapter, MessageFactory $factory = null)
+    public function setHttpClient(HttpClient $client)
     {
-        $this->httpClient = new HttpClient($httpAdapter, $factory);
+        $this->httpClient = $client;
 
         return $this;
     }
@@ -608,7 +608,7 @@ class LinkedIn
     protected function getHttpClient()
     {
         if ($this->httpClient === null) {
-            $this->httpClient = new HttpClient();
+            $this->httpClient = HttpAdapterDiscovery::find();
         }
 
         return $this->httpClient;

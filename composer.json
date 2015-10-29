@@ -13,11 +13,12 @@
     ],
     "require": {
         "php": ">=5.4",
-        "happyr/http-auto-discovery": "0.1.*"
+        "php-http/httplug": "@dev",
+        "php-http/client-implementation": "@dev",
+        "php-http/discovery": "@dev"
     },
     "require-dev": {
-        "php-http/guzzle5-adapter": "^0.1.0",
-        "guzzlehttp/psr7": "~1.2",
+        "php-http/guzzle6-adapter": "@dev",
         "mockery/mockery": "*",
         "illuminate/support": "*"
     },
