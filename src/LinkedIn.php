@@ -4,6 +4,7 @@ namespace Happyr\LinkedIn;
 
 use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 use Happyr\LinkedIn\Exceptions\LoginError;
+use Happyr\LinkedIn\Http\GlobalVariableGetter;
 use Happyr\LinkedIn\Http\ResponseConverter;
 use Happyr\LinkedIn\Http\UrlGenerator;
 use Happyr\LinkedIn\Http\UrlGeneratorInterface;
@@ -318,8 +319,8 @@ class LinkedIn
     {
         $storage = $this->getStorage();
 
-        if (isset($_REQUEST['code'])) {
-            if ($storage->get('code') === $_REQUEST['code']) {
+        if (GlobalVariableGetter::has('code')) {
+            if ($storage->get('code') === GlobalVariableGetter::get('code')) {
                 //we have already validated this code
                 return;
             }
@@ -330,12 +331,12 @@ class LinkedIn
             }
 
             //if state exists in the request
-            if (!isset($_REQUEST['state'])) {
+            if (!GlobalVariableGetter::has('state')) {
                 throw new LinkedInApiException('Could not find a CSRF state token in the request.');
             }
 
             //if state exists in session and in request and if they are not equal
-            if ($state !== $_REQUEST['state']) {
+            if ($state !== GlobalVariableGetter::get('state')) {
                 throw new LinkedInApiException('The CSRF state token from the request does not match the stored token.');
             }
 
@@ -343,7 +344,7 @@ class LinkedIn
             $this->setState(null);
             $storage->clear('state');
 
-            return $_REQUEST['code'];
+            return GlobalVariableGetter::get('code');
         }
 
         return;
