@@ -10,7 +10,7 @@ use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Happyr\LinkedIn\Storage\SessionStorage;
 use Http\Client\HttpClient;
-use Http\Discovery\HttpAdapterDiscovery;
+use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 use Psr\Http\Message\ResponseInterface;
 
@@ -608,7 +608,7 @@ class LinkedIn
     protected function getHttpClient()
     {
         if ($this->httpClient === null) {
-            $this->httpClient = HttpAdapterDiscovery::find();
+            $this->httpClient = HttpClientDiscovery::find();
         }
 
         return $this->httpClient;
