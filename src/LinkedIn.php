@@ -163,7 +163,7 @@ class LinkedIn
         }
 
         $body = isset($options['body']) ? $options['body'] : null;
-        $request = $this->createRequest($method, $url, $body, $options['headers']);
+        $request = $this->createRequest($method, $url, $options['headers'], $body);
         $this->lastResponse = $this->getHttpClient()->sendRequest($request);
 
         return ResponseConverter::convert($this->lastResponse, $requestFormat, $responseDataType);
@@ -432,21 +432,19 @@ class LinkedIn
         }
 
         try {
-            $response = $this->getHttpClient()->send(
+            $request = $this->createRequest(
                 'POST',
                 $this->getUrlGenerator()->getUrl('www', 'uas/oauth2/accessToken'),
-                [
-                    'Content-Type' => 'application/x-www-form-urlencoded',
-                ],
+                ['Content-Type' => 'application/x-www-form-urlencoded'],
                 http_build_query([
                     'grant_type' => 'authorization_code',
                     'code' => $code,
                     'redirect_uri' => $redirectUri,
                     'client_id' => $this->getAppId(),
                     'client_secret' => $this->getAppSecret(),
-                ])
-            );
-            $response = ResponseConverter::convertToArray($response);
+                ]));
+
+            $response = ResponseConverter::convertToArray($this->getHttpClient()->sendRequest($request));
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.
@@ -736,8 +734,8 @@ class LinkedIn
      *
      * @return \Psr\Http\Message\RequestInterface
      */
-    protected function createRequest($method, $url, $body, array $options)
+    protected function createRequest($method, $url, array $headers = array(), $body = null)
     {
-        return MessageFactoryDiscovery::find()->createRequest($method, $url, '1.1', $options['headers'], $body);
+        return MessageFactoryDiscovery::find()->createRequest($method, $url, $headers, $body);
     }
 }

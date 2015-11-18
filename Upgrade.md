@@ -9,7 +9,7 @@
 To make sure you can upgrade you need to install a HTTP adapter.
 
 ```bash
-php composer.phar require php-http/guzzle5-adapter:^0.1.0
+php composer.phar require php-http/guzzle5-adapter:dev-master
 ```
 
 ## BC breaks
