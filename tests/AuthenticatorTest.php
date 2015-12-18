@@ -12,78 +12,14 @@ use Mockery as m;
  *
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
-class LinkedInTest extends \PHPUnit_Framework_TestCase
+class AuthenticatorTest extends \PHPUnit_Framework_TestCase
 {
     const APP_ID = '123456789';
     const APP_SECRET = '987654321';
-    /**
-     * @var LinkedInDummy ln
-     */
-    protected $ln;
 
-    public function setUp()
+    private function getRequestManagerMock()
     {
-        $this->ln = new LinkedInDummy(self::APP_ID, self::APP_SECRET);
-    }
-
-    public function testApi()
-    {
-        $resource = 'resource';
-        $token = 'token';
-        $urlParams = array('url' => 'foo');
-        $postParams = array('post' => 'bar');
-        $method = 'GET';
-        $expected = array('foobar' => 'test');
-        $request = new Request('GET', 'foo');
-        $response = new Response(200, [], json_encode($expected));
-        $url = 'http://example.com/test';
-
-        $headers = array('Content-Type' => 'application/json', 'x-li-format' => 'json', 'Authorization' => 'Bearer '.$token);
-
-        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
-            ->shouldReceive('getUrl')->once()->with(
-                'api',
-                $resource,
-                array(
-                    'url' => 'foo',
-                    'format' => 'json',
-                ))->andReturn($url)
-            ->getMock();
-
-        $httpClient = m::mock('Http\Client\HttpClient')
-            ->shouldReceive('sendRequest')->once()->with($request)->andReturn($response)
-            ->getMock();
-
-        $linkedIn = $this->getMockBuilder('Happyr\LinkedIn\LinkedIn')
-            ->setConstructorArgs(array('id', 'secret'))
-            ->setMethods(array('getAccessToken', 'getUrlGenerator', 'getHttpClient', 'createRequest'))
-            ->getMock();
-        $linkedIn->expects($this->once())->method('createRequest')->with(
-            $this->equalTo($method),
-            $this->equalTo($url),
-            $this->equalTo(json_encode($postParams)),
-            $this->equalTo($headers)
-        )->willReturn($request);
-
-        $linkedIn->expects($this->once())->method('getAccessToken')->willReturn($token);
-        $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
-        $linkedIn->expects($this->once())->method('getHttpClient')->willReturn($httpClient);
-
-        $result = $linkedIn->api($method, $resource, array('query' => $urlParams, 'json' => $postParams));
-        $this->assertEquals($expected, $result);
-    }
-
-    public function testIsAuthenticated()
-    {
-        $linkedIn = m::mock('Happyr\LinkedIn\LinkedIn[getUser]', array(1, 2))
-            ->shouldReceive('getUser')->once()->andReturn(null)
-            ->getMock();
-        $this->assertFalse($linkedIn->isAuthenticated());
-
-        $linkedIn = m::mock('Happyr\LinkedIn\LinkedIn[getUser]', array(1, 2))
-            ->shouldReceive('getUser')->once()->andReturn(3)
-            ->getMock();
-        $this->assertTrue($linkedIn->isAuthenticated());
+        return m::mock('Happyr\LinkedIn\Http\RequestManager');
     }
 
     public function testGetLoginUrl()
@@ -97,18 +33,19 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
             'state' => $state,
         );
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('establishCSRFTokenState', 'getState'), array(self::APP_ID, self::APP_SECRET));
-        $linkedIn->expects($this->any())->method('establishCSRFTokenState');
-        $linkedIn->expects($this->any())->method('getState')->will($this->returnValue($state));
+        $storage = $this->getMock('Happyr\LinkedIn\Storage\DataStorageInterface');
+
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('establishCSRFTokenState', 'getState', 'getStorage'), array($this->getRequestManagerMock(), self::APP_ID, self::APP_SECRET));
+        $auth->expects($this->exactly(2))->method('establishCSRFTokenState')->willReturn(null);
+        $auth->expects($this->any())->method('getState')->will($this->returnValue($state));
+        $auth->expects($this->exactly(2))->method('getStorage')->will($this->returnValue($storage));
 
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getCurrentUrl')->once()->andReturn('currentUrl')
             ->shouldReceive('getUrl')->once()->with('www', 'uas/oauth2/authorization', $params)->andReturn($expected)
             ->getMock();
 
-        $linkedIn->setUrlGenerator($generator);
-
-        $this->assertEquals($expected, $linkedIn->getLoginUrl());
+        $this->assertEquals($expected, $auth->getLoginUrl($generator));
 
         /*
          * Test with a url in the param
@@ -124,25 +61,10 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         );
 
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
-            ->shouldReceive('getCurrentUrl')->once()->andReturn('currentUrl')
             ->shouldReceive('getUrl')->once()->with('www', 'uas/oauth2/authorization', $params)->andReturn($expected)
             ->getMock();
 
-        $linkedIn->setUrlGenerator($generator);
-
-        $this->assertEquals($expected, $linkedIn->getLoginUrl(array('redirect_uri' => $otherUrl, 'scope' => $scope)));
-    }
-
-    public function testGetUser()
-    {
-        $user = 'user';
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('getUserFromAvailableData', 'getState'), array(), '', false);
-        $linkedIn->expects($this->once())->method('getUserFromAvailableData')->will($this->returnValue($user));
-
-        $this->assertEquals($user, $linkedIn->getUser());
-
-        //test again to make sure getUserFromAvailableData() is not called again
-        $this->assertEquals($user, $linkedIn->getUser());
+        $this->assertEquals($expected, $auth->getLoginUrl($generator, array('redirect_uri' => $otherUrl, 'scope' => $scope)));
     }
 
     public function testFetchNewAccessToken()
@@ -543,84 +465,3 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-/**
- * Class LinkedInDummy.
- *
- * @author Tobias Nyholm
- */
-class LinkedInDummy extends LinkedIn
-{
-    public function init($storage = null, $request = null, $generator = null)
-    {
-        if (!$storage) {
-            $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface');
-        }
-
-        if (!$request) {
-            $request = m::mock('Happyr\LinkedIn\Http\RequestInterface');
-        }
-
-        if (!$generator) {
-            $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
-        }
-
-        $this->setStorage($storage);
-        $this->setHttpAdapter($request);
-        $this->setUrlGenerator($generator);
-    }
-
-    public function getUserFromAvailableData()
-    {
-        return parent::getUserFromAvailableData();
-    }
-
-    public function getUserFromAccessToken()
-    {
-        return parent::getUserFromAccessToken();
-    }
-
-    public function getCode()
-    {
-        return parent::getCode();
-    }
-
-    public function fetchNewAccessToken()
-    {
-        return parent::fetchNewAccessToken();
-    }
-
-    public function getAccessTokenFromCode($code, $redirectUri = null)
-    {
-        return parent::getAccessTokenFromCode($code, $redirectUri);
-    }
-
-    public function establishCSRFTokenState()
-    {
-        parent::establishCSRFTokenState();
-    }
-
-    public function getState()
-    {
-        return parent::getState();
-    }
-
-    public function setState($state)
-    {
-        return parent::setState($state);
-    }
-
-    public function getUrlGenerator()
-    {
-        return parent::getUrlGenerator();
-    }
-
-    public function getStorage()
-    {
-        return parent::getStorage();
-    }
-
-    public function getHttpClient()
-    {
-        return parent::getHttpClient();
-    }
-}

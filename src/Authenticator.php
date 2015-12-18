@@ -246,7 +246,7 @@ class Authenticator
     /**
      * Lays down a CSRF state token for this process.
      */
-    private function establishCSRFTokenState()
+    protected function establishCSRFTokenState()
     {
         if ($this->getState() === null) {
             $this->setState(md5(uniqid(mt_rand(), true)));
