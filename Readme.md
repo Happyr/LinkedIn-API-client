@@ -39,7 +39,7 @@ find adapters to use. For more information about virtual packages please refer t
 [Httplug](http://docs.httplug.io/en/latest/virtual-package/). Example:
 
 ```bash
-php composer.phar require php-http/guzzle6-adapter:dev-master
+php composer.phar require php-http/guzzle5-adapter:dev-master
 ```
 
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
@@ -139,7 +139,9 @@ before that we do some modifications. Below is a table of array keys that you ma
 | format | Set this to 'json', 'xml' or 'simple_xml' to override the default value.
 | headers | This is HTTP headers to the request
 | json | This is an array with json data that will be encoded to a json string. Using this option you do need to specify a format. 
+| response_data_type | To override the response format for one request 
 | query | This is an array with query parameters
+
 
 If you are using the `GuzzleRequest` (default) you may want to have a look at [its documentation](http://docs.guzzlephp.org/en/latest/clients.html?highlight=format#request-options)
 to find out what more options that are available. 
@@ -163,8 +165,8 @@ There is one exception to the *format* option: When you specifying $options['jso
 
 ### Understanding response data type
 
-The data type returned from `LinkedIn::api` can be configured. You may use the forth construtor argument or the
-`LinkedIn::setResponseDataType`.
+The data type returned from `LinkedIn::api` can be configured. You may use the forth construtor argument, the
+`LinkedIn::setResponseDataType` or as an option for `LinkedIn::api`
 
 ```php
 // By constructor argument
@@ -172,6 +174,9 @@ $linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret', 'json', 'array');
 
 // By setter
 $linkedIn->setResponseDataType('simple_xml');
+
+// Set format for just one request
+$linkedIn->get('v1/people/~:(firstName,lastName)', array('response_data_type'=>'psr7'));
 
 ```
 
@@ -214,7 +219,7 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 
 ## Framework integration
 
-See how I integrated this with [Symfony2](docs/symfony.md).
+See how this library could be integrated with [Symfony2](docs/symfony.md).
 
 Looking for a Laravel 5.1 package? Check [mauri870/laravel-linkedin](https://github.com/mauri870/laravel-linkedin)
 
