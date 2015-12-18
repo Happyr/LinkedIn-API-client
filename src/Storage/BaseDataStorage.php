@@ -7,7 +7,7 @@ namespace Happyr\LinkedIn\Storage;
  */
 abstract class BaseDataStorage implements DataStorageInterface
 {
-    public static $validKeys = array('state', 'code', 'access_token', 'user');
+    public static $validKeys = array('state', 'code', 'access_token', 'user', 'redirect_url');
 
     /**
      * {@inheritdoc}

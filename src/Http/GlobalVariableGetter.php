@@ -14,7 +14,7 @@ class GlobalVariableGetter
      *
      * @return bool
      */
-    static function has($name)
+    public static function has($name)
     {
         if (isset($_REQUEST[$name])) {
             return true;
@@ -25,10 +25,8 @@ class GlobalVariableGetter
 
     /**
      * @param $name
-     *
-     * @return null
      */
-    static function get($name)
+    public static function get($name)
     {
         if (isset($_REQUEST[$name])) {
             return $_REQUEST[$name];
@@ -38,6 +36,6 @@ class GlobalVariableGetter
             return $_GET[$name];
         }
 
-        return null;
+        return;
     }
 }
