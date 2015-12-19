@@ -25,6 +25,8 @@ class GlobalVariableGetter
 
     /**
      * @param $name
+     *
+     * @return mixed
      */
     public static function get($name)
     {

@@ -103,7 +103,7 @@ class Authenticator
      * @return AccessToken|null An access token exchanged for the authorization code, or
      *                          null if an access token could not be generated.
      */
-    private function getAccessTokenFromCode(UrlGeneratorInterface $urlGenerator, $code)
+    protected function getAccessTokenFromCode(UrlGeneratorInterface $urlGenerator, $code)
     {
         if (empty($code)) {
             return;
@@ -123,7 +123,7 @@ class Authenticator
                 ]
             );
 
-            $response = ResponseConverter::convertToArray($this->requestManager->sendRequest('POST', $url, $headers, $body));
+            $response = ResponseConverter::convertToArray($this->getRequestManager()->sendRequest('POST', $url, $headers, $body));
         } catch (LinkedInApiException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so say so.
@@ -315,5 +315,13 @@ class Authenticator
         $this->storage = $storage;
 
         return $this;
+    }
+
+    /**
+     * @return RequestManager
+     */
+    protected function getRequestManager()
+    {
+        return $this->requestManager;
     }
 }

@@ -69,17 +69,19 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
 
     public function testFetchNewAccessToken()
     {
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
+        $code = 'newCode';
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('set')->once()->with('code', 'newCode')
+            ->shouldReceive('set')->once()->with('code', $code)
             ->shouldReceive('set')->once()->with('access_token', 'at')
             ->getMock();
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
-        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getAccessTokenFromCode')->will($this->returnValue('at'));
-        $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('newCode'));
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
+        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $auth->expects($this->once())->method('getAccessTokenFromCode')->with($generator, $code)->will($this->returnValue('at'));
+        $auth->expects($this->once())->method('getCode')->will($this->returnValue($code));
 
-        $this->assertEquals('at', $linkedIn->fetchNewAccessToken());
+        $this->assertEquals('at', $auth->fetchNewAccessToken($generator));
     }
 
     /**
@@ -87,71 +89,75 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function testFetchNewAccessTokenFail()
     {
+
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
+        $code = 'newCode';
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('clearAll')->once()
             ->getMock();
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
-        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getAccessTokenFromCode');
-        $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue('newCode'));
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
+        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $auth->expects($this->once())->method('getAccessTokenFromCode')->with($generator, $code);
+        $auth->expects($this->once())->method('getCode')->will($this->returnValue($code));
 
-        $linkedIn->fetchNewAccessToken();
+        $auth->fetchNewAccessToken($generator);
     }
 
     public function testFetchNewAccessTokenNoCode()
     {
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->with('code')->andReturn('foobar')
             ->shouldReceive('get')->once()->with('access_token', null)->andReturn('baz')
             ->getMock();
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
-        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getCode');
 
-        $this->assertEquals('baz', $linkedIn->fetchNewAccessToken());
-    }
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getCode', 'getStorage'), array(), '', false);
+        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
+        $auth->expects($this->once())->method('getCode');
 
-    public function testFetchNewAccessTokenSameCode()
-    {
-        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('get')->once()->with('access_token', null)->andReturn('baz')
-            ->getMock();
-
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getCode', 'getStorage'), array(), '', false);
-        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getCode')->will($this->returnValue(null));
-
-        $this->assertEquals('baz', $linkedIn->fetchNewAccessToken());
+        $this->assertEquals('baz', $auth->fetchNewAccessToken($generator));
     }
 
     public function testGetAccessTokenFromCodeEmpty()
     {
-        $this->assertNull($this->ln->getAccessTokenFromCode(''));
-        $this->assertNull($this->ln->getAccessTokenFromCode(null));
-        $this->assertNull($this->ln->getAccessTokenFromCode(false));
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
+
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method->setAccessible(true);
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array(), array(), '', false);
+
+        $this->assertNull($method->invoke($auth, $generator, ''));
+        $this->assertNull($method->invoke($auth, $generator, null));
+        $this->assertNull($method->invoke($auth, $generator, false));
     }
 
     public function testGetAccessTokenFromCode()
     {
-        $code = 'code';
-        $response = array('access_token' => 'foobar', 'expires_in' => 10);
-        $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method->setAccessible(true);
 
-        $token = $linkedIn->getAccessTokenFromCode($code);
+        $code = 'code';
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
+            ->shouldReceive('getUrl')->with(
+                'www',
+                'uas/oauth2/accessToken'
+            )->andReturn('url')
+            ->getMock();
+
+        $response = array('access_token' => 'foobar', 'expires_in' => 10);
+        $auth = $this->prepareGetAccessTokenFromCode($code, $response);
+        $token = $method->invoke($auth, $generator, $code);
         $this->assertEquals('foobar', $token, 'Standard get access token form code');
 
         $response = array('foo' => 'bar');
-        $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
-
-        $this->assertNull($linkedIn->getAccessTokenFromCode($code), 'Found array but no access token');
+        $auth = $this->prepareGetAccessTokenFromCode($code, $response);
+        $this->assertNull($method->invoke($auth, $generator, $code), 'Found array but no access token');
 
         $response = '';
-        $linkedIn = $this->prepareGetAccessTokenFromCode($code, $response);
-
-        $this->assertNull($linkedIn->getAccessTokenFromCode($code), 'Empty result');
-        $this->assertNull($linkedIn->getAccessTokenFromCode(null), 'Empty result');
+        $auth = $this->prepareGetAccessTokenFromCode($code, $response);
+        $this->assertNull($method->invoke($auth, $generator, $code), 'Empty result');
     }
 
     /**
@@ -165,15 +171,14 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
     {
         $response = new Response(200, [], json_encode($responseData));
         $currentUrl = 'foobar';
-        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
-            ->shouldReceive('getCurrentUrl')->once()->andReturn($currentUrl)
-            ->shouldReceive('getUrl')->once()->with(
-                'www',
-                'uas/oauth2/accessToken'
-            )->andReturn('url')
+
+        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
+            ->shouldReceive('get')->with('redirect_url')->andReturn($currentUrl)
             ->getMock();
-        $httpClient = m::mock('Happyr\HttpAutoDiscovery\Client')
-            ->shouldReceive('send')->once()->with('POST', 'url', [
+
+
+        $requestManager = m::mock('Happyr\LinkedIn\Http\RequestManager')
+            ->shouldReceive('sendRequest')->once()->with('POST', 'url', [
                 'Content-Type' => 'application/x-www-form-urlencoded',
             ], http_build_query(array(
                 'grant_type' => 'authorization_code',
@@ -184,15 +189,17 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
             )))->andReturn($response)
             ->getMock();
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getHttpClient', 'getUrlGenerator'), array(self::APP_ID, self::APP_SECRET));
-        $linkedIn->expects($this->any())->method('getUrlGenerator')->will($this->returnValue($generator));
-        $linkedIn->expects($this->once())->method('getHttpClient')->will($this->returnValue($httpClient));
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getStorage'), array($requestManager, self::APP_ID, self::APP_SECRET));
+        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
 
-        return $linkedIn;
+        return $auth;
     }
 
     public function testEstablishCSRFTokenState()
     {
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'establishCSRFTokenState');
+        $method->setAccessible(true);
+
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->with('state', null)->andReturn(null, 'state')
             ->shouldReceive('set')->once()->with('state', \Mockery::on(function (&$param) {
@@ -200,129 +207,48 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
                 }))
             ->getMock();
 
-        $this->ln->setStorage($storage);
 
-        $this->ln->establishCSRFTokenState();
-        $this->ln->establishCSRFTokenState();
-    }
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getStorage'), array(), '', false);
+        $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
 
-    /**
-     * Test with no previous user.
-     */
-    public function testGetUserFromAvailableData()
-    {
-        $expected = 'foobar';
-        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('set')->once()->with('user', $expected)
-            ->shouldReceive('get')->once()->with('user', null)->andReturn(null)
-            ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
-            ->getMock();
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
-        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('access_token'));
-        $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue($expected));
-
-        $this->assertEquals($expected, $linkedIn->getUserFromAvailableData());
-    }
-
-    /**
-     * Test with previous user.
-     */
-    public function testGetUserFromAvailableDataExistingUser()
-    {
-        $expected = 'user';
-        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('get')->once()->with('user', null)->andReturn($expected)
-            ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
-            ->getMock();
-
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getAccessToken', 'getStorage'), array(), '', false);
-        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('access_token'));
-
-        $this->assertEquals($expected, $linkedIn->getUserFromAvailableData());
-    }
-
-    /**
-     * Test with previous user but new access token.
-     */
-    public function testGetUserFromAvailableDataExistingUserDifferentAccessToken()
-    {
-        $expected = 'foobar';
-        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('set')->once()->with('user', $expected)
-            ->shouldReceive('get')->once()->with('user', null)->andReturn('user')
-            ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
-            ->getMock();
-
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
-        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('new_access_token'));
-        $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue($expected));
-
-        $this->assertEquals($expected, $linkedIn->getUserFromAvailableData());
-    }
-
-    /**
-     * Test when getUserFromAccessToken fails.
-     */
-    public function testGetUserFromAvailableDataFailedToGetUser()
-    {
-        $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
-            ->shouldReceive('clearAll')->once()
-            ->shouldReceive('get')->once()->with('user', null)->andReturn(null)
-            ->shouldReceive('get')->once()->with('access_token')->andReturn('access_token')
-            ->getMock();
-
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getAccessToken', 'getUserFromAccessToken', 'getStorage'), array(), '', false);
-        $linkedIn->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('getAccessToken')->will($this->returnValue('new_access_token'));
-        $linkedIn->expects($this->once())->method('getUserFromAccessToken')->will($this->returnValue(null));
-
-        $this->assertNull($linkedIn->getUserFromAvailableData());
-    }
-
-    public function testGetUserFromAccessToken()
-    {
-        $expected = 'foobar';
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('api'), array(), '', false);
-        $linkedIn->expects($this->once())->method('api')->will($this->returnValue($expected));
-
-        $this->assertEquals($expected, $linkedIn->getUserFromAccessToken());
-    }
-
-    public function testGetUserFromAccessTokenFail()
-    {
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('api'), array(), '', false);
-        $linkedIn->expects($this->once())->method('api')->will($this->throwException(new LinkedInApiException('foobar')));
-
-        $this->assertNull($linkedIn->getUserFromAccessToken());
+        // Make sure we only set the state once
+        $method->invoke($auth);
+        $method->invoke($auth);
     }
 
     public function testGetCodeEmpty()
     {
         unset($_REQUEST['code']);
-        $this->assertNull($this->ln->getCode());
+        unset($_GET['code']);
+
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getCode');
+        $method->setAccessible(true);
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array(), array(), '', false);
+
+        $this->assertNull($method->invoke($auth));
     }
 
     public function testGetCode()
     {
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getCode');
+        $method->setAccessible(true);
+
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('clear')->once()->with('state')
             ->shouldReceive('get')->once()->with('code')->andReturn(null)
             ->getMock();
         $state = 'bazbar';
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getState', 'setState', 'getStorage'), array(), '', false);
-        $linkedIn->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
-        $linkedIn->expects($this->once())->method('setState')->with($this->equalTo(null));
-        $linkedIn->expects($this->once())->method('getState')->will($this->returnValue($state));
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getState', 'setState', 'getStorage'), array(), '', false);
+        $auth->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+        $auth->expects($this->once())->method('setState')->with($this->equalTo(null));
+        $auth->expects($this->once())->method('getState')->will($this->returnValue($state));
 
         $_REQUEST['code'] = 'foobar';
         $_REQUEST['state'] = $state;
 
-        $this->assertEquals('foobar', $linkedIn->getCode());
+        $this->assertEquals('foobar', $method->invoke($auth));
     }
 
     /**
@@ -330,138 +256,69 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetCodeInvalidCode()
     {
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getCode');
+        $method->setAccessible(true);
+
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->once()->with('code')->andReturn(null)
             ->getMock();
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getState', 'getStorage'), array(), '', false);
-        $linkedIn->expects($this->once())->method('getState')->will($this->returnValue('bazbar'));
-        $linkedIn->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getState', 'getStorage'), array(), '', false);
+        $auth->expects($this->once())->method('getState')->will($this->returnValue('bazbar'));
+        $auth->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
 
         $_REQUEST['code'] = 'foobar';
         $_REQUEST['state'] = 'invalid';
 
-        $this->assertEquals('foobar', $linkedIn->getCode());
+        $this->assertEquals('foobar', $method->invoke($auth));
     }
 
     public function testGetCodeUsedCode()
     {
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getCode');
+        $method->setAccessible(true);
+
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
             ->shouldReceive('get')->once()->with('code')->andReturn('foobar')
             ->getMock();
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedInDummy', array('getStorage'), array(), '', false);
-        $linkedIn->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getStorage'), array(), '', false);
+        $auth->expects($this->once())->method('getStorage')->will($this->returnValue($storage));
 
         $_REQUEST['code'] = 'foobar';
 
-        $this->assertEquals(null, $linkedIn->getCode());
-    }
-
-    /**
-     * Test a call to getAccessToken when there is no token.
-     */
-    public function testGetAccessTokenEmpty()
-    {
-        $token = 'token';
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('fetchNewAccessToken', 'setAccessToken'), array(), '', false);
-        $linkedIn->expects($this->once())->method('fetchNewAccessToken')->will($this->returnValue($token));
-        $linkedIn->expects($this->once())->method('setAccessToken')->with($token);
-
-        $linkedIn->getAccessToken();
-    }
-
-    public function testAccessTokenAccessors()
-    {
-        $token = 'token';
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('fetchNewAccessToken'), array(), '', false);
-        $linkedIn->expects($this->never())->method('fetchNewAccessToken');
-
-        $linkedIn->setAccessToken($token);
-        $result = $linkedIn->getAccessToken();
-
-        $this->assertEquals($token, $result);
-    }
-
-    public function testRequestAccessors()
-    {
-        // test default
-        $this->assertInstanceOf('Http\Client\HttpClient', $this->ln->getHttpClient());
-
-        $object = m::mock('Http\Adapter\Guzzle6HttpAdapter');
-        $this->ln->setHttpClient($object);
-        $this->assertEquals($object, $this->ln->getHttpClient());
-    }
-
-    public function testGeneratorAccessors()
-    {
-        // test default
-        $this->assertInstanceOf('Happyr\LinkedIn\Http\UrlGenerator', $this->ln->getUrlGenerator());
-
-        $object = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
-        $this->ln->setUrlGenerator($object);
-        $this->assertEquals($object, $this->ln->getUrlGenerator());
+        $this->assertEquals(null, $method->invoke($auth));
     }
 
     public function testStorageAccessors()
     {
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getStorage');
+        $method->setAccessible(true);
+        $requestManager = m::mock('Happyr\LinkedIn\Http\RequestManager');
+        $auth = new Authenticator($requestManager, self::APP_ID, self::APP_SECRET);
+
         // test default
-        $this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $this->ln->getStorage());
+        $this->assertInstanceOf('Happyr\LinkedIn\Storage\SessionStorage', $method->invoke($auth));
 
         $object = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface');
-        $this->ln->setStorage($object);
-        $this->assertEquals($object, $this->ln->getStorage());
+        $auth->setStorage($object);
+        $this->assertEquals($object, $method->invoke($auth));
     }
 
     public function testStateAccessors()
     {
+        $set = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'setState');
+        $set->setAccessible(true);
+        $get = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getState');
+        $get->setAccessible(true);
+
+        $requestManager = m::mock('Happyr\LinkedIn\Http\RequestManager');
+        $auth = new Authenticator($requestManager, self::APP_ID, self::APP_SECRET);
+
         $state = 'foobar';
-        $this->ln->setState($state);
-        $this->assertEquals($state, $this->ln->getState());
+        $set->invoke($auth, $state);
+        $this->assertEquals($state, $get->invoke($auth));
     }
 
-    public function testHasError()
-    {
-        unset($_GET['error']);
-        $this->assertFalse($this->ln->hasError());
-
-        $_GET['error'] = 'foobar';
-        $this->assertTrue($this->ln->hasError());
-    }
-
-    public function testGetError()
-    {
-        unset($_GET['error']);
-        unset($_GET['error_description']);
-
-        $this->assertNull($this->ln->getError());
-
-        $_GET['error'] = 'foo';
-        $_GET['error_description'] = 'bar';
-
-        $this->assertEquals('foo', $this->ln->getError()->getName());
-        $this->assertEquals('bar', $this->ln->getError()->getDescription());
-    }
-
-    public function testGetErrorWithMissingDescription()
-    {
-        unset($_GET['error']);
-        unset($_GET['error_description']);
-
-        $_GET['error'] = 'foo';
-
-        $this->assertEquals('foo', $this->ln->getError()->getName());
-        $this->assertNull($this->ln->getError()->getDescription());
-    }
-
-    public function testFormatAccessors()
-    {
-        //test default
-        $this->assertEquals('json', $this->ln->getFormat());
-
-        $format = 'foo';
-        $this->ln->setFormat($format);
-        $this->assertEquals($format, $this->ln->getFormat());
-    }
 }
 
