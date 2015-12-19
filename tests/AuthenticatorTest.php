@@ -2,14 +2,10 @@
 
 namespace Happyr\LinkedIn;
 
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Happyr\LinkedIn\Exceptions\LinkedInApiException;
 use Mockery as m;
 
 /**
- *
- *
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
 class AuthenticatorTest extends \PHPUnit_Framework_TestCase
@@ -89,7 +85,6 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
      */
     public function testFetchNewAccessTokenFail()
     {
-
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
         $code = 'newCode';
         $storage = m::mock('Happyr\LinkedIn\Storage\DataStorageInterface')
@@ -111,7 +106,6 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
             ->shouldReceive('get')->with('code')->andReturn('foobar')
             ->shouldReceive('get')->once()->with('access_token', null)->andReturn('baz')
             ->getMock();
-
 
         $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getCode', 'getStorage'), array(), '', false);
         $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
@@ -176,7 +170,6 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
             ->shouldReceive('get')->with('redirect_url')->andReturn($currentUrl)
             ->getMock();
 
-
         $requestManager = m::mock('Happyr\LinkedIn\Http\RequestManager')
             ->shouldReceive('sendRequest')->once()->with('POST', 'url', [
                 'Content-Type' => 'application/x-www-form-urlencoded',
@@ -207,10 +200,8 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
                 }))
             ->getMock();
 
-
         $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getStorage'), array(), '', false);
         $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-
 
         // Make sure we only set the state once
         $method->invoke($auth);
@@ -294,7 +285,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
     {
         $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getStorage');
         $method->setAccessible(true);
-        $requestManager = m::mock('Happyr\LinkedIn\Http\RequestManager');
+        $requestManager = $this->getRequestManagerMock();
         $auth = new Authenticator($requestManager, self::APP_ID, self::APP_SECRET);
 
         // test default
@@ -312,13 +303,11 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $get = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getState');
         $get->setAccessible(true);
 
-        $requestManager = m::mock('Happyr\LinkedIn\Http\RequestManager');
+        $requestManager = $this->getRequestManagerMock();
         $auth = new Authenticator($requestManager, self::APP_ID, self::APP_SECRET);
 
         $state = 'foobar';
         $set->invoke($auth, $state);
         $this->assertEquals($state, $get->invoke($auth));
     }
-
 }
-

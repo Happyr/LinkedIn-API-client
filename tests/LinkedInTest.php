@@ -2,14 +2,9 @@
 
 namespace Happyr\LinkedIn;
 
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use Happyr\LinkedIn\Exceptions\LinkedInApiException;
-use Mockery as m;
 
 /**
- *
- *
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
 class LinkedInTest extends \PHPUnit_Framework_TestCase
@@ -30,24 +25,23 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
         $headers = array('Authorization' => 'Bearer '.$token, 'Content-Type' => 'application/json', 'x-li-format' => 'json');
 
-        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
-            ->shouldReceive('getUrl')->once()->with(
-                'api',
-                $resource,
-                array(
-                    'url' => 'foo',
-                    'format' => 'json',
-                ))->andReturn($url)
-            ->getMock();
+        $generator = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getUrl'));
+        $generator->expects($this->once())->method('getUrl')->with(
+            $this->equalTo('api'),
+            $this->equalTo($resource),
+            $this->equalTo(array(
+                'url' => 'foo',
+                'format' => 'json',
+            )))
+            ->willReturn($url);
 
-        $requestManager = m::mock('Happyr\LinkedIn\Http\RequestManager')
-            ->shouldReceive('sendRequest')->once()->with(
+        $requestManager = $this->getMock('Happyr\LinkedIn\Http\RequestManager', array('sendRequest'));
+        $requestManager->expects($this->once())->method('sendRequest')->with(
                 $this->equalTo($method),
                 $this->equalTo($url),
                 $this->equalTo($headers),
                 $this->equalTo(json_encode($postParams)))
-            ->andReturn($response)
-            ->getMock();
+            ->willReturn($response);
 
         $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('getAccessToken', 'getUrlGenerator', 'getRequestManager'), array(self::APP_ID, self::APP_SECRET));
 
@@ -65,17 +59,15 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $linkedIn->expects($this->once())->method('getAccessToken')->willReturn(null);
         $this->assertFalse($linkedIn->isAuthenticated());
 
-
         $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('api', 'getAccessToken'), array(self::APP_ID, self::APP_SECRET));
         $linkedIn->expects($this->once())->method('getAccessToken')->willReturn('token');
-        $linkedIn->expects($this->once())->method('api')->willReturn(array('id'=>4711));
+        $linkedIn->expects($this->once())->method('api')->willReturn(array('id' => 4711));
         $this->assertTrue($linkedIn->isAuthenticated());
 
         $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('api', 'getAccessToken'), array(self::APP_ID, self::APP_SECRET));
         $linkedIn->expects($this->once())->method('getAccessToken')->willReturn('token');
-        $linkedIn->expects($this->once())->method('api')->willReturn(array('foobar'=>4711));
+        $linkedIn->expects($this->once())->method('api')->willReturn(array('foobar' => 4711));
         $this->assertFalse($linkedIn->isAuthenticated());
-
     }
 
     /**
@@ -102,11 +94,10 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $get->setAccessible(true);
         $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
 
-
         // test default
         $this->assertInstanceOf('Happyr\LinkedIn\Http\UrlGenerator', $get->invoke($linkedIn));
 
-        $object = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
+        $object = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator');
         $linkedIn->setUrlGenerator($object);
         $this->assertEquals($object, $get->invoke($linkedIn));
     }

@@ -393,7 +393,6 @@ class LinkedIn
     }
 
     /**
-     *
      * @return RequestManager
      */
     protected function getRequestManager()
@@ -402,7 +401,6 @@ class LinkedIn
     }
 
     /**
-     *
      * @return Authenticator
      */
     protected function getAuthenticator()
