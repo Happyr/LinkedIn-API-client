@@ -138,7 +138,7 @@ class LinkedIn
         }
 
         $body = isset($options['body']) ? $options['body'] : null;
-        $this->lastResponse = $this->requestManager->sendRequest($method, $url, $options['headers'], $body);
+        $this->lastResponse = $this->getRequestManager()->sendRequest($method, $url, $options['headers'], $body);
 
         return ResponseConverter::convert($this->lastResponse, $requestFormat, $responseDataType);
     }
@@ -193,7 +193,7 @@ class LinkedIn
      */
     public function getLoginUrl($options = array())
     {
-        return $this->authenticator->getLoginUrl($this->getUrlGenerator(), $options);
+        return $this->getAuthenticator()->getLoginUrl($this->getUrlGenerator(), $options);
     }
 
     /**
@@ -227,7 +227,7 @@ class LinkedIn
      */
     public function clearStorage()
     {
-        $this->authenticator->clearStorage();
+        $this->getAuthenticator()->clearStorage();
     }
 
     /**
@@ -316,7 +316,7 @@ class LinkedIn
     public function getAccessToken()
     {
         if ($this->accessToken === null) {
-            $newAccessToken = $this->authenticator->fetchNewAccessToken($this->getUrlGenerator());
+            $newAccessToken = $this->getAuthenticator()->fetchNewAccessToken($this->getUrlGenerator());
             if ($newAccessToken !== null) {
                 $this->setAccessToken($newAccessToken);
             }
@@ -375,7 +375,7 @@ class LinkedIn
      */
     public function setStorage(DataStorageInterface $storage)
     {
-        $this->authenticator->setStorage($storage);
+        $this->getAuthenticator()->setStorage($storage);
 
         return $this;
     }
@@ -387,8 +387,26 @@ class LinkedIn
      */
     public function setHttpClient(HttpClient $client)
     {
-        $this->requestManager->setHttpClient($client);
+        $this->getRequestManager()->setHttpClient($client);
 
         return $this;
+    }
+
+    /**
+     *
+     * @return RequestManager
+     */
+    protected function getRequestManager()
+    {
+        return $this->requestManager;
+    }
+
+    /**
+     *
+     * @return Authenticator
+     */
+    protected function getAuthenticator()
+    {
+        return $this->authenticator;
     }
 }
