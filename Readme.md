@@ -193,6 +193,8 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 
 See how I integrated this with [Symfony2](docs/symfony.md).
 
+Looking for a Laravel 5.1 package? Check [mauri870/laravel-linkedin](https://github.com/mauri870/laravel-linkedin)
+
 
 [register-app]: https://www.linkedin.com/secure/developer
 [linkedin-code-samples]: https://developer.linkedin.com/documents/code-samples
