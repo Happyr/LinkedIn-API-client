@@ -2,13 +2,12 @@
 
 namespace Happyr\LinkedIn\Storage;
 
-use Happyr\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Exception\InvalidArgumentException;
+use Happyr\LinkedIn\Exception\LinkedInTransferException;
 use Illuminate\Support\Facades\Session;
 
 /**
- * Class SessionStorage.
- *
- * Store data in the session.
+ * Store data in a IlluminateSession.
  *
  * @author Andreas Creten
  */
@@ -20,7 +19,7 @@ class IlluminateSessionStorage extends BaseDataStorage
     public function set($key, $value)
     {
         if (!in_array($key, self::$validKeys)) {
-            throw new LinkedInApiException(sprintf('Unsupported key ("%s") passed to set.', $key));
+            throw new InvalidArgumentException('Unsupported key "%s" passed to set.', $key);
         }
 
         $name = $this->constructSessionVariableName($key);
@@ -48,7 +47,7 @@ class IlluminateSessionStorage extends BaseDataStorage
     public function clear($key)
     {
         if (!in_array($key, self::$validKeys)) {
-            throw new LinkedInApiException(sprintf('Unsupported key ("%s") passed to clear.', $key));
+            throw new InvalidArgumentException('Unsupported key "%s" passed to clear.', $key);
         }
 
         $name = $this->constructSessionVariableName($key);

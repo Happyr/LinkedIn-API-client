@@ -31,11 +31,11 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testSetFail()
     {
-        Session::shouldReceive('put')->once()->with($this->prefix.'code', 'baz')->andThrow('\Happyr\LinkedIn\Exceptions\LinkedInApiException');
+        Session::shouldReceive('put')->once()->with($this->prefix.'code', 'baz')->andThrow('\Happyr\LinkedIn\Exception\LinkedInTransferException');
 
         $this->storage->set('foobar', 'baz');
     }
@@ -60,7 +60,7 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testClearFail()
     {

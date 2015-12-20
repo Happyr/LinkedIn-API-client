@@ -2,6 +2,8 @@
 
 namespace Happyr\LinkedIn\Http;
 
+use Happyr\LinkedIn\Exception\LinkedInTransferException;
+use Http\Client\Exception\TransferException;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
@@ -30,7 +32,11 @@ class RequestManager
     {
         $request = MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body);
 
-        return $this->getHttpClient()->sendRequest($request);
+        try {
+            return $this->getHttpClient()->sendRequest($request);
+        } catch (TransferException $e) {
+            throw new LinkedInTransferException('Error while requesting data from LinkedIn.com: '.$e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**

@@ -36,7 +36,7 @@ class ResponseConverterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testConvertJsonToSimpleXml()
     {
@@ -47,7 +47,7 @@ class ResponseConverterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testConvertXmlToArray()
     {
@@ -63,7 +63,7 @@ class ResponseConverterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testConvertJsonToFoobar()
     {
@@ -73,7 +73,7 @@ class ResponseConverterTest extends \PHPUnit_Framework_TestCase
         ResponseConverter::convert($response, 'json', 'foobar');
     }
 
-    public function testConvertToSimbleXml()
+    public function testConvertToSimpleXml()
     {
         $body = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <person>
@@ -90,9 +90,9 @@ class ResponseConverterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\LinkedInTransferException
      */
-    public function testConvertToSimbleXmlError()
+    public function testConvertToSimpleXmlError()
     {
         $body = '{Foo: bar}';
 

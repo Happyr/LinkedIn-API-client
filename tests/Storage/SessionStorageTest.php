@@ -30,7 +30,7 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testSetFail()
     {
@@ -61,7 +61,7 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testClearFail()
     {

@@ -3,6 +3,7 @@
 namespace Happyr\LinkedIn;
 
 use GuzzleHttp\Psr7\Response;
+use Happyr\LinkedIn\Exception\LinkedInException;
 use Mockery as m;
 
 /**
@@ -81,7 +82,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\LinkedInException
      */
     public function testFetchNewAccessTokenFail()
     {
@@ -93,7 +94,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
 
         $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getCode', 'getStorage', 'getAccessTokenFromCode'), array(), '', false);
         $auth->expects($this->any())->method('getStorage')->will($this->returnValue($storage));
-        $auth->expects($this->once())->method('getAccessTokenFromCode')->with($generator, $code);
+        $auth->expects($this->once())->method('getAccessTokenFromCode')->with($generator, $code)->willThrowException(new LinkedInException());
         $auth->expects($this->once())->method('getCode')->will($this->returnValue($code));
 
         $auth->fetchNewAccessToken($generator);
@@ -114,7 +115,10 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('baz', $auth->fetchNewAccessToken($generator));
     }
 
-    public function testGetAccessTokenFromCodeEmpty()
+    /**
+     * @expectedException \Happyr\LinkedIn\Exception\LinkedInException
+     */
+    public function testGetAccessTokenFromCodeEmptyString()
     {
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
 
@@ -122,9 +126,35 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $method->setAccessible(true);
         $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array(), array(), '', false);
 
-        $this->assertNull($method->invoke($auth, $generator, ''));
-        $this->assertNull($method->invoke($auth, $generator, null));
-        $this->assertNull($method->invoke($auth, $generator, false));
+        $method->invoke($auth, $generator, '');
+    }
+
+    /**
+     * @expectedException \Happyr\LinkedIn\Exception\LinkedInException
+     */
+    public function testGetAccessTokenFromCodeNull()
+    {
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
+
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method->setAccessible(true);
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array(), array(), '', false);
+
+        $method->invoke($auth, $generator, null);
+    }
+
+    /**
+     * @expectedException \Happyr\LinkedIn\Exception\LinkedInException
+     */
+    public function testGetAccessTokenFromCodeFalse()
+    {
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator');
+
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method->setAccessible(true);
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array(), array(), '', false);
+
+        $method->invoke($auth, $generator, false);
     }
 
     public function testGetAccessTokenFromCode()
@@ -144,10 +174,44 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $auth = $this->prepareGetAccessTokenFromCode($code, $response);
         $token = $method->invoke($auth, $generator, $code);
         $this->assertEquals('foobar', $token, 'Standard get access token form code');
+    }
+
+    /**
+     * @expectedException \Happyr\LinkedIn\Exception\LinkedInException
+     */
+    public function testGetAccessTokenFromCodeNoTokenInResponse()
+    {
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method->setAccessible(true);
+
+        $code = 'code';
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
+            ->shouldReceive('getUrl')->with(
+                'www',
+                'uas/oauth2/accessToken'
+            )->andReturn('url')
+            ->getMock();
 
         $response = array('foo' => 'bar');
         $auth = $this->prepareGetAccessTokenFromCode($code, $response);
         $this->assertNull($method->invoke($auth, $generator, $code), 'Found array but no access token');
+    }
+
+    /**
+     * @expectedException \Happyr\LinkedIn\Exception\LinkedInException
+     */
+    public function testGetAccessTokenFromCodeEmptyResponse()
+    {
+        $method = new \ReflectionMethod('Happyr\LinkedIn\Authenticator', 'getAccessTokenFromCode');
+        $method->setAccessible(true);
+
+        $code = 'code';
+        $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
+            ->shouldReceive('getUrl')->with(
+                'www',
+                'uas/oauth2/accessToken'
+            )->andReturn('url')
+            ->getMock();
 
         $response = '';
         $auth = $this->prepareGetAccessTokenFromCode($code, $response);
@@ -243,7 +307,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\LinkedInException
      */
     public function testGetCodeInvalidCode()
     {

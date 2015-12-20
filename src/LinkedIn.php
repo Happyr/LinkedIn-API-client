@@ -2,7 +2,7 @@
 
 namespace Happyr\LinkedIn;
 
-use Happyr\LinkedIn\Exceptions\LoginError;
+use Happyr\LinkedIn\Exception\LoginError;
 use Happyr\LinkedIn\Http\GlobalVariableGetter;
 use Happyr\LinkedIn\Http\RequestManager;
 use Happyr\LinkedIn\Http\ResponseConverter;

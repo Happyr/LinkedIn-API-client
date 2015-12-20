@@ -2,7 +2,8 @@
 
 namespace Happyr\LinkedIn\Http;
 
-use Happyr\LinkedIn\Exceptions\LinkedInApiException;
+use Happyr\LinkedIn\Exception\InvalidArgumentException;
+use Happyr\LinkedIn\Exception\LinkedInTransferException;
 use Psr\Http\Message\ResponseInterface;
 
 class ResponseConverter
@@ -13,13 +14,13 @@ class ResponseConverter
      *
      * @return ResponseInterface|\Psr\Http\Message\StreamInterface|\SimpleXMLElement|string
      *
-     * @throws LinkedInApiException
+     * @throws LinkedInTransferException
      */
     public static function convert(ResponseInterface $response, $requestFormat, $dataType)
     {
         if (($requestFormat === 'json' && $dataType === 'simple_xml') ||
             ($requestFormat === 'xml' && $dataType === 'array')) {
-            throw new \InvalidArgumentException(sprintf('Can not use reponse data format "%s" with the request format "s%"', $dataType, $requestFormat));
+            throw new InvalidArgumentException('Can not use reponse data format "%s" with the request format "%s"', $dataType, $requestFormat);
         }
 
         switch ($dataType) {
@@ -34,7 +35,7 @@ class ResponseConverter
             case 'psr7':
                 return $response;
             default:
-                throw new \InvalidArgumentException(sprintf('Format "%s" is not supported', $dataType));
+                throw new InvalidArgumentException('Format "%s" is not supported', $dataType);
         }
     }
 
@@ -53,7 +54,7 @@ class ResponseConverter
      *
      * @return \SimpleXMLElement
      *
-     * @throws LinkedInApiException
+     * @throws LinkedInTransferException
      */
     public static function convertToSimpleXml(ResponseInterface $response)
     {
@@ -61,14 +62,7 @@ class ResponseConverter
         try {
             return new \SimpleXMLElement((string) $body ?: '<root />');
         } catch (\Exception $e) {
-            throw new LinkedInApiException(
-                array(
-                    'error' => array(
-                        'message' => 'Unable to parse response body into XML: '.$e->getMessage(),
-                        'type' => 'XmlParseException',
-                    ),
-                )
-            );
+            throw new LinkedInTransferException('Unable to parse response body into XML.');
         }
     }
 }
