@@ -2,8 +2,6 @@
 
 namespace Happyr\LinkedIn\Storage;
 
-use Happyr\LinkedIn\Exception\InvalidArgumentException;
-
 /**
  * Store data in the global session.
  *
@@ -26,26 +24,21 @@ class SessionStorage extends BaseDataStorage
      */
     public function set($key, $value)
     {
-        if (!in_array($key, self::$validKeys)) {
-            throw new InvalidArgumentException('Unsupported key "%s" passed to set.', $key);
-        }
+        $this->validateKey($key);
 
-        $name = $this->constructSessionVariableName($key);
+        $name = $this->getStorageKeyId($key);
         $_SESSION[$name] = $value;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function get($key, $default = false)
+    public function get($key)
     {
-        if (!in_array($key, self::$validKeys)) {
-            return $default;
-        }
+        $this->validateKey($key);
+        $name = $this->getStorageKeyId($key);
 
-        $name = $this->constructSessionVariableName($key);
-
-        return isset($_SESSION[$name]) ? $_SESSION[$name] : $default;
+        return isset($_SESSION[$name]) ? $_SESSION[$name] : null;
     }
 
     /**
@@ -53,11 +46,9 @@ class SessionStorage extends BaseDataStorage
      */
     public function clear($key)
     {
-        if (!in_array($key, self::$validKeys)) {
-            throw new InvalidArgumentException('Unsupported key "%s" passed to clear.', $key);
-        }
+        $this->validateKey($key);
 
-        $name = $this->constructSessionVariableName($key);
+        $name = $this->getStorageKeyId($key);
         if (isset($_SESSION[$name])) {
             unset($_SESSION[$name]);
         }

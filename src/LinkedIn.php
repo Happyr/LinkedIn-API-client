@@ -21,11 +21,11 @@ use Psr\Http\Message\ResponseInterface;
  * 3. The user returns to your site with a *code* in the the $_REQUEST.
  * 4. You call isAuthenticated() or getAccessToken()
  * 5. We don't got an access token (only a *code*). So getAccessToken() calls fetchNewAccessToken()
- * 6. fetchNewAccessToken() gets the *code* and calls getAccessTokenFromCode()
+ * 6. fetchNewAccessToken() gets the *code* from the $_REQUEST and calls getAccessTokenFromCode()
  * 7. getAccessTokenFromCode() makes a request to www.linkedin.com and exchanges the *code* for an access token
- * 8. With a valid access token we can query the api for the user
- * 9. When you make a second request to the api you skip the authorization (1-3) and
- *     the "*code* for access token exchange" (5-7).
+ * 8. When you have the access token you should store it in a database and/or query the API.
+ * 9. When you make a second request to the API we have the access token in memory, so we don't go through all these
+ *    authentication steps again.
  *
  * @author Tobias Nyholm
  */
@@ -98,22 +98,29 @@ class LinkedIn
             return false;
         }
 
-        $user = $this->api('GET', '/v1/people/~:(id,firstName,lastName)', array('responseDataType' => 'array'));
+        $user = $this->api('GET', '/v1/people/~:(id,firstName,lastName)', array('format' => 'json', 'response_data_type' => 'array'));
 
         return !empty($user['id']);
     }
 
     /**
-     * Make an API call.
+     * Make an API call. Read about what calls that are possible here: https://developer.linkedin.com/docs/rest-api.
      *
+     * Example:
      * $linkedIn->api('GET', '/v1/people/~:(id,firstName,lastName,headline)');
+     *
+     * The options:
+     * - body: the body of the request
+     * - format: the format you are using to send the request
+     * - headers: array with headers to use
+     * - response_data_type: the data type to get back
+     * - query: query parameters to the request
      *
      * @param string $method   This is the HTTP verb
      * @param string $resource everything after the domain in the URL.
-     * @param array  $options  [optional] This is the options you may pass to the request. You might be interested
-     *                         in setting values for 'query', 'headers', 'body' or 'response_data_type'. See the readme for more.
+     * @param array  $options  See the readme for option description.
      *
-     * @return array|\SimpleXMLElement|string What the function return depends on the responseDataType parameter.
+     * @return mixed this depends on the response_data_type parameter.
      */
     public function api($method, $resource, array $options = array())
     {
@@ -130,15 +137,15 @@ class LinkedIn
             isset($options['query']) ? $options['query'] : array()
         );
 
+        $body = isset($options['body']) ? $options['body'] : null;
+        $this->lastResponse = $this->getRequestManager()->sendRequest($method, $url, $options['headers'], $body);
+
         //Get the response data format
         if (isset($options['response_data_type'])) {
             $responseDataType = $options['response_data_type'];
         } else {
             $responseDataType = $this->getResponseDataType();
         }
-
-        $body = isset($options['body']) ? $options['body'] : null;
-        $this->lastResponse = $this->getRequestManager()->sendRequest($method, $url, $options['headers'], $body);
 
         return ResponseConverter::convert($this->lastResponse, $requestFormat, $responseDataType);
     }
@@ -148,7 +155,7 @@ class LinkedIn
      *
      * @param array &$options
      *
-     * @return string
+     * @return string the request format to use
      */
     protected function filterRequestOption(array &$options)
     {
@@ -156,6 +163,7 @@ class LinkedIn
             $options['format'] = 'json';
             $options['body'] = json_encode($options['json']);
         } elseif (!isset($options['format'])) {
+            // Make sure we always have a format
             $options['format'] = $this->getFormat();
         }
 
@@ -172,18 +180,14 @@ class LinkedIn
             default:
                 // Do nothing
         }
-        $format = $options['format'];
-        unset($options['format']);
 
-        return $format;
+        return $options['format'];
     }
 
     /**
-     * Get a Login URL for use with redirects. By default, full page redirect is
-     * assumed. If you are using the generated URL with a window.open() call in
-     * JavaScript, you can pass in display=popup as part of the $params.
+     * Get a login URL where the user can put his/hers LinkedIn credentials and authorize the application.
      *
-     * The parameters:
+     * The options:
      * - redirect_uri: the url to go to after a successful login
      * - scope: comma (or space) separated list of requested extended permissions
      *
@@ -193,16 +197,23 @@ class LinkedIn
      */
     public function getLoginUrl($options = array())
     {
-        return $this->getAuthenticator()->getLoginUrl($this->getUrlGenerator(), $options);
+        $urlGenerator = $this->getUrlGenerator();
+
+        // Set redirect_uri to current URL if not defined
+        if (!isset($options['redirect_uri'])) {
+            $options['redirect_uri'] = $urlGenerator->getCurrentUrl();
+        }
+
+        return $this->getAuthenticator()->getLoginUrl($urlGenerator, $options);
     }
 
     /**
-     * See docs for LinkedIn::api.
+     * See docs for LinkedIn::api().
      *
      * @param string $resource
      * @param array  $options
      *
-     * @return array|\SimpleXMLElement|string
+     * @return mixed
      */
     public function get($resource, array $options = array())
     {
@@ -210,12 +221,12 @@ class LinkedIn
     }
 
     /**
-     * See docs for LinkedIn::api.
+     * See docs for LinkedIn::api().
      *
      * @param string $resource
      * @param array  $options
      *
-     * @return array|\SimpleXMLElement|string
+     * @return mixed
      */
     public function post($resource, array $options = array())
     {
@@ -223,11 +234,15 @@ class LinkedIn
     }
 
     /**
-     * Clear the storage. This will forget everything about the user and authentication process.
+     * Clear the data storage. This will forget everything about the user and authentication process.
+     *
+     * @return $this
      */
     public function clearStorage()
     {
         $this->getAuthenticator()->clearStorage();
+
+        return $this;
     }
 
     /**
@@ -247,14 +262,14 @@ class LinkedIn
      */
     public function getError()
     {
-        if (!$this->hasError()) {
-            return;
+        if ($this->hasError()) {
+            return new LoginError(GlobalVariableGetter::get('error'), GlobalVariableGetter::get('error_description'));
         }
-
-        return new LoginError(GlobalVariableGetter::get('error'), GlobalVariableGetter::get('error_description'));
     }
 
     /**
+     * Get the default format to use when sending requests.
+     *
      * @return string
      */
     public function getFormat()
@@ -263,6 +278,8 @@ class LinkedIn
     }
 
     /**
+     * Set the default format to use when sending requests.
+     *
      * @param string $format
      *
      * @return $this
@@ -275,6 +292,8 @@ class LinkedIn
     }
 
     /**
+     * Get the default data type to be returned as a response.
+     *
      * @return string
      */
     public function getResponseDataType()
@@ -283,9 +302,11 @@ class LinkedIn
     }
 
     /**
+     * Set the default data type to be returned as a response.
+     *
      * @param string $responseDataType
      *
-     * @return LinkedIn
+     * @return $this
      */
     public function setResponseDataType($responseDataType)
     {
@@ -295,29 +316,24 @@ class LinkedIn
     }
 
     /**
-     * Get headers from last response.
+     * Get the last response. This will always return a PSR-7 response no matter of the data type used.
      *
-     * @return array
+     * @return ResponseInterface|null
      */
-    public function getLastHeaders()
+    public function getLastResponse()
     {
-        if ($this->lastResponse === null) {
-            return [];
-        }
-
-        return $this->lastResponse->getHeaders();
+        return $this->lastResponse;
     }
 
     /**
-     * Determines the access token that should be used for API calls.
+     * Returns an access token. If we do not have one in memory, try to fetch one from a *code* in the $_REQUEST.
      *
      * @return AccessToken|null The access token of null if the access token is not found
      */
     public function getAccessToken()
     {
         if ($this->accessToken === null) {
-            $newAccessToken = $this->getAuthenticator()->fetchNewAccessToken($this->getUrlGenerator());
-            if ($newAccessToken !== null) {
+            if (null !== $newAccessToken = $this->getAuthenticator()->fetchNewAccessToken($this->getUrlGenerator())) {
                 $this->setAccessToken($newAccessToken);
             }
         }
@@ -327,7 +343,8 @@ class LinkedIn
     }
 
     /**
-     * Get the access token.
+     * If you have stored a previous access token in a storage (database) you could set it here. After setting an
+     * access token you have to make sure to verify it is still valid by running LinkedIn::isAuthenticated.
      *
      * @param string|AccessToken $accessToken
      *
@@ -345,6 +362,8 @@ class LinkedIn
     }
 
     /**
+     * Set a URL generator.
+     *
      * @param UrlGeneratorInterface $urlGenerator
      *
      * @return $this
@@ -369,6 +388,8 @@ class LinkedIn
     }
 
     /**
+     * Set a data storage.
+     *
      * @param DataStorageInterface $storage
      *
      * @return $this
@@ -381,6 +402,8 @@ class LinkedIn
     }
 
     /**
+     * Set a http client.
+     *
      * @param HttpClient $client
      *
      * @return $this

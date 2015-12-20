@@ -2,8 +2,6 @@
 
 namespace Happyr\LinkedIn\Storage;
 
-use Happyr\LinkedIn\Exception\InvalidArgumentException;
-use Happyr\LinkedIn\Exception\LinkedInTransferException;
 use Illuminate\Support\Facades\Session;
 
 /**
@@ -18,11 +16,8 @@ class IlluminateSessionStorage extends BaseDataStorage
      */
     public function set($key, $value)
     {
-        if (!in_array($key, self::$validKeys)) {
-            throw new InvalidArgumentException('Unsupported key "%s" passed to set.', $key);
-        }
-
-        $name = $this->constructSessionVariableName($key);
+        $this->validateKey($key);
+        $name = $this->getStorageKeyId($key);
 
         return Session::put($name, $value);
     }
@@ -30,13 +25,10 @@ class IlluminateSessionStorage extends BaseDataStorage
     /**
      * {@inheritdoc}
      */
-    public function get($key, $default = false)
+    public function get($key)
     {
-        if (!in_array($key, self::$validKeys)) {
-            return $default;
-        }
-
-        $name = $this->constructSessionVariableName($key);
+        $this->validateKey($key);
+        $name = $this->getStorageKeyId($key);
 
         return Session::get($name);
     }
@@ -46,11 +38,8 @@ class IlluminateSessionStorage extends BaseDataStorage
      */
     public function clear($key)
     {
-        if (!in_array($key, self::$validKeys)) {
-            throw new InvalidArgumentException('Unsupported key "%s" passed to clear.', $key);
-        }
-
-        $name = $this->constructSessionVariableName($key);
+        $this->validateKey($key);
+        $name = $this->getStorageKeyId($key);
 
         return Session::forget($name);
     }

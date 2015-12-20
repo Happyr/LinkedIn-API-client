@@ -5,7 +5,7 @@
 * Introduced PHP-HTTP and PSR-7 messages
 * Added constructor argument for responseDataType
 * Added setResponseDataType()
-* Moved authentication functions to `Authenticator` class. The public API has not changed.   
+* Moved authentication functions to `Authenticator` class  
 
 To make sure you can upgrade you need to install a HTTP adapter.
 
@@ -15,9 +15,11 @@ php composer.phar require php-http/guzzle5-adapter:dev-master
 
 ## BC breaks
 
-* Removed `LinkedIn::setRequest` in favor to `LinkedIn::setHttpAdapter`
-* Removed `LinkedIn::getSecret` and `LinkedIn::getAppId` 
+* Removed `LinkedIn::setRequest` in favor of `LinkedIn::setHttpAdapter`
+* Removed `LinkedIn::getAppSecret` and `LinkedIn::getAppId` 
 * Removed `LinkedIn::getUser`
+* Removed `LinkedInApiException` in favor of `LinkedInException`, `InvalidArgumentException` and `LinkedInTransferException` 
+* Removed `LinkedIn::getLastHeaders` in favor of `LinkedIn::getLastResponse`
 
 # Upgrade from 0.5 to 0.6
 

@@ -9,18 +9,22 @@ use Psr\Http\Message\ResponseInterface;
 class ResponseConverter
 {
     /**
+     * Convert a PSR-7 response to a data type you want to work with.
+     *
      * @param ResponseInterface $response
      * @param string            $format
+     * @param string            $dataType
      *
      * @return ResponseInterface|\Psr\Http\Message\StreamInterface|\SimpleXMLElement|string
      *
+     * @throws InvalidArgumentException
      * @throws LinkedInTransferException
      */
     public static function convert(ResponseInterface $response, $requestFormat, $dataType)
     {
         if (($requestFormat === 'json' && $dataType === 'simple_xml') ||
             ($requestFormat === 'xml' && $dataType === 'array')) {
-            throw new InvalidArgumentException('Can not use reponse data format "%s" with the request format "%s"', $dataType, $requestFormat);
+            throw new InvalidArgumentException('Can not use reponse data format "%s" with the request format "%s".', $dataType, $requestFormat);
         }
 
         switch ($dataType) {

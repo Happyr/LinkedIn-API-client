@@ -9,5 +9,4 @@ namespace Happyr\LinkedIn\Exception;
  */
 class LinkedInTransferException extends LinkedInException
 {
-
 }

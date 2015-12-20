@@ -3,39 +3,8 @@
 namespace Happyr\LinkedIn\Http;
 
 /**
- * Class UrlGeneratorInterface.
- *
- * Time to time we need build a URL or get the current URL
- *
- * @author Tobias Nyholm
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
-interface UrlGeneratorInterface
+interface UrlGeneratorInterface extends LinkedInUrlGeneratorInterface, CurrentUrlGeneratorInterface
 {
-    /**
-     * Build the URL for given domain alias, path and parameters.
-     *
-     * @param $name string The name of the domain
-     * @param $path string Optional path (without a leading slash)
-     * @param $params array Optional query parameters
-     *
-     * @return string The URL for the given parameters
-     */
-    public function getUrl($name, $path = '', $params = array());
-
-    /**
-     * Returns the Current URL,
-     * not persist.
-     *
-     * @return string The current URL
-     */
-    public function getCurrentUrl();
-
-    /**
-     * Should we trust forwarded headers?
-     *
-     * @param bool $trustForwarded
-     *
-     * @return $this
-     */
-    public function setTrustForwarded($trustForwarded);
 }

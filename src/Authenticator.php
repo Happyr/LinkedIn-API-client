@@ -5,34 +5,36 @@ namespace Happyr\LinkedIn;
 use Happyr\LinkedIn\Exception\LinkedInTransferException;
 use Happyr\LinkedIn\Exception\LinkedInException;
 use Happyr\LinkedIn\Http\GlobalVariableGetter;
+use Happyr\LinkedIn\Http\LinkedInUrlGeneratorInterface;
 use Happyr\LinkedIn\Http\RequestManager;
 use Happyr\LinkedIn\Http\ResponseConverter;
-use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Happyr\LinkedIn\Storage\SessionStorage;
 
+/**
+ * This class is responseble for the authentication process with LinkedIn.
+ *
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
+ */
 class Authenticator
 {
     /**
-     * The Application ID.
+     * The application ID.
      *
      * @var string
      */
     protected $appId;
 
     /**
-     * The Application App Secret.
+     * The application secret.
      *
      * @var string
      */
     protected $appSecret;
 
     /**
-     * A CSRF state variable to assist in the defense against CSRF attacks.
-     */
-    protected $state;
-
-    /**
+     * A storage to use to store data between requests.
+     *
      * @var DataStorageInterface storage
      */
     private $storage;
@@ -55,26 +57,26 @@ class Authenticator
     }
 
     /**
-     * Determines and returns the user access token using the authorization code. The intent is to
-     * return a valid access token, or null if one is determined to not be available.
+     * Tries to get a new access token from data storage or code. If it fails, it will return null.
      *
-     * @param UrlGeneratorInterface $urlGenerator
+     * @param LinkedInUrlGeneratorInterface $urlGenerator
      *
-     * @return AccessToken|null A valid user access token, or null if one could not be determined.
+     * @return AccessToken|null A valid user access token, or null if one could not be fetched.
      *
-     * @throws LinkedInTransferException
+     * @throws LinkedInException
      */
-    public function fetchNewAccessToken(UrlGeneratorInterface $urlGenerator)
+    public function fetchNewAccessToken(LinkedInUrlGeneratorInterface $urlGenerator)
     {
         $storage = $this->getStorage();
         $code = $this->getCode();
 
         if ($code === null) {
-            // as a fallback, just return whatever is in the persistent
-            // store, knowing nothing explicit (signed request, authorization
-            // code, etc.) was present to shadow it (or we saw a code in $_REQUEST,
-            // but it's the same as what's in the persistent store)
-            return $storage->get('access_token', null);
+            /*
+             * As a fallback, just return whatever is in the persistent
+             * store, knowing nothing explicit (signed request, authorization
+             *  code, etc.) was present to shadow it.
+             */
+            return $storage->get('access_token');
         }
 
         try {
@@ -99,18 +101,20 @@ class Authenticator
      * and the user for which it was generated all match, and the user is
      * either logged in to LinkedIn or has granted an offline access permission.
      *
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param string                $code         An authorization code.
+     * @param LinkedInUrlGeneratorInterface $urlGenerator
+     * @param string                        $code         An authorization code.
      *
      * @return AccessToken An access token exchanged for the authorization code.
+     *
+     * @throws LinkedInException
      */
-    protected function getAccessTokenFromCode(UrlGeneratorInterface $urlGenerator, $code)
+    protected function getAccessTokenFromCode(LinkedInUrlGeneratorInterface $urlGenerator, $code)
     {
         if (empty($code)) {
             throw new LinkedInException('Could not get access token: The code was empty.');
         }
 
-        $redirectUri = $this->getStorage()->get('redirect_url');
+        $redirectUri = $this->getStorage()->get('redirect_uri');
         try {
             $url = $urlGenerator->getUrl('www', 'uas/oauth2/accessToken');
             $headers = ['Content-Type' => 'application/x-www-form-urlencoded'];
@@ -128,7 +132,7 @@ class Authenticator
         } catch (LinkedInTransferException $e) {
             // most likely that user very recently revoked authorization.
             // In any event, we don't have an access token, so throw an exception.
-            throw new LinkedInException('Could not get access token: The user may have revoked the authorization response from LinkedIn.com was empty.', 0, $e);
+            throw new LinkedInException('Could not get access token: The user may have revoked the authorization response from LinkedIn.com was empty.', $e->getCode(), $e);
         }
 
         if (empty($response)) {
@@ -146,40 +150,28 @@ class Authenticator
     }
 
     /**
-     * Get a Login URL for use with redirects. By default, full page redirect is
-     * assumed. If you are using the generated URL with a window.open() call in
-     * JavaScript, you can pass in display=popup as part of the $params.
+     * Generate a login url.
      *
-     * The parameters:
-     * - redirect_uri: the url to go to after a successful login
-     * - scope: comma (or space) separated list of requested extended permissions
+     * @param LinkedInUrlGeneratorInterface $urlGenerator
+     * @param array                         $options
      *
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param array                 $options      Provide custom parameters
-     *
-     * @return string The URL for the login flow
+     * @return string
      */
-    public function getLoginUrl(UrlGeneratorInterface $urlGenerator, $options = array())
+    public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = array())
     {
         // Generate a state
         $this->establishCSRFTokenState();
 
         // Build request params
-        $requestParams = array(
+        $requestParams = array_merge(array(
             'response_type' => 'code',
             'client_id' => $this->appId,
-            'state' => $this->getState(),
-        );
-
-        // Look for the redirect URL
-        if (isset($options['redirect_uri'])) {
-            $requestParams['redirect_uri'] = $options['redirect_uri'];
-        } else {
-            $requestParams['redirect_uri'] = $urlGenerator->getCurrentUrl();
-        }
+            'state' => $this->getStorage()->get('state'),
+            'redirect_uri' => null,
+        ), $options);
 
         // Save the redirect url for later
-        $this->getStorage()->set('redirect_url', $requestParams['redirect_uri']);
+        $this->getStorage()->set('redirect_uri', $requestParams['redirect_uri']);
 
         // if 'scope' is passed as an array, convert to space separated list
         $scopeParams = isset($options['scope']) ? $options['scope'] : null;
@@ -199,11 +191,11 @@ class Authenticator
     /**
      * Get the authorization code from the query parameters, if it exists,
      * and otherwise return null to signal no authorization code was
-     * discoverable.
+     * discovered.
      *
-     * @return string|null The authorization code, or null if the authorization code could not be determined.
+     * @return string|null The authorization code, or null if the authorization code not exists.
      *
-     * @throws LinkedInTransferException
+     * @throws LinkedInException on invalid CSRF tokens
      */
     protected function getCode()
     {
@@ -218,23 +210,22 @@ class Authenticator
             return;
         }
 
-        //if stored state does not exists
-        if (null === $state = $this->getState()) {
+        // if stored state does not exists
+        if (null === $state = $storage->get('state')) {
             throw new LinkedInException('Could not find a stored CSRF state token.');
         }
 
-        //if state exists in the request
+        // if state not exists in the request
         if (!GlobalVariableGetter::has('state')) {
             throw new LinkedInException('Could not find a CSRF state token in the request.');
         }
 
-        //if state exists in session and in request and if they are not equal
+        // if state exists in session and in request and if they are not equal
         if ($state !== GlobalVariableGetter::get('state')) {
             throw new LinkedInException('The CSRF state token from the request does not match the stored token.');
         }
 
         // CSRF state has done its job, so clear it
-        $this->setState(null);
         $storage->clear('state');
 
         return GlobalVariableGetter::get('code');
@@ -245,9 +236,9 @@ class Authenticator
      */
     protected function establishCSRFTokenState()
     {
-        if ($this->getState() === null) {
-            $this->setState(md5(uniqid(mt_rand(), true)));
-            $this->getStorage()->set('state', $this->getState());
+        $storage = $this->getStorage();
+        if ($storage->get('state') === null) {
+            $storage->set('state', md5(uniqid(mt_rand(), true)));
         }
     }
 
@@ -259,33 +250,6 @@ class Authenticator
     public function clearStorage()
     {
         $this->getStorage()->clearAll();
-
-        return $this;
-    }
-
-    /**
-     * Get the state, use this to verify the CSRF token.
-     *
-     *
-     * @return string|null
-     */
-    protected function getState()
-    {
-        if ($this->state === null) {
-            $this->state = $this->getStorage()->get('state', null);
-        }
-
-        return $this->state;
-    }
-
-    /**
-     * @param $state
-     *
-     * @return $this
-     */
-    protected function setState($state)
-    {
-        $this->state = $state;
 
         return $this;
     }

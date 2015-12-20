@@ -5,7 +5,7 @@ namespace Happyr\LinkedIn\Exception;
 class InvalidArgumentException extends LinkedInException
 {
     /**
-     * Treat this constructor as sprintf()
+     * Treat this constructor as sprintf().
      */
     public function __construct()
     {

@@ -39,13 +39,9 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
 
     public function testGet()
     {
-        $expected = 'foobar';
-        $result = $this->storage->get('code', $expected);
-        $this->assertEquals($expected, $result);
-
-        $expected = 'foobar';
-        $result = $this->storage->get('nono', $expected);
-        $this->assertEquals($expected, $result);
+        unset($_SESSION[$this->prefix.'state']);
+        $result = $this->storage->get('state');
+        $this->assertNull($result);
 
         $expected = 'foobar';
         $_SESSION[$this->prefix.'code'] = $expected;

@@ -21,16 +21,21 @@ class RequestManager
     private $httpClient;
 
     /**
+     * Send a request.
+     *
      * @param string $method
      * @param string $uri
      * @param array  $headers
-     * @param null   $body
+     * @param string $body
+     * @param string $protocolVersion
      *
      * @return \Psr\Http\Message\ResponseInterface
+     *
+     * @throws LinkedInTransferException
      */
-    public function sendRequest($method, $uri, array $headers = [], $body = null)
+    public function sendRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
     {
-        $request = MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body);
+        $request = MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body, $protocolVersion);
 
         try {
             return $this->getHttpClient()->sendRequest($request);

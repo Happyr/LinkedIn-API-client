@@ -153,4 +153,43 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $linkedIn->setFormat($format);
         $this->assertEquals($format, $linkedIn->getFormat());
     }
+
+    public function testLoginUrl()
+    {
+        $currentUrl = 'currentUrl';
+        $loginUrl = 'result';
+
+        $generator = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getCurrentUrl'));
+        $generator->expects($this->once())->method('getCurrentUrl')->willReturn($currentUrl);
+
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getLoginUrl'), array(), '', false);
+        $auth->expects($this->once())->method('getLoginUrl')
+            ->with($generator, array('redirect_uri' => $currentUrl))
+            ->will($this->returnValue($loginUrl));
+
+        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('getAuthenticator', 'getUrlGenerator'), array(), '', false);
+        $linkedIn->expects($this->once())->method('getAuthenticator')->willReturn($auth);
+        $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
+
+        $linkedIn->getLoginUrl();
+    }
+
+    public function testLoginUrlWithParameter()
+    {
+        $loginUrl = 'result';
+        $otherUrl = 'otherUrl';
+
+        $generator = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator');
+
+        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', array('getLoginUrl'), array(), '', false);
+        $auth->expects($this->once())->method('getLoginUrl')
+            ->with($generator, array('redirect_uri' => $otherUrl))
+            ->will($this->returnValue($loginUrl));
+
+        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', array('getAuthenticator', 'getUrlGenerator'), array(), '', false);
+        $linkedIn->expects($this->once())->method('getAuthenticator')->willReturn($auth);
+        $linkedIn->expects($this->once())->method('getUrlGenerator')->willReturn($generator);
+
+        $linkedIn->getLoginUrl(array('redirect_uri' => $otherUrl));
+    }
 }
