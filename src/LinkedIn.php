@@ -219,6 +219,8 @@ class LinkedIn
      * Get the user response.
      *
      * @return mixed|null
+     *
+     * @deprecated This function will be removed in 0.7.0.
      */
     public function getUser()
     {
@@ -482,6 +484,8 @@ class LinkedIn
      * Get the app id.
      *
      * @return string
+     *
+     * @deprecated This function will be removed in 0.7.0.
      */
     public function getAppId()
     {
@@ -492,6 +496,8 @@ class LinkedIn
      * Get the app secret.
      *
      * @return string
+     *
+     * @deprecated This function will be removed in 0.7.0.
      */
     public function getAppSecret()
     {
@@ -568,6 +574,8 @@ class LinkedIn
      * @param RequestInterface $request
      *
      * @return $this
+     *
+     * @deprecated This function will be removed in 0.7.0. It will be replaced by setHttpAdapter
      */
     public function setRequest(RequestInterface $request)
     {
@@ -636,6 +644,8 @@ class LinkedIn
      * Get headers from last response.
      *
      * @return array|null
+     *
+     * @deprecated This function will be removed in 0.7.0. It will be replaced by getLastResponse
      */
     public function getLastHeaders()
     {

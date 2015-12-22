@@ -6,6 +6,8 @@ namespace Happyr\LinkedIn\Exceptions;
  * Class LinkedInApiException.
  *
  * @author Tobias Nyholm
+ *
+ * @deprecated This class will be removed in 0.7.0. It will be replaced by LinkedInException and LinkedInTransferException.
  */
 class LinkedInApiException extends \Exception
 {
