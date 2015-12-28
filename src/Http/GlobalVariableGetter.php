@@ -10,7 +10,9 @@ namespace Happyr\LinkedIn\Http;
 class GlobalVariableGetter
 {
     /**
-     * @param $name
+     * Returns true iff the $_REQUEST or $_GET variables has a key with $name
+     *
+     * @param string $name
      *
      * @return bool
      */
@@ -24,9 +26,11 @@ class GlobalVariableGetter
     }
 
     /**
-     * @param $name
+     * Returns the value in $_REQUEST[$name] or $_GET[$name] if the former was empty. If no value found, return null.
      *
-     * @return mixed
+     * @param string $name
+     *
+     * @return mixed|null
      */
     public static function get($name)
     {
