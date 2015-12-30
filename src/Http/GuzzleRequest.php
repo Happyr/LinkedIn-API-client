@@ -114,7 +114,11 @@ class GuzzleRequest implements RequestInterface
             };
         }
 
-        return (string) $response->xml()->message;
+        try {
+            return (string)$response->xml()->message;
+        } catch (\Exception $ex) {
+            return 'Excpetion while processing error response. Error reason phrase: ' . $response->getReasonPhrase();
+        }
     }
 
     /**
