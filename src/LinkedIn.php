@@ -27,9 +27,9 @@ use Psr\Http\Message\ResponseInterface;
  * 9. When you make a second request to the API we have the access token in memory, so we don't go through all these
  *    authentication steps again.
  *
- * @author Tobias Nyholm
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
-class LinkedIn
+class LinkedIn implements LinkedInInterface
 {
     /**
      * The OAuth access token received in exchange for a valid authorization
@@ -87,9 +87,7 @@ class LinkedIn
     }
 
     /**
-     * Is the current user authenticated?
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isAuthenticated()
     {
@@ -104,23 +102,7 @@ class LinkedIn
     }
 
     /**
-     * Make an API call. Read about what calls that are possible here: https://developer.linkedin.com/docs/rest-api.
-     *
-     * Example:
-     * $linkedIn->api('GET', '/v1/people/~:(id,firstName,lastName,headline)');
-     *
-     * The options:
-     * - body: the body of the request
-     * - format: the format you are using to send the request
-     * - headers: array with headers to use
-     * - response_data_type: the data type to get back
-     * - query: query parameters to the request
-     *
-     * @param string $method   This is the HTTP verb
-     * @param string $resource everything after the domain in the URL.
-     * @param array  $options  See the readme for option description.
-     *
-     * @return mixed this depends on the response_data_type parameter.
+     * {@inheritdoc}
      */
     public function api($method, $resource, array $options = array())
     {
@@ -185,15 +167,7 @@ class LinkedIn
     }
 
     /**
-     * Get a login URL where the user can put his/hers LinkedIn credentials and authorize the application.
-     *
-     * The options:
-     * - redirect_uri: the url to go to after a successful login
-     * - scope: comma (or space) separated list of requested extended permissions
-     *
-     * @param array $options Provide custom parameters
-     *
-     * @return string The URL for the login flow
+     * {@inheritdoc}
      */
     public function getLoginUrl($options = array())
     {
@@ -234,9 +208,7 @@ class LinkedIn
     }
 
     /**
-     * Clear the data storage. This will forget everything about the user and authentication process.
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function clearStorage()
     {
@@ -246,9 +218,7 @@ class LinkedIn
     }
 
     /**
-     * If the user has canceled the login we will return with an error.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasError()
     {
@@ -256,9 +226,7 @@ class LinkedIn
     }
 
     /**
-     * Returns a LoginError or null.
-     *
-     * @return LoginError|null
+     * {@inheritdoc}
      */
     public function getError()
     {
@@ -272,17 +240,13 @@ class LinkedIn
      *
      * @return string
      */
-    public function getFormat()
+    protected function getFormat()
     {
         return $this->format;
     }
 
     /**
-     * Set the default format to use when sending requests.
-     *
-     * @param string $format
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function setFormat($format)
     {
@@ -296,17 +260,13 @@ class LinkedIn
      *
      * @return string
      */
-    public function getResponseDataType()
+    protected function getResponseDataType()
     {
         return $this->responseDataType;
     }
 
     /**
-     * Set the default data type to be returned as a response.
-     *
-     * @param string $responseDataType
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function setResponseDataType($responseDataType)
     {
@@ -316,9 +276,7 @@ class LinkedIn
     }
 
     /**
-     * Get the last response. This will always return a PSR-7 response no matter of the data type used.
-     *
-     * @return ResponseInterface|null
+     * {@inheritdoc}
      */
     public function getLastResponse()
     {
@@ -326,9 +284,7 @@ class LinkedIn
     }
 
     /**
-     * Returns an access token. If we do not have one in memory, try to fetch one from a *code* in the $_REQUEST.
-     *
-     * @return AccessToken|null The access token of null if the access token is not found
+     * {@inheritdoc}
      */
     public function getAccessToken()
     {
@@ -343,12 +299,7 @@ class LinkedIn
     }
 
     /**
-     * If you have stored a previous access token in a storage (database) you could set it here. After setting an
-     * access token you have to make sure to verify it is still valid by running LinkedIn::isAuthenticated.
-     *
-     * @param string|AccessToken $accessToken
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function setAccessToken($accessToken)
     {
@@ -362,11 +313,7 @@ class LinkedIn
     }
 
     /**
-     * Set a URL generator.
-     *
-     * @param UrlGeneratorInterface $urlGenerator
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function setUrlGenerator(UrlGeneratorInterface $urlGenerator)
     {
@@ -388,11 +335,7 @@ class LinkedIn
     }
 
     /**
-     * Set a data storage.
-     *
-     * @param DataStorageInterface $storage
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function setStorage(DataStorageInterface $storage)
     {
@@ -402,13 +345,7 @@ class LinkedIn
     }
 
     /**
-     * Set a http client.
-     *
-     * @param HttpClient $client
-     *
-     * @return $this
-     *
-     * @deprecated This function will be removed in 0.7.0. It will be replaced by setHttpAdapter
+     * {@inheritdoc}
      */
     public function setHttpClient(HttpClient $client)
     {

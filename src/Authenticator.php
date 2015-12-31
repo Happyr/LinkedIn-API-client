@@ -7,16 +7,15 @@ use Happyr\LinkedIn\Exception\LinkedInException;
 use Happyr\LinkedIn\Http\GlobalVariableGetter;
 use Happyr\LinkedIn\Http\LinkedInUrlGeneratorInterface;
 use Happyr\LinkedIn\Http\RequestManager;
+use Happyr\LinkedIn\Http\RequestManagerInterface;
 use Happyr\LinkedIn\Http\ResponseConverter;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Happyr\LinkedIn\Storage\SessionStorage;
 
 /**
- * This class is responseble for the authentication process with LinkedIn.
- *
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
-class Authenticator
+class Authenticator implements AuthenticatorInterface
 {
     /**
      * The application ID.
@@ -45,11 +44,11 @@ class Authenticator
     private $requestManager;
 
     /**
-     * @param RequestManager $requestManager
-     * @param string         $appId
-     * @param string         $appSecret
+     * @param RequestManagerInterface $requestManager
+     * @param string                  $appId
+     * @param string                  $appSecret
      */
-    public function __construct(RequestManager $requestManager, $appId, $appSecret)
+    public function __construct(RequestManagerInterface $requestManager, $appId, $appSecret)
     {
         $this->appId = $appId;
         $this->appSecret = $appSecret;
@@ -57,13 +56,7 @@ class Authenticator
     }
 
     /**
-     * Tries to get a new access token from data storage or code. If it fails, it will return null.
-     *
-     * @param LinkedInUrlGeneratorInterface $urlGenerator
-     *
-     * @return AccessToken|null A valid user access token, or null if one could not be fetched.
-     *
-     * @throws LinkedInException
+     * {@inheritdoc}
      */
     public function fetchNewAccessToken(LinkedInUrlGeneratorInterface $urlGenerator)
     {
@@ -150,12 +143,7 @@ class Authenticator
     }
 
     /**
-     * Generate a login url.
-     *
-     * @param LinkedInUrlGeneratorInterface $urlGenerator
-     * @param array                         $options
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = array())
     {
@@ -243,9 +231,7 @@ class Authenticator
     }
 
     /**
-     * Clear the storage.
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function clearStorage()
     {
@@ -267,9 +253,7 @@ class Authenticator
     }
 
     /**
-     * @param DataStorageInterface $storage
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function setStorage(DataStorageInterface $storage)
     {

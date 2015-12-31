@@ -10,7 +10,7 @@ namespace Happyr\LinkedIn\Http;
 class GlobalVariableGetter
 {
     /**
-     * Returns true iff the $_REQUEST or $_GET variables has a key with $name
+     * Returns true iff the $_REQUEST or $_GET variables has a key with $name.
      *
      * @param string $name
      *

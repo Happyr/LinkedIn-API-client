@@ -144,14 +144,16 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
 
     public function testFormatAccessors()
     {
+        $get = new \ReflectionMethod('Happyr\LinkedIn\LinkedIn', 'getFormat');
+        $get->setAccessible(true);
         $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
 
         //test default
-        $this->assertEquals('json', $linkedIn->getFormat());
+        $this->assertEquals('json', $get->invoke($linkedIn));
 
         $format = 'foo';
         $linkedIn->setFormat($format);
-        $this->assertEquals($format, $linkedIn->getFormat());
+        $this->assertEquals($format, $get->invoke($linkedIn));
     }
 
     public function testLoginUrl()

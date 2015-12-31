@@ -20,6 +20,7 @@ php composer.phar require php-http/guzzle5-adapter:dev-master
 * Removed `LinkedIn::getUser`
 * Removed `LinkedInApiException` in favor of `LinkedInException`, `InvalidArgumentException` and `LinkedInTransferException` 
 * Removed `LinkedIn::getLastHeaders` in favor of `LinkedIn::getLastResponse`
+* Made the public functions `LinkedIn::getResponseDataType` and `LinkedIn::getFormat` protected
 
 # Upgrade from 0.5 to 0.6
 

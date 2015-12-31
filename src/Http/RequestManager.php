@@ -8,12 +8,7 @@ use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
 
-/**
- * A request manager builds a request.
- *
- * @author Tobias Nyholm <tobias.nyholm@gmail.com>
- */
-class RequestManager
+class RequestManager implements RequestManagerInterface
 {
     /**
      * @var \Http\Client\HttpClient
@@ -21,17 +16,7 @@ class RequestManager
     private $httpClient;
 
     /**
-     * Send a request.
-     *
-     * @param string $method
-     * @param string $uri
-     * @param array  $headers
-     * @param string $body
-     * @param string $protocolVersion
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     *
-     * @throws LinkedInTransferException
+     * {@inheritdoc}
      */
     public function sendRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
     {
@@ -45,9 +30,7 @@ class RequestManager
     }
 
     /**
-     * @param \Http\Client\HttpClient $httpClient
-     *
-     * @return RequestManager
+     * {@inheritdoc}
      */
     public function setHttpClient(HttpClient $httpClient)
     {
