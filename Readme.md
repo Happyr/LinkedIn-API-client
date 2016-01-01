@@ -32,9 +32,9 @@ php composer.phar require happyr/linkedin-api-client:dev-master
 ```
 
 You do also need to choose what library to use when you are sending http messages. Consult the
-[php-http/adapter-implementation](https://packagist.org/providers/php-http/adapter-implementation) virtual package to
-find adapters to use. For more information about virtual packages please refer to 
-[Httplug](http://docs.httplug.io/en/latest/virtual-package/). Example:
+[php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) virtual package to
+find clients to use. For more information about virtual packages please refer to 
+[Httplug](http://docs.httplug.io/en/latest/httplug/virtual-package/). Example:
 
 ```bash
 php composer.phar require php-http/guzzle5-adapter:dev-master
