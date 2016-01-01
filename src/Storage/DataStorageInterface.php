@@ -3,9 +3,7 @@
 namespace Happyr\LinkedIn\Storage;
 
 /**
- * Class DataStorage.
- *
- * We need to store data some where. It might be in a apc cache, filesystem cache, database or in the session.
+ * We need to store data somewhere. It might be in a apc cache, filesystem cache, database or in the session.
  * We need it to protect us from CSRF attacks and to reduce the requests to the API.
  *
  * @author Tobias Nyholm
@@ -24,12 +22,11 @@ interface DataStorageInterface
     /**
      * Get the data for $key, persisted by BaseFacebook::setPersistentData().
      *
-     * @param string $key     The key of the data to retrieve
-     * @param mixed  $default The default value to return if $key is not found
+     * @param string $key The key of the data to retrieve
      *
      * @return mixed
      */
-    public function get($key, $default = false);
+    public function get($key);
 
     /**
      * Clear the data with $key from the persistent storage.

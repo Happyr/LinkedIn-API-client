@@ -2,14 +2,10 @@
 
 namespace Happyr\LinkedIn\Storage;
 
-use Happyr\LinkedIn\Exceptions\LinkedInApiException;
-
 /**
- * Class SessionStorage.
+ * Store data in the global session.
  *
- * Store data in the session.
- *
- * @author Tobias Nyholm
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
 class SessionStorage extends BaseDataStorage
 {
@@ -24,42 +20,35 @@ class SessionStorage extends BaseDataStorage
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function set($key, $value)
     {
-        if (!in_array($key, self::$validKeys)) {
-            throw new LinkedInApiException(sprintf('Unsupported key ("%s") passed to set.', $key));
-        }
+        $this->validateKey($key);
 
-        $name = $this->constructSessionVariableName($key);
+        $name = $this->getStorageKeyId($key);
         $_SESSION[$name] = $value;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    public function get($key, $default = false)
+    public function get($key)
     {
-        if (!in_array($key, self::$validKeys)) {
-            return $default;
-        }
+        $this->validateKey($key);
+        $name = $this->getStorageKeyId($key);
 
-        $name = $this->constructSessionVariableName($key);
-
-        return isset($_SESSION[$name]) ? $_SESSION[$name] : $default;
+        return isset($_SESSION[$name]) ? $_SESSION[$name] : null;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function clear($key)
     {
-        if (!in_array($key, self::$validKeys)) {
-            throw new LinkedInApiException(sprintf('Unsupported key ("%s") passed to clear.', $key));
-        }
+        $this->validateKey($key);
 
-        $name = $this->constructSessionVariableName($key);
+        $name = $this->getStorageKeyId($key);
         if (isset($_SESSION[$name])) {
             unset($_SESSION[$name]);
         }

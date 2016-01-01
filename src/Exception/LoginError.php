@@ -1,6 +1,6 @@
 <?php
 
-namespace Happyr\LinkedIn\Exceptions;
+namespace Happyr\LinkedIn\Exception;
 
 /**
  * Class LoginError.
@@ -50,6 +50,6 @@ class LoginError
      */
     public function __toString()
     {
-        return 'Name: '.$this->getName().', Description: '.$this->getDescription();
+        return sprintf('Name: %s, Description: %s', $this->getName(), $this->getDescription());
     }
 }

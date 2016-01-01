@@ -31,12 +31,10 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testSetFail()
     {
-        Session::shouldReceive('put')->once()->with($this->prefix.'code', 'baz')->andThrow('\Happyr\LinkedIn\Exceptions\LinkedInApiException');
-
         $this->storage->set('foobar', 'baz');
     }
 
@@ -44,13 +42,12 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     {
         $expected = 'foobar';
         Session::shouldReceive('get')->once()->with($this->prefix.'code')->andReturn($expected);
-        $result = $this->storage->get('code', $expected);
+        $result = $this->storage->get('code');
         $this->assertEquals($expected, $result);
 
-        $expected = 'foobar';
-        Session::shouldReceive('get')->once()->with($this->prefix.'code')->andReturn(false);
-        $result = $this->storage->get('nono', $expected);
-        $this->assertEquals($expected, $result);
+        Session::shouldReceive('get')->once()->with($this->prefix.'state')->andReturn(null);
+        $result = $this->storage->get('state');
+        $this->assertNull($result);
     }
 
     public function testClear()
@@ -60,7 +57,7 @@ class IlluminateSessionStorageTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Happyr\LinkedIn\Exceptions\LinkedInApiException
+     * @expectedException \Happyr\LinkedIn\Exception\InvalidArgumentException
      */
     public function testClearFail()
     {

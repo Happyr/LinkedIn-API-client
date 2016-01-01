@@ -1,6 +1,6 @@
 <?php
 
-namespace Happyr\LinkedIn\Exceptions;
+namespace Happyr\LinkedIn\Exception;
 
 /**
  * Class LoginErrorTest.

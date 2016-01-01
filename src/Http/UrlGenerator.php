@@ -3,9 +3,7 @@
 namespace Happyr\LinkedIn\Http;
 
 /**
- * Class UrlGenerator.
- *
- * @author Tobias Nyholm
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
 class UrlGenerator implements UrlGeneratorInterface
 {
@@ -34,13 +32,7 @@ class UrlGenerator implements UrlGeneratorInterface
     protected $trustForwarded = false;
 
     /**
-     * Build the URL for given domain alias, path and parameters.
-     *
-     * @param $name string The name of the domain
-     * @param $path string Optional path (without a leading slash)
-     * @param $params array Optional query parameters
-     *
-     * @return string The URL for the given parameters
+     * {@inheritdoc}
      */
     public function getUrl($name, $path = '', $params = array())
     {
@@ -69,10 +61,7 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * Returns the Current URL,
-     * not persist.
-     *
-     * @return string The current URL
+     * {@inheritdoc}
      */
     public function getCurrentUrl()
     {
@@ -178,9 +167,7 @@ class UrlGenerator implements UrlGeneratorInterface
     }
 
     /**
-     * @param bool $trustForwarded
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function setTrustForwarded($trustForwarded)
     {

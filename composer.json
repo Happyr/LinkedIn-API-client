@@ -13,13 +13,22 @@
     ],
     "require": {
         "php": ">=5.4",
-        "guzzlehttp/guzzle": "~5.0"
+        "php-http/client-implementation": "1.0",
+        "php-http/httplug": "v1.0.0-beta",
+        "php-http/discovery": "^0.4|^0.5|^0.6"
     },
     "require-dev": {
-        "mockery/mockery": "*",
-        "illuminate/support": "*"
+        "php-http/guzzle5-adapter": "dev-master",
+        "guzzlehttp/psr7": "^1.2",
+        "mockery/mockery": "@stable",
+        "illuminate/support": "@stable"
     },
     "autoload": {
         "psr-4": { "Happyr\\LinkedIn\\": "src/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.7.x-dev"
+        }
     }
 }
