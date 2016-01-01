@@ -25,5 +25,10 @@
     },
     "autoload": {
         "psr-4": { "Happyr\\LinkedIn\\": "src/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.7.x-dev"
+        }
     }
 }
