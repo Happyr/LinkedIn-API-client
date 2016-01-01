@@ -128,8 +128,7 @@ $options = array(
 
 ### The api options
 
-The third parameter of `LinkedIn::api` is an array with options. They will eventually be past to a Request client but 
-before that we do some modifications. Below is a table of array keys that you may use. 
+The third parameter of `LinkedIn::api` is an array with options. Below is a table of array keys that you may use. 
 
 | Option name | Description
 | ----------- | -----------
@@ -141,12 +140,23 @@ before that we do some modifications. Below is a table of array keys that you ma
 | query | This is an array with query parameters
 
 
-If you are using the `GuzzleRequest` (default) you may want to have a look at [its documentation](http://docs.guzzlephp.org/en/latest/clients.html?highlight=format#request-options)
-to find out what more options that are available. 
 
 ### Changing request format
 
-The default format when communicating with LinkedIn API is json. This means that you will get an array back as a response when you call `LinkedIn::api`. It is easy to change the format.
+The default format when communicating with LinkedIn API is json. You can let the API do `json_encode` for you. 
+The following code shows you how. 
+
+```php
+$body = array(
+    'comment' => 'Im testing Happyr LinkedIn client! https://github.com/Happyr/LinkedIn-API-client',
+    'visibility' => array('code' => 'anyone')
+);
+
+$linkedIn->post('v1/people/~/shares', array('json'=>$body));
+$linkedIn->post('v1/people/~/shares', array('body'=>json_encode($body)));
+```
+
+When using `array('json'=>$body)` as option the format will always be `json`. You can change the request format in three ways.
 
 ```php
 // By constructor argument
@@ -156,10 +166,9 @@ $linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret', 'xml');
 $linkedIn->setFormat('xml');
 
 // Set format for just one request
-$linkedIn->get('v1/people/~:(firstName,lastName)', array('format'=>'xml'));
+$linkedIn->post('v1/people/~/shares', array('format'=>'xml', 'body'=>$body));
 ```
 
-There is one exception to the *format* option: When you specifying $options['json'=>...] then the format will always be json.
 
 ### Understanding response data type
 
@@ -194,7 +203,6 @@ Below is a table that specifies what the possible return data types are when you
 You might want to use an other storage than the default `SessionStorage`. If you are using Laravel
 you are more likely to inject the `IlluminateSessionStorage`.  
 ```php
-
 $linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
 $linkedIn->setStorage(new IlluminateSessionStorage());
 ```
