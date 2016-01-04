@@ -45,7 +45,7 @@ If you are updating form a previous version make sure to read [the upgrade docum
 
 ### Puli
 
-If you run in to issues with [Puli](http://docs.puli.io/en/latest/) when installing or gets the error *No factories found*. 
+If you run in to issues with [Puli](http://docs.puli.io/en/latest/) when installing or gets the error *"Puli Factory is not available"*. 
 Make sure you have installed [Puli cli](http://docs.puli.io/en/latest/installation.html) or try to require a lower version
 of `php-http/discovery`. 
 
