@@ -25,22 +25,33 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 
 ## Installation
 
-Install it with Composer.
+Install the library with Composer. At the time of writing we depend on `php-http/httplug` which is in a beta version. 
+If you have the default composer stability level (`min-stability: stable`) you need to require the beta package as well. 
 
 ```bash
-php composer.phar require happyr/linkedin-api-client:dev-master
+php composer.phar require happyr/linkedin-api-client:dev-master php-http/httplug:v1.0.0-beta
 ```
 
 You do also need to choose what library to use when you are sending http messages. Consult the
 [php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) virtual package to
 find clients to use. For more information about virtual packages please refer to 
-[Httplug](http://docs.httplug.io/en/latest/httplug/virtual-package/). Example:
+[Httplug](http://docs.php-http.org/en/latest/httplug/users.html). Example:
 
 ```bash
-php composer.phar require php-http/guzzle5-adapter:dev-master
+php composer.phar require php-http/guzzle6-adapter:dev-master
 ```
 
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
+
+### Puli
+
+If you run in to issues with [Puli](http://docs.puli.io/en/latest/) when installing or gets the error *"Puli Factory is not available"*. 
+Make sure you have installed [Puli cli](http://docs.puli.io/en/latest/installation.html) or try to require a lower version
+of `php-http/discovery`. 
+
+```bash
+php composer.phar require php-http/discovery:^0.5
+```
 
 ## Usage
 
