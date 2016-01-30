@@ -8,6 +8,9 @@ php:
   - 7.0
   - hhvm
 
+before_install:
+  - composer self-update
+
 install:
   - composer require satooshi/php-coveralls:~0.6@stable
 

@@ -25,32 +25,41 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 
 ## Installation
 
-Install the library with Composer. At the time of writing we depend on `php-http/httplug` which is in a beta version. 
-If you have the default composer stability level (`min-stability: stable`) you need to require the beta package as well. 
+Install the library with Composer. 
 
 ```bash
-php composer.phar require happyr/linkedin-api-client:dev-master php-http/httplug:v1.0.0-beta
+composer require happyr/linkedin-api-client
 ```
 
-You do also need to choose what library to use when you are sending http messages. Consult the
-[php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) virtual package to
+This library does not have a dependency on Guzzle or any other library that sends HTTP requests. We use the awesome 
+Httplug to achieve the decoupling. We want you to choose what library to use for sending HTTP requests. Consult this list 
+ofthis list virtual packages that support [php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) 
 find clients to use. For more information about virtual packages please refer to 
 [Httplug](http://docs.php-http.org/en/latest/httplug/users.html). Example:
 
 ```bash
-php composer.phar require php-http/guzzle6-adapter:dev-master
+composer require php-http/guzzle6-adapter
 ```
 
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
-### Puli
+### Auto discovery with Puli 
 
-If you run in to issues with [Puli](http://docs.puli.io/en/latest/) when installing or gets the error *"Puli Factory is not available"*. 
-Make sure you have installed [Puli cli](http://docs.puli.io/en/latest/installation.html) or try to require a lower version
-of `php-http/discovery`. 
+This library has a dependency on `php-http/discovery` that will find a HTTP client and a library that can
+create PSR-7 messages that you already have installed. It uses [Puli](http://docs.puli.io/en/latest/) for the actual 
+discovery. If you do not know about Puli yet you should check it out. 
 
-```bash
-php composer.phar require php-http/discovery:^0.5
+Puli is in currently under delveopment but they are aiming for a stable release in Mars 2016. To be able to use the beta
+version of Puli you need to add the following packages to your composer.json. 
+
+```json
+"require": {
+    // ...
+    "puli/composer-plugin": "^1.0.0-beta9",
+    "puli/repository": "^1.0-beta9",
+    "puli/discovery": "^1.0-beta9",
+    "puli/url-generator": "^1.0-beta4"
+},
 ```
 
 ## Usage
