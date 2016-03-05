@@ -6,6 +6,7 @@ use Happyr\LinkedIn\Exception\LoginError;
 use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Http\Client\HttpClient;
+use Http\Message\MessageFactory;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -165,4 +166,13 @@ interface LinkedInInterface
      * @return $this
      */
     public function setHttpClient(HttpClient $client);
+
+    /**
+     * Set a http message factory.
+     *
+     * @param MessageFactory $factory
+     *
+     * @return $this
+     */
+    public function setHttpMessageFactory(MessageFactory $factory);
 }

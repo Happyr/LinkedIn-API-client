@@ -43,24 +43,30 @@ composer require php-http/guzzle6-adapter
 
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
-### Auto discovery with Puli 
+### Finding the HTTP client. 
 
-This library has a dependency on `php-http/discovery` that will find a HTTP client and a library that can
-create PSR-7 messages that you already have installed. It uses [Puli](http://docs.puli.io/en/latest/) for the actual 
-discovery. If you do not know about Puli yet you should check it out. 
+The LinkedIn client need to know what library you are using to send HTTP messages. You could provide an instance of 
+HttpClient and MessageFactory or you could fallback on auto discovery. Below is an example on where you provide a Guzzle6 
+instance.
 
-Puli is in currently under delveopment but they are aiming for a stable release in Mars 2016. To be able to use the beta
-version of Puli you need to add the following packages to your composer.json. 
+```php
+$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn->setHttpClient(new \Http\Adapter\Guzzle6\Client());
+$linkedIn->setHttpMessageFactory(new Http\Message\MessageFactory\GuzzleMessageFactory());
 
+```
+
+If you do not provide anything we will fallback on using auto discovery with [Puli](http://docs.puli.io/en/latest/). It will automatically find the 
+client you have installed. In order to use Puli you need to add the following to your composer.json. 
 ```json
 "require": {
-    // ...
     "puli/composer-plugin": "^1.0.0-beta9",
     "puli/repository": "^1.0-beta9",
     "puli/discovery": "^1.0-beta9",
     "puli/url-generator": "^1.0-beta4"
 },
 ```
+
 
 ## Usage
 

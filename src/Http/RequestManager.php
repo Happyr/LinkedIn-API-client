@@ -7,7 +7,13 @@ use Http\Client\Exception\TransferException;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
+use Http\Message\MessageFactory;
 
+/**
+ * A class to create HTTP requests and to send them.
+ *
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
+ */
 class RequestManager implements RequestManagerInterface
 {
     /**
@@ -16,11 +22,16 @@ class RequestManager implements RequestManagerInterface
     private $httpClient;
 
     /**
+     * @var \Http\Message\MessageFactory
+     */
+    private $messageFactory;
+
+    /**
      * {@inheritdoc}
      */
     public function sendRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
     {
-        $request = MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body, $protocolVersion);
+        $request = $this->getMessageFactory()->createRequest($method, $uri, $headers, $body, $protocolVersion);
 
         try {
             return $this->getHttpClient()->sendRequest($request);
@@ -49,5 +60,30 @@ class RequestManager implements RequestManagerInterface
         }
 
         return $this->httpClient;
+    }
+
+    /**
+     * @param MessageFactory $messageFactory
+     *
+     * @return RequestManager
+     */
+    public function setMessageFactory(MessageFactory $messageFactory)
+    {
+        $this->messageFactory = $messageFactory;
+
+        return $this;
+    }
+
+    /**
+     *
+     * @return \Http\Message\MessageFactory
+     */
+    private function getMessageFactory()
+    {
+        if ($this->messageFactory === null) {
+            $this->messageFactory = MessageFactoryDiscovery::find();
+        }
+
+        return $this->messageFactory;
     }
 }
