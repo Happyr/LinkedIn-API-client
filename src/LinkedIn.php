@@ -10,6 +10,7 @@ use Happyr\LinkedIn\Http\UrlGenerator;
 use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Http\Client\HttpClient;
+use Http\Message\MessageFactory;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -350,6 +351,16 @@ class LinkedIn implements LinkedInInterface
     public function setHttpClient(HttpClient $client)
     {
         $this->getRequestManager()->setHttpClient($client);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setHttpMessageFactory(MessageFactory $factory)
+    {
+        $this->getRequestManager()->setMessageFactory($factory);
 
         return $this;
     }
