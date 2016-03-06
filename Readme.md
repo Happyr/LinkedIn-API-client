@@ -254,7 +254,7 @@ echo "<a href='$url'>Login with LinkedIn</a>";
 If you want an easier integration with a framwork you may want to check out these repositories: 
 
 * [HappyrLinkedInBundle](https://github.com/Happyr/LinkedInBundle) for Symfony
-* [Laravel-Linkedin by mauri870](https://github.com/mauri870/laravel-linkedin) for Laravel 5
+* [Laravel-Linkedin by mauri870](https://github.com/artesaos/laravel-linkedin) for Laravel 5
 
 
 [register-app]: https://www.linkedin.com/secure/developer
