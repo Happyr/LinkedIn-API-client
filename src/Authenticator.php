@@ -109,7 +109,7 @@ class Authenticator implements AuthenticatorInterface
 
         $redirectUri = $this->getStorage()->get('redirect_uri');
         try {
-            $url = $urlGenerator->getUrl('www', 'uas/oauth2/accessToken');
+            $url = $urlGenerator->getUrl('www', 'oauth/v2/accessToken');
             $headers = ['Content-Type' => 'application/x-www-form-urlencoded'];
             $body = http_build_query(
                 [
