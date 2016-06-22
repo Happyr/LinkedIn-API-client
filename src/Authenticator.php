@@ -173,7 +173,7 @@ class Authenticator implements AuthenticatorInterface
             }
         }
 
-        return $urlGenerator->getUrl('www', 'uas/oauth2/authorization', $requestParams);
+        return $urlGenerator->getUrl('www', 'oauth/v2/authorization', $requestParams);
     }
 
     /**
