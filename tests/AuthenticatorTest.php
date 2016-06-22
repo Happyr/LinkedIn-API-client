@@ -165,7 +165,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getUrl')->with(
                 'www',
-                'uas/oauth2/accessToken'
+                'oauth/v2/accessToken'
             )->andReturn('url')
             ->getMock();
 
