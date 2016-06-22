@@ -38,7 +38,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $auth->method('getStorage')->will($this->returnValue($storage));
 
         $generator = m::mock('Happyr\LinkedIn\Http\LinkedInUrlGeneratorInterface')
-            ->shouldReceive('getUrl')->once()->with('www', 'uas/oauth2/authorization', $params)->andReturn($expected)
+            ->shouldReceive('getUrl')->once()->with('www', 'oauth/v2/authorization', $params)->andReturn($expected)
             ->getMock();
 
         $this->assertEquals($expected, $auth->getLoginUrl($generator));
@@ -57,7 +57,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         );
 
         $generator = m::mock('Happyr\LinkedIn\Http\LinkedInUrlGeneratorInterface')
-            ->shouldReceive('getUrl')->once()->with('www', 'uas/oauth2/authorization', $params)->andReturn($expected)
+            ->shouldReceive('getUrl')->once()->with('www', 'oauth/v2/authorization', $params)->andReturn($expected)
             ->getMock();
 
         $this->assertEquals($expected, $auth->getLoginUrl($generator, array('redirect_uri' => $otherUrl, 'scope' => $scope)));
@@ -187,7 +187,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getUrl')->with(
                 'www',
-                'uas/oauth2/accessToken'
+                'oauth/v2/accessToken'
             )->andReturn('url')
             ->getMock();
 
@@ -208,7 +208,7 @@ class AuthenticatorTest extends \PHPUnit_Framework_TestCase
         $generator = m::mock('Happyr\LinkedIn\Http\UrlGenerator')
             ->shouldReceive('getUrl')->with(
                 'www',
-                'uas/oauth2/accessToken'
+                'oauth/v2/accessToken'
             )->andReturn('url')
             ->getMock();
 
