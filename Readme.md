@@ -57,16 +57,7 @@ $linkedIn->setHttpMessageFactory(new Http\Message\MessageFactory\GuzzleMessageFa
 ```
 
 If you do not provide anything we will fallback on using auto discovery with [Puli](http://docs.puli.io/en/latest/). It will automatically find the 
-client you have installed. In order to use Puli you need to add the following to your composer.json. 
-```json
-"require": {
-    "puli/composer-plugin": "^1.0.0-beta9",
-    "puli/repository": "^1.0-beta9",
-    "puli/discovery": "^1.0-beta9",
-    "puli/url-generator": "^1.0-beta4"
-},
-```
-
+client you have installed.
 
 ## Usage
 
