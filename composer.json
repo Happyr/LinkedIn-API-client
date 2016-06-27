@@ -20,7 +20,7 @@
         "php-http/discovery": "^0.9"
     },
     "require-dev": {
-        "php-http/guzzle5-adapter": "^0.5",
+        "php-http/guzzle5-adapter": "^0.6",
         "guzzlehttp/psr7": "^1.2",
         "mockery/mockery": "^0.9",
         "illuminate/support": "^5.0"
