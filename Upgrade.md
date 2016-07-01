@@ -2,8 +2,14 @@
 
 This document explains how you upgrade from one version to another. 
 
-## Upgrade from 0.7 to dev-master
+## Upgrade from 0.7.1 to dev-master
 
+## Upgrade from 0.7.0 to 0.7.1
+
+### Changes
+
+* Using `php-http/discovery:0.9` which makes Puli optional
+* Using new URL's to LinkedIn API so users are provided with the new authentication UX. (Thanks to @mbarwick83)
 
 ## Upgrade from 0.6 to 0.7
 
