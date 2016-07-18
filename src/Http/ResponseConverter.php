@@ -12,7 +12,7 @@ class ResponseConverter
      * Convert a PSR-7 response to a data type you want to work with.
      *
      * @param ResponseInterface $response
-     * @param string            $format
+     * @param string            $requestFormat
      * @param string            $dataType
      *
      * @return ResponseInterface|\Psr\Http\Message\StreamInterface|\SimpleXMLElement|string
