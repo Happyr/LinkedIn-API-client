@@ -9,7 +9,7 @@ use Happyr\LinkedIn\Exception\InvalidArgumentException;
  */
 abstract class BaseDataStorage implements DataStorageInterface
 {
-    public static $validKeys = array('state', 'code', 'access_token', 'redirect_uri');
+    public static $validKeys = ['state', 'code', 'access_token', 'redirect_uri'];
 
     /**
      * {@inheritdoc}

@@ -18,5 +18,5 @@ interface LinkedInUrlGeneratorInterface
      *
      * @return string The URL for the given parameters. The URL query  MUST be build with PHP_QUERY_RFC3986
      */
-    public function getUrl($name, $path = '', $params = array());
+    public function getUrl($name, $path = '', $params = []);
 }

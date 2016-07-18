@@ -12,17 +12,17 @@ class UrlGenerator implements UrlGeneratorInterface
      *
      * A list of params that might be in the query string
      */
-    public static $knownLinkedInParams = array('state', 'code', 'access_token', 'user');
+    public static $knownLinkedInParams = ['state', 'code', 'access_token', 'user'];
 
     /**
      * @var array domainMap
      *
      * Maps aliases to LinkedIn domains.
      */
-    public static $domainMap = array(
+    public static $domainMap = [
         'api' => 'https://api.linkedin.com/',
         'www' => 'https://www.linkedin.com/',
-    );
+    ];
 
     /**
      * @var bool
@@ -34,7 +34,7 @@ class UrlGenerator implements UrlGeneratorInterface
     /**
      * {@inheritdoc}
      */
-    public function getUrl($name, $path = '', $params = array())
+    public function getUrl($name, $path = '', $params = [])
     {
         $url = self::$domainMap[$name];
         if ($path) {
