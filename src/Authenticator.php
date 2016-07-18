@@ -39,7 +39,7 @@ class Authenticator implements AuthenticatorInterface
     private $storage;
 
     /**
-     * @var RequestManager
+     * @var RequestManagerInterface
      */
     private $requestManager;
 

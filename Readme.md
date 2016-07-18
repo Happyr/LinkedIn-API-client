@@ -1,10 +1,13 @@
 # LinkedIn API client in PHP
 
-[![Build Status](https://travis-ci.org/Happyr/LinkedIn-API-client.svg?branch=master)](https://travis-ci.org/Happyr/LinkedIn-API-client)
-[![Coverage Status](https://img.shields.io/coveralls/Happyr/LinkedIn-API-client.svg)](https://coveralls.io/r/Happyr/LinkedIn-API-client?branch=master)
+[![Latest Version](https://img.shields.io/github/release/Happyr/LinkedIn-API-client.svg?style=flat-square)](https://github.com/Happyr/LinkedIn-API-client/releases)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
+[![Build Status](https://img.shields.io/travis/Happyr/LinkedIn-API-client.svg?style=flat-square)](https://travis-ci.org/Happyr/LinkedIn-API-client)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b/mini.png)](https://insight.sensiolabs.com/projects/44c425af-90f6-4c25-b789-4ece28b01a2b)
-[![Latest Stable Version](https://poser.pugx.org/happyr/linkedin-api-client/v/stable.svg)](https://packagist.org/packages/happyr/linkedin-api-client)
-[![Monthly Downloads](https://poser.pugx.org/happyr/linkedin-api-client/d/monthly.png)](https://packagist.org/packages/happyr/linkedin-api-client)
+[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/Happyr/LinkedIn-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Happyr/LinkedIn-API-client)
+[![Quality Score](https://img.shields.io/scrutinizer/g/Happyr/LinkedIn-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Happyr/LinkedIn-API-client)
+[![Total Downloads](https://img.shields.io/packagist/dt/happyr/linkedin-api-client.svg?style=flat-square)](https://packagist.org/packages/happyr/linkedin-api-client)
+
 
 A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
 token and when authenticated it helps you to send API requests. You will not get *everything* for free though... You
