@@ -32,7 +32,7 @@ interface AuthenticatorInterface
      *
      * @return string
      */
-    public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = array());
+    public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = []);
 
     /**
      * Clear the storage.

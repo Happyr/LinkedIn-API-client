@@ -75,7 +75,6 @@ class RequestManager implements RequestManagerInterface
     }
 
     /**
-     *
      * @return \Http\Message\MessageFactory
      */
     private function getMessageFactory()

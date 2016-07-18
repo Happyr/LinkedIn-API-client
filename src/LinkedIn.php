@@ -97,7 +97,7 @@ class LinkedIn implements LinkedInInterface
             return false;
         }
 
-        $user = $this->api('GET', '/v1/people/~:(id,firstName,lastName)', array('format' => 'json', 'response_data_type' => 'array'));
+        $user = $this->api('GET', '/v1/people/~:(id,firstName,lastName)', ['format' => 'json', 'response_data_type' => 'array']);
 
         return !empty($user['id']);
     }
@@ -105,7 +105,7 @@ class LinkedIn implements LinkedInInterface
     /**
      * {@inheritdoc}
      */
-    public function api($method, $resource, array $options = array())
+    public function api($method, $resource, array $options = [])
     {
         // Add access token to the headers
         $options['headers']['Authorization'] = sprintf('Bearer %s', (string) $this->getAccessToken());
@@ -117,7 +117,7 @@ class LinkedIn implements LinkedInInterface
         $url = $this->getUrlGenerator()->getUrl(
             'api',
             $resource,
-            isset($options['query']) ? $options['query'] : array()
+            isset($options['query']) ? $options['query'] : []
         );
 
         $body = isset($options['body']) ? $options['body'] : null;
@@ -170,7 +170,7 @@ class LinkedIn implements LinkedInInterface
     /**
      * {@inheritdoc}
      */
-    public function getLoginUrl($options = array())
+    public function getLoginUrl($options = [])
     {
         $urlGenerator = $this->getUrlGenerator();
 
@@ -190,7 +190,7 @@ class LinkedIn implements LinkedInInterface
      *
      * @return mixed
      */
-    public function get($resource, array $options = array())
+    public function get($resource, array $options = [])
     {
         return $this->api('GET', $resource, $options);
     }
@@ -203,7 +203,7 @@ class LinkedIn implements LinkedInInterface
      *
      * @return mixed
      */
-    public function post($resource, array $options = array())
+    public function post($resource, array $options = [])
     {
         return $this->api('POST', $resource, $options);
     }
