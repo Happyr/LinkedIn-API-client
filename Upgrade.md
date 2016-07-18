@@ -2,7 +2,11 @@
 
 This document explains how you upgrade from one version to another. 
 
-## Upgrade from 0.7.1 to dev-master
+## Upgrade from 0.7.1 to 0.7.2
+
+### Changes
+
+* Using `php-http/discovery:1.0`
 
 ## Upgrade from 0.7.0 to 0.7.1
 
