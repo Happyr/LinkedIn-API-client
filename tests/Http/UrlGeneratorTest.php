@@ -57,22 +57,22 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
         $gen = new DummyUrlGenerator();
 
         $expected = 'https://api.linkedin.com/?bar=baz';
-        $this->assertEquals($expected, $gen->getUrl('api', '', array('bar' => 'baz')), 'No path');
+        $this->assertEquals($expected, $gen->getUrl('api', '', ['bar' => 'baz']), 'No path');
 
         $expected = 'https://api.linkedin.com/foobar';
         $this->assertEquals($expected, $gen->getUrl('api', 'foobar'), 'Path does not begin with forward slash');
         $this->assertEquals($expected, $gen->getUrl('api', '/foobar'), 'Path begins with forward slash');
 
         $expected = 'https://api.linkedin.com/foobar?bar=baz';
-        $this->assertEquals($expected, $gen->getUrl('api', 'foobar', array('bar' => 'baz')), 'One parameter');
+        $this->assertEquals($expected, $gen->getUrl('api', 'foobar', ['bar' => 'baz']), 'One parameter');
 
         $expected = 'https://api.linkedin.com/foobar?bar=baz&a=b&c=d';
-        $this->assertEquals($expected, $gen->getUrl('api', 'foobar', array('bar' => 'baz', 'a' => 'b', 'c' => 'd')), 'Many parameters');
+        $this->assertEquals($expected, $gen->getUrl('api', 'foobar', ['bar' => 'baz', 'a' => 'b', 'c' => 'd']), 'Many parameters');
 
         $expected = 'https://api.linkedin.com/foobar?bar=baz%20a%20b';
         $notExpected = 'https://api.linkedin.com/foobar?bar=baz+a+b';
-        $this->assertEquals($expected, $gen->getUrl('api', 'foobar', array('bar' => 'baz a b')), 'Use of PHP_QUERY_RFC3986');
-        $this->assertNotEquals($notExpected, $gen->getUrl('api', 'foobar', array('bar' => 'baz a b')), 'Dont use PHP_QUERY_RFC1738');
+        $this->assertEquals($expected, $gen->getUrl('api', 'foobar', ['bar' => 'baz a b']), 'Use of PHP_QUERY_RFC3986');
+        $this->assertNotEquals($notExpected, $gen->getUrl('api', 'foobar', ['bar' => 'baz a b']), 'Dont use PHP_QUERY_RFC1738');
     }
 
     public function testGetUrlWithParams()
@@ -80,18 +80,20 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
         $gen = new UrlGenerator();
 
         $expected = 'https://api.linkedin.com/endpoint?bar=baz&format=json';
-        $this->assertEquals($expected, $gen->getUrl('api', 'endpoint?bar=baz', array('format' => 'json')));
+        $this->assertEquals($expected, $gen->getUrl('api', 'endpoint?bar=baz', ['format' => 'json']));
 
         $expected = 'https://api.linkedin.com/endpoint?bar=baz&bar=baz';
-        $this->assertEquals($expected, $gen->getUrl('api', 'endpoint?bar=baz', array('bar' => 'baz')));
+        $this->assertEquals($expected, $gen->getUrl('api', 'endpoint?bar=baz', ['bar' => 'baz']));
     }
 
     public function testGetCurrentURL()
     {
-        $gen = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
+        $gen = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', ['getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'], []);
         $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
         $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com'));
-        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {return empty($arg) ? '' : '?'.$arg;}));
+        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {
+            return empty($arg) ? '' : '?'.$arg;
+        }));
 
         // fake the HPHP $_SERVER globals
         $_SERVER['REQUEST_URI'] = '/unit-tests.php?one=one&two=two&three=three';
@@ -120,10 +122,12 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetCurrentURLPort80()
     {
-        $gen = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
+        $gen = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', ['getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'], []);
         $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
         $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com:80'));
-        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {return empty($arg) ? '' : '?'.$arg;}));
+        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {
+            return empty($arg) ? '' : '?'.$arg;
+        }));
 
         //test port 80
         $_SERVER['REQUEST_URI'] = '/foobar.php';
@@ -136,10 +140,12 @@ class UrlGeneratorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetCurrentURLPort8080()
     {
-        $gen = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', array('getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'), array());
+        $gen = $this->getMock('Happyr\LinkedIn\Http\UrlGenerator', ['getHttpProtocol', 'getHttpHost', 'dropLinkedInParams'], []);
         $gen->expects($this->any())->method('getHttpProtocol')->will($this->returnValue('http'));
         $gen->expects($this->any())->method('getHttpHost')->will($this->returnValue('www.test.com:8080'));
-        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {return empty($arg) ? '' : '?'.$arg;}));
+        $gen->expects($this->any())->method('dropLinkedInParams')->will($this->returnCallback(function ($arg) {
+            return empty($arg) ? '' : '?'.$arg;
+        }));
 
         //test non default port 8080
         $_SERVER['REQUEST_URI'] = '/foobar.php';

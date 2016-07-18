@@ -42,7 +42,7 @@ interface LinkedInInterface
      *
      * @return mixed this depends on the response_data_type parameter.
      */
-    public function api($method, $resource, array $options = array());
+    public function api($method, $resource, array $options = []);
 
     /**
      * Get a login URL where the user can put his/hers LinkedIn credentials and authorize the application.
@@ -55,7 +55,7 @@ interface LinkedInInterface
      *
      * @return string The URL for the login flow
      */
-    public function getLoginUrl($options = array());
+    public function getLoginUrl($options = []);
 
     /**
      * See docs for LinkedIn::api().
@@ -65,7 +65,7 @@ interface LinkedInInterface
      *
      * @return mixed
      */
-    public function get($resource, array $options = array());
+    public function get($resource, array $options = []);
 
     /**
      * See docs for LinkedIn::api().
@@ -75,7 +75,7 @@ interface LinkedInInterface
      *
      * @return mixed
      */
-    public function post($resource, array $options = array());
+    public function post($resource, array $options = []);
 
     /**
      * Clear the data storage. This will forget everything about the user and authentication process.

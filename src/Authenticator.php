@@ -132,7 +132,7 @@ class Authenticator implements AuthenticatorInterface
             throw new LinkedInException('Could not get access token: The response from LinkedIn.com was empty.');
         }
 
-        $tokenData = array_merge(array('access_token' => null, 'expires_in' => null), $response);
+        $tokenData = array_merge(['access_token' => null, 'expires_in' => null], $response);
         $token = new AccessToken($tokenData['access_token'], $tokenData['expires_in']);
 
         if (!$token->hasToken()) {
@@ -145,18 +145,18 @@ class Authenticator implements AuthenticatorInterface
     /**
      * {@inheritdoc}
      */
-    public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = array())
+    public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = [])
     {
         // Generate a state
         $this->establishCSRFTokenState();
 
         // Build request params
-        $requestParams = array_merge(array(
+        $requestParams = array_merge([
             'response_type' => 'code',
             'client_id' => $this->appId,
             'state' => $this->getStorage()->get('state'),
             'redirect_uri' => null,
-        ), $options);
+        ], $options);
 
         // Save the redirect url for later
         $this->getStorage()->set('redirect_uri', $requestParams['redirect_uri']);
