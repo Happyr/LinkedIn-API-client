@@ -44,9 +44,16 @@ find clients to use. For more information about virtual packages please refer to
 composer require php-http/guzzle6-adapter
 ```
 
+You do also need to install a PSR-7 implementation and a factory to create PSR-7 messages (PSR-17 whenever that is 
+released). You could use Guzzles PSR-7 implementation and factories from php-http:
+
+```bash
+composer require guzzlehttp/psr7 php-http/message 
+```
+
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
-### Finding the HTTP client. 
+### Finding the HTTP client (optional) 
 
 The LinkedIn client need to know what library you are using to send HTTP messages. You could provide an instance of 
 HttpClient and MessageFactory or you could fallback on auto discovery. Below is an example on where you provide a Guzzle6 
@@ -58,7 +65,6 @@ $linkedIn->setHttpClient(new \Http\Adapter\Guzzle6\Client());
 $linkedIn->setHttpMessageFactory(new Http\Message\MessageFactory\GuzzleMessageFactory());
 
 ```
-
 
 ## Usage
 
