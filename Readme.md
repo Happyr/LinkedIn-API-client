@@ -28,12 +28,6 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 
 ## Installation
 
-Install the library with Composer. 
-
-```bash
-composer require happyr/linkedin-api-client
-```
-
 This library does not have a dependency on Guzzle or any other library that sends HTTP requests. We use the awesome 
 HTTPlug to achieve the decoupling. We want you to choose what library to use for sending HTTP requests. Consult this list 
 ofthis list virtual packages that support [php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) 
@@ -50,6 +44,7 @@ released). You could use Guzzles PSR-7 implementation and factories from php-htt
 ```bash
 composer require guzzlehttp/psr7 php-http/message 
 ```
+
 
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
