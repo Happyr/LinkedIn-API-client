@@ -44,11 +44,6 @@ find clients to use. For more information about virtual packages please refer to
 composer require php-http/guzzle6-adapter
 ```
 
-For a simple installation of all components, you can run this Composer command:
-```bash
-composer require php-http/curl-client guzzlehttp/psr7 php-http/message happyr/linkedin-bundle
-```
-
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
 ### Finding the HTTP client. 
