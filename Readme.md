@@ -45,6 +45,11 @@ released). You could use Guzzles PSR-7 implementation and factories from php-htt
 composer require guzzlehttp/psr7 php-http/message 
 ```
 
+Now you may install the library by running the following:
+
+```bash
+composer require happyr/linkedin-api-client
+```
 
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
