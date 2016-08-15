@@ -28,12 +28,6 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 
 ## Installation
 
-Install the library with Composer. 
-
-```bash
-composer require happyr/linkedin-api-client
-```
-
 This library does not have a dependency on Guzzle or any other library that sends HTTP requests. We use the awesome 
 HTTPlug to achieve the decoupling. We want you to choose what library to use for sending HTTP requests. Consult this list 
 ofthis list virtual packages that support [php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) 
@@ -44,9 +38,22 @@ find clients to use. For more information about virtual packages please refer to
 composer require php-http/guzzle6-adapter
 ```
 
+You do also need to install a PSR-7 implementation and a factory to create PSR-7 messages (PSR-17 whenever that is 
+released). You could use Guzzles PSR-7 implementation and factories from php-http:
+
+```bash
+composer require guzzlehttp/psr7 php-http/message 
+```
+
+Now you may install the library by running the following:
+
+```bash
+composer require happyr/linkedin-api-client
+```
+
 If you are updating form a previous version make sure to read [the upgrade documentation](Upgrade.md).
 
-### Finding the HTTP client. 
+### Finding the HTTP client (optional) 
 
 The LinkedIn client need to know what library you are using to send HTTP messages. You could provide an instance of 
 HttpClient and MessageFactory or you could fallback on auto discovery. Below is an example on where you provide a Guzzle6 
@@ -58,7 +65,6 @@ $linkedIn->setHttpClient(new \Http\Adapter\Guzzle6\Client());
 $linkedIn->setHttpMessageFactory(new Http\Message\MessageFactory\GuzzleMessageFactory());
 
 ```
-
 
 ## Usage
 

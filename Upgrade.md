@@ -2,6 +2,12 @@
 
 This document explains how you upgrade from one version to another. 
 
+## Upgrade from 0.7.2 to 1.0
+
+### Changes
+
+* We do not longer require `php-http/message`. You have to make sure to put that in your own composer.json.
+
 ## Upgrade from 0.7.1 to 0.7.2
 
 ### Changes
