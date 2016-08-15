@@ -28,9 +28,14 @@ Here is a list of features that might convince you to choose this LinkedIn clien
 
 ## Installation
 
+**TL;DR**
+```bash
+composer require php-http/curl-client guzzlehttp/psr7 php-http/message happyr/linkedin-api-client
+```
+
 This library does not have a dependency on Guzzle or any other library that sends HTTP requests. We use the awesome 
 HTTPlug to achieve the decoupling. We want you to choose what library to use for sending HTTP requests. Consult this list 
-ofthis list virtual packages that support [php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) 
+of packages that support [php-http/client-implementation](https://packagist.org/providers/php-http/client-implementation) 
 find clients to use. For more information about virtual packages please refer to 
 [HTTPlug](http://docs.php-http.org/en/latest/httplug/users.html). Example:
 
