@@ -21,7 +21,7 @@ use Psr\Http\Message\ResponseInterface;
  * 2. The user logs in on www.linkedin.com and authorize your application.
  * 3. The user returns to your site with a *code* in the the $_REQUEST.
  * 4. You call isAuthenticated() or getAccessToken()
- * 5. We don't got an access token (only a *code*). So getAccessToken() calls fetchNewAccessToken()
+ * 5. We don't get an access token (only a *code*). So getAccessToken() calls fetchNewAccessToken()
  * 6. fetchNewAccessToken() gets the *code* from the $_REQUEST and calls getAccessTokenFromCode()
  * 7. getAccessTokenFromCode() makes a request to www.linkedin.com and exchanges the *code* for an access token
  * 8. When you have the access token you should store it in a database and/or query the API.
