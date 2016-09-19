@@ -94,7 +94,7 @@ This example below is showing how to login with LinkedIn.
  */
 //require_once "vendor/autoload.php";
 
-$linkedIn=new Happyr\LinkedIn\LinkedIn('app_id', 'app_secret');
+$linkedIn=new Happyr\LinkedIn\LinkedIn('client_id', 'client_secret');
 
 if ($linkedIn->isAuthenticated()) {
     //we know that the user is authenticated now. Start query the API
