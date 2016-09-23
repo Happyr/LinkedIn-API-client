@@ -148,7 +148,7 @@ class Authenticator implements AuthenticatorInterface
     public function getLoginUrl(LinkedInUrlGeneratorInterface $urlGenerator, $options = [])
     {
         // Generate a state
-        $this->establishCSRFTokenState();
+        $this->establishCSRFTokenState(isset($options['state'])?$options['state']:null);
 
         // Build request params
         $requestParams = array_merge([
@@ -222,11 +222,14 @@ class Authenticator implements AuthenticatorInterface
     /**
      * Lays down a CSRF state token for this process.
      */
-    protected function establishCSRFTokenState()
+    protected function establishCSRFTokenState($predefinedState = null)
     {
         $storage = $this->getStorage();
         if ($storage->get('state') === null) {
-            $storage->set('state', md5(uniqid(mt_rand(), true)));
+            if ($predefinedState === null) {
+                $predefinedState = md5(uniqid(mt_rand(), true));
+            }
+            $storage->set('state', $predefinedState);
         }
     }
 
