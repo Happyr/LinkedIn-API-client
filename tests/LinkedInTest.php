@@ -3,6 +3,7 @@
 namespace Happyr\LinkedIn;
 
 use GuzzleHttp\Psr7\Response;
+use Nyholm\NSA;
 
 /**
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
@@ -86,6 +87,17 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         // Make sure we go to the authenticator only once
         $this->assertEquals($token, $linkedIn->getAccessToken());
         $this->assertEquals($token, $linkedIn->getAccessToken());
+    }
+
+    public function testAccessTokenSetterWithSerializedToken()
+    {
+        $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $token = new AccessToken('foobar');
+        $serializedToken = serialize($token);
+        $linkedIn->setAccessToken($serializedToken);
+
+        $storedToken = NSA::getProperty($linkedIn, 'accessToken');
+        $this->assertEquals('foobar', $storedToken->__toString());
     }
 
     public function testGeneratorAccessors()

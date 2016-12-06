@@ -304,7 +304,10 @@ class LinkedIn implements LinkedInInterface
      */
     public function setAccessToken($accessToken)
     {
-        if (!($accessToken instanceof AccessToken)) {
+        $deserializedToken = unserialize($accessToken);
+        if ($deserializedToken instanceof AccessToken) {
+            $accessToken = $deserializedToken;
+        } elseif (!$accessToken instanceof AccessToken) {
             $accessToken = new AccessToken($accessToken);
         }
 
