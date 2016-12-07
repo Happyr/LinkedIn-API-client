@@ -304,11 +304,7 @@ class LinkedIn implements LinkedInInterface
      */
     public function setAccessToken($accessToken)
     {
-        if (!$accessToken instanceof AccessToken) {
-            $accessToken = AccessToken::create($accessToken);
-        }
-
-        $this->accessToken = $accessToken;
+        $this->accessToken = AccessToken::create($accessToken);
 
         return $this;
     }
