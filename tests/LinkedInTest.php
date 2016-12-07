@@ -78,10 +78,16 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
     {
         $token = 'token';
 
-        $auth = $this->getMock('Happyr\LinkedIn\Authenticator', ['fetchNewAccessToken'], [], '', false);
+        $auth = $this->getMockBuilder('Happyr\LinkedIn\Authenticator')
+            ->setMethods(['fetchNewAccessToken'])
+            ->disableOriginalConstructor()
+            ->getMock();
         $auth->expects($this->once())->method('fetchNewAccessToken')->will($this->returnValue($token));
 
-        $linkedIn = $this->getMock('Happyr\LinkedIn\LinkedIn', ['getAuthenticator'], [], '', false);
+        $linkedIn = $this->getMockBuilder('Happyr\LinkedIn\LinkedIn')
+            ->setMethods(['getAuthenticator'])
+            ->disableOriginalConstructor()
+            ->getMock();
         $linkedIn->expects($this->once())->method('getAuthenticator')->willReturn($auth);
 
         // Make sure we go to the authenticator only once
@@ -95,6 +101,16 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $token = new AccessToken('foobar');
         $serializedToken = serialize($token);
         $linkedIn->setAccessToken($serializedToken);
+
+        $storedToken = NSA::getProperty($linkedIn, 'accessToken');
+        $this->assertEquals('foobar', $storedToken->__toString());
+    }
+
+    public function testAccessTokenSetterWithTokenObject()
+    {
+        $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $token = new AccessToken('foobar');
+        $linkedIn->setAccessToken($token);
 
         $storedToken = NSA::getProperty($linkedIn, 'accessToken');
         $this->assertEquals('foobar', $storedToken->__toString());
