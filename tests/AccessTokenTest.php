@@ -36,4 +36,35 @@ class AccessTokenTest extends \PHPUnit_Framework_TestCase
         $token->setExpiresAt(new \DateTime('+2minutes'));
         $this->assertInstanceOf('\DateTime', $token->getExpiresAt());
     }
+
+    public function testCreateWithString()
+    {
+        $token = AccessToken::create('foobar');
+        $this->assertInstanceOf(AccessToken::class, $token);
+        $this->assertEquals('foobar', $token->__toString());
+    }
+
+    public function testCreateWithNoData()
+    {
+        $token = AccessToken::create('');
+        $this->assertInstanceOf(AccessToken::class, $token);
+        $this->assertEquals('', $token->__toString());
+    }
+
+    public function testCreateWithAccessToken()
+    {
+        $orgToken = new AccessToken('foobar', 10);
+        $token = AccessToken::create($orgToken);
+        $this->assertInstanceOf(AccessToken::class, $token);
+        $this->assertEquals('foobar', $token->__toString());
+    }
+
+    public function testCreateWithSerializedAccessToken()
+    {
+        $orgToken = new AccessToken('foobar', 10);
+        $orgTokenSerialized = serialize($orgToken);
+        $token = AccessToken::create($orgTokenSerialized);
+        $this->assertInstanceOf(AccessToken::class, $token);
+        $this->assertEquals('foobar', $token->__toString());
+    }
 }

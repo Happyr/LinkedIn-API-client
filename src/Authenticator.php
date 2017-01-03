@@ -81,7 +81,7 @@ class Authenticator implements AuthenticatorInterface
         }
 
         $storage->set('code', $code);
-        $storage->set('access_token', $accessToken);
+        $storage->set('access_token', serialize($accessToken));
 
         return $accessToken;
     }

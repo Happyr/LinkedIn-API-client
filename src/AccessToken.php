@@ -35,6 +35,31 @@ class AccessToken
     }
 
     /**
+     * Restore a stored access token.
+     *
+     * @param string|AccessToken $token
+     *
+     * @return AccessToken
+     */
+    public static function create($token)
+    {
+        if (empty($token)) {
+            return new self();
+        }
+
+        if ($token instanceof AccessToken) {
+            return $token;
+        }
+
+        $unserialized = @unserialize($token);
+        if ($unserialized instanceof AccessToken) {
+            return $unserialized;
+        }
+
+        return new self($token);
+    }
+
+    /**
      * @return string
      */
     public function __toString()
