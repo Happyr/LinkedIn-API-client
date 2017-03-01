@@ -39,7 +39,11 @@ class AccessToken
      */
     public function __toString()
     {
-        return $this->token ?: '';
+        if ($this->hasToken()) {
+            return $this->token;
+        }
+
+        return '';
     }
 
     /**
