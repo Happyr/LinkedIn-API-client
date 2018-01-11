@@ -42,7 +42,7 @@ class UrlGenerator implements UrlGeneratorInterface
             if (!empty($urlComponents['host'])) {
                 $path = $urlComponents['path'];
                 if (!empty($urlComponents['query'])) {
-                    $path .= '?' . http_build_query($urlComponents['query']);
+                    $path .= '?' . $urlComponents['query'];
                 }
             }
         }
