@@ -5,6 +5,7 @@ namespace Happyr\LinkedIn;
 use Happyr\LinkedIn\Exception\LoginError;
 use Happyr\LinkedIn\Http\GlobalVariableGetter;
 use Happyr\LinkedIn\Http\RequestManager;
+use Happyr\LinkedIn\Http\RequestManagerInterface;
 use Happyr\LinkedIn\Http\ResponseConverter;
 use Happyr\LinkedIn\Http\UrlGenerator;
 use Happyr\LinkedIn\Http\UrlGeneratorInterface;
@@ -336,6 +337,15 @@ class LinkedIn implements LinkedInInterface
     }
 
     /**
+     * @param RequestManagerInterface $manager
+     */
+    public function setRequestManager(RequestManagerInterface $manager) {
+        $this->requestManager = $manager;
+
+        return $this;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function setStorage(DataStorageInterface $storage)
@@ -379,5 +389,14 @@ class LinkedIn implements LinkedInInterface
     protected function getAuthenticator()
     {
         return $this->authenticator;
+    }
+
+    /**
+     * @return Authenticator
+     */
+    public function setAuthenticator(AuthenticatorInterface $auth)
+    {
+        $this->authenticator = $auth;
+        return $this;
     }
 }
