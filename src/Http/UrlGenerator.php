@@ -36,6 +36,17 @@ class UrlGenerator implements UrlGeneratorInterface
      */
     public function getUrl($name, $path = '', $params = [])
     {
+        /* handle the user passing in a full URL as the path */
+        $urlComponents = parse_url($path);
+        if (isset($urlComponents['path'])) {
+            if (!empty($urlComponents['host'])) {
+                $path = $urlComponents['path'];
+                if (!empty($urlComponents['query'])) {
+                    $path .= '?' . http_build_query($urlComponents['query']);
+                }
+            }
+        }
+
         $url = self::$domainMap[$name];
         if ($path) {
             if ($path[0] === '/') {
