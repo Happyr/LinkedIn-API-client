@@ -51,11 +51,6 @@ class LinkedIn implements LinkedInInterface
     private $responseDataType;
 
     /**
-     * @var ResponseInterface
-     */
-    private $lastResponse;
-
-    /**
      * @var RequestManager
      */
     private $requestManager;
@@ -279,14 +274,6 @@ class LinkedIn implements LinkedInInterface
     /**
      * {@inheritdoc}
      */
-    public function getLastResponse()
-    {
-        return $this->lastResponse;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getAccessToken()
     {
         if ($this->accessToken === null) {
@@ -379,5 +366,22 @@ class LinkedIn implements LinkedInInterface
     protected function getAuthenticator()
     {
         return $this->authenticator;
+    }
+
+
+    /**
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function getLastResponse()
+    {
+        return $this->getRequestManager()->getLastResponse();
+    }
+
+    /**
+     * @return \Psr\Http\Message\RequestInterface
+     */
+    public function getLastRequest()
+    {
+        return $this->getRequestManager()->getLastRequest();
     }
 }
