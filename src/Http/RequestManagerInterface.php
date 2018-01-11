@@ -33,4 +33,20 @@ interface RequestManagerInterface
      * @return RequestManager
      */
     public function setHttpClient(HttpClient $httpClient);
+
+    /**
+     * Get the last request we sent
+     *
+     * @return \Psr\Http\Message\RequestInterface
+     */
+    public function getLastRequest();
+
+
+    /**
+     * Get the last response we received
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function getLastResponse();
+
 }

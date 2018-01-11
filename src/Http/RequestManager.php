@@ -27,14 +27,44 @@ class RequestManager implements RequestManagerInterface
     private $messageFactory;
 
     /**
+     * @var \Psr\Http\Message\RequestInterface
+     */
+    private $lastRequest;
+
+
+    /**
+     * @var \Psr\Http\Message\ResponseInterface
+     */
+    private $lastResponse;
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLastRequest() {
+        return $this->lastRequest;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLastResponse() {
+        return $this->lastResponse;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function sendRequest($method, $uri, array $headers = [], $body = null, $protocolVersion = '1.1')
     {
         $request = $this->getMessageFactory()->createRequest($method, $uri, $headers, $body, $protocolVersion);
 
+        $this->lastRequest = $request;
+
         try {
-            return $this->getHttpClient()->sendRequest($request);
+            $response = $this->getHttpClient()->sendRequest($request);
+            $this->lastResponse = $response;
+            return $response;
         } catch (TransferException $e) {
             throw new LinkedInTransferException('Error while requesting data from LinkedIn.com: '.$e->getMessage(), $e->getCode(), $e);
         }

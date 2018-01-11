@@ -7,6 +7,7 @@ use Happyr\LinkedIn\Http\UrlGeneratorInterface;
 use Happyr\LinkedIn\Storage\DataStorageInterface;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -122,6 +123,13 @@ interface LinkedInInterface
      * @return ResponseInterface|null
      */
     public function getLastResponse();
+
+    /**
+     * Get the last request. This will always return a PSR-7 request no matter of the data type used.
+     *
+     * @return RequestInterface|null
+     */
+    public function getLastRequest();
 
     /**
      * Returns an access token. If we do not have one in memory, try to fetch one from a *code* in the $_REQUEST.
