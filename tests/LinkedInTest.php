@@ -41,11 +41,10 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $requestManager->shouldReceive('sendRequest')->once()->withArgs([$method, $url, $headers, json_encode($postParams)])->andReturn($response);
 
 
-        $linkedIn = m::mock(LinkedIn::class, [self::APP_ID, self::APP_SECRET])->makePartial();
+        $linkedIn = m::mock(LinkedIn::class, [self::APP_ID, self::APP_SECRET, 'json', 'array', $requestManager])->makePartial();
         $linkedIn->shouldReceive('getAccessToken')->once()->andREturn($token);
 
         $linkedIn->setUrlGenerator($mockGenerator);
-        $linkedIn->setRequestManager($requestManager);
 
         $result = $linkedIn->api($method, $resource, ['query' => $urlParams, 'json' => $postParams]);
         $this->assertEquals($expected, $result);
@@ -81,9 +80,7 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $auth->shouldReceive('fetchNewAccessToken')->once()->andREturn($token);
 
 
-        $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
-        $linkedIn->setAuthenticator($auth);
-
+        $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET, 'json', 'array', null, $auth);
 
         // Make sure we go to the authenticator only once
         $this->assertEquals($token, $linkedIn->getAccessToken());
@@ -184,14 +181,12 @@ class LinkedInTest extends \PHPUnit_Framework_TestCase
         $generator = m::mock(UrlGenerator::class)->makePartial();
         $generator->shouldReceive('getLoginUrl')->withAnyArgs()->andReturn($loginUrl);
 
-
         $mockAuth = m::mock(Authenticator::class)->makePartial();
         $mockAuth->shouldReceive('getLoginUrl')->once()->withArgs([$generator, ['redirect_uri' => $otherUrl]])->andReturn($otherUrl);
 
 
-        $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET);
+        $linkedIn = new LinkedIn(self::APP_ID, self::APP_SECRET, 'json', 'array', null, $mockAuth);
         $linkedIn->setUrlGenerator($generator);
-        $linkedIn->setAuthenticator($mockAuth);
 
 
         $this->assertContains($otherUrl, $linkedIn->getLoginUrl(['redirect_uri' => $otherUrl]));

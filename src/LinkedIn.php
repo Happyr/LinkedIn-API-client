@@ -79,13 +79,13 @@ class LinkedIn implements LinkedInInterface
      * @param string $format           'json', 'xml'
      * @param string $responseDataType 'array', 'string', 'simple_xml' 'psr7', 'stream'
      */
-    public function __construct($appId, $appSecret, $format = 'json', $responseDataType = 'array')
+    public function __construct($appId, $appSecret, $format = 'json', $responseDataType = 'array', RequestManagerInterface $requestManager = null, AuthenticatorInterface $authenticator = null)
     {
         $this->format = $format;
         $this->responseDataType = $responseDataType;
 
-        $this->requestManager = new RequestManager();
-        $this->authenticator = new Authenticator($this->requestManager, $appId, $appSecret);
+        $this->requestManager = isset($requestManager) ? $requestManager : new RequestManager();
+        $this->authenticator = isset($authenticator) ? $authenticator : new Authenticator($this->requestManager, $appId, $appSecret);
     }
 
     /**
@@ -391,12 +391,4 @@ class LinkedIn implements LinkedInInterface
         return $this->authenticator;
     }
 
-    /**
-     * @return Authenticator
-     */
-    public function setAuthenticator(AuthenticatorInterface $auth)
-    {
-        $this->authenticator = $auth;
-        return $this;
-    }
 }
