@@ -27,7 +27,7 @@ class SessionStorage extends BaseDataStorage
         $this->validateKey($key);
 
         $name = $this->getStorageKeyId($key);
-        $_SESSION[$name] = $value;
+        $_SESSION[$name] = serialize($value);
     }
 
     /**
@@ -38,7 +38,7 @@ class SessionStorage extends BaseDataStorage
         $this->validateKey($key);
         $name = $this->getStorageKeyId($key);
 
-        return isset($_SESSION[$name]) ? $_SESSION[$name] : null;
+        return isset($_SESSION[$name]) ? unserialize($_SESSION[$name]) : null;
     }
 
     /**
