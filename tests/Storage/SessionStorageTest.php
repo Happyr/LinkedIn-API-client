@@ -26,7 +26,7 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
     public function testSet()
     {
         $this->storage->set('code', 'foobar');
-        $this->assertEquals($_SESSION[$this->prefix.'code'], 'foobar');
+        $this->assertEquals($_SESSION[$this->prefix.'code'], serialize('foobar'));
     }
 
     /**
@@ -43,10 +43,9 @@ class SessionStorageTest extends \PHPUnit_Framework_TestCase
         $result = $this->storage->get('state');
         $this->assertNull($result);
 
-        $expected = 'foobar';
-        $_SESSION[$this->prefix.'code'] = $expected;
+        $_SESSION[$this->prefix.'code'] = serialize('foobar');
         $result = $this->storage->get('code');
-        $this->assertEquals($expected, $result);
+        $this->assertEquals('foobar', $result);
     }
 
     public function testClear()
