@@ -8,13 +8,17 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/Happyr/LinkedIn-API-client.svg?style=flat-square)](https://scrutinizer-ci.com/g/Happyr/LinkedIn-API-client)
 [![Total Downloads](https://img.shields.io/packagist/dt/happyr/linkedin-api-client.svg?style=flat-square)](https://packagist.org/packages/happyr/linkedin-api-client)
 
-
 A PHP library to handle authentication and communication with LinkedIn API. The library/SDK helps you to get an access
 token and when authenticated it helps you to send API requests. You will not get *everything* for free though... You
 have to read the [LinkedIn documentation][api-doc-core] to understand how you should query the API. 
 
 To get an overview what this library actually is doing for you. Take a look at the authentication page from
 the [API docs][api-doc-authentication].
+
+# :warning: Warning
+This library does only support version 1 of the LinkedIn API at this moment. Please note [LinkedIn communicated](https://engineering.linkedin.com/blog/2018/12/developer-program-updates) all developers need to migrate their apps to the newest LinkedIn APIs and OAuth 2.0 by March 1, 2019. Therefor this library stops working correctly when the support for version 1 of the API is dropped.
+
+Vote issue [147](https://github.com/Happyr/LinkedIn-API-client/issues/147) if this library should be updated to support version 2.
 
 ## Features
 
