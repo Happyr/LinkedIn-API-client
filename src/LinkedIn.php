@@ -120,7 +120,7 @@ class LinkedIn implements LinkedInInterface
             isset($options['query']) ? $options['query'] : []
         );
 
-        $body = isset($options['body']) ? $options['body'] : null;
+        $body = isset($options['json']) ? json_encode($options['json']) : null;
         $this->lastResponse = $this->getRequestManager()->sendRequest($method, $url, $options['headers'], $body);
 
         //Get the response data format
@@ -142,6 +142,9 @@ class LinkedIn implements LinkedInInterface
      */
     protected function filterRequestOption(array &$options)
     {
+        // Updated by sireko for good working in v2 API
+
+        /*
         if (isset($options['json'])) {
             $options['format'] = 'json';
             $options['body'] = json_encode($options['json']);
@@ -163,6 +166,10 @@ class LinkedIn implements LinkedInInterface
             default:
                 // Do nothing
         }
+        */
+
+        $options['headers']['Content-Type'] = 'application/json';
+        $options['headers']['x-li-format'] = 'json';
 
         return $options['format'];
     }
